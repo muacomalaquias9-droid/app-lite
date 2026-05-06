@@ -676,7 +676,7 @@ export default function Admin() {
 
           {/* Tabs */}
           <Tabs defaultValue="users" className="w-full px-4">
-            <TabsList className="w-full grid grid-cols-5 mb-4 h-12 bg-muted/50 p-1 rounded-xl">
+            <TabsList className="w-full grid grid-cols-6 mb-4 h-12 bg-muted/50 p-1 rounded-xl overflow-x-auto">
               <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-background">
                 <Users className="h-4 w-4 mr-1" />
                 Usuários
@@ -684,6 +684,10 @@ export default function Admin() {
               <TabsTrigger value="boost" className="rounded-lg text-xs data-[state=active]:bg-background">
                 <Zap className="h-4 w-4 mr-1" />
                 Boost
+              </TabsTrigger>
+              <TabsTrigger value="moderation" className="rounded-lg text-xs data-[state=active]:bg-background">
+                <Shield className="h-4 w-4 mr-1" />
+                Mod.
               </TabsTrigger>
               <TabsTrigger value="reports" className="rounded-lg text-xs data-[state=active]:bg-background relative">
                 <FileWarning className="h-4 w-4 mr-1" />
@@ -807,6 +811,10 @@ export default function Admin() {
             {/* Boost Tab */}
             <TabsContent value="boost" className="space-y-3 mt-0">
               <BoostPanel users={filteredUsers} />
+            </TabsContent>
+
+            <TabsContent value="moderation" className="space-y-3 mt-0">
+              <AdminModerationPanel users={filteredUsers} onRefresh={loadData} />
             </TabsContent>
 
             <TabsContent value="reports" className="space-y-3 mt-0">
