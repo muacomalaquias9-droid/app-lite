@@ -56,6 +56,17 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
     }
   };
 
+  const loadTurnServers = async (): Promise<RTCIceServer[]> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('twilio-turn-token');
+      if (error || !Array.isArray(data?.iceServers)) return [];
+      return data.iceServers;
+    } catch (error) {
+      console.warn('TURN token unavailable, using fallback ICE servers', error);
+      return [];
+    }
+  };
+
   const initCall = async () => {
     try {
       const { data: callRow, error: callErr } = await supabase
@@ -96,8 +107,10 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
 
       // ICE servers for NAT traversal — STUN + free public TURN (required when
       // peers are on different networks / mobile carriers / behind symmetric NAT)
+      const twilioIceServers = await loadTurnServers();
       const configuration: RTCConfiguration = {
         iceServers: [
+          ...twilioIceServers,
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
           { urls: 'stun:stun2.l.google.com:19302' },
