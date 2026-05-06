@@ -31,6 +31,7 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
   const missedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
+  const localIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   useEffect(() => {
     loadCallData();
@@ -185,9 +186,10 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
             if (payload.type === 'ready' && isCaller) {
               // Receiver just subscribed — (re)send the offer immediately
               await sendOffer();
+              flushLocalIceCandidates();
             } else if (payload.type === 'offer' && !isCaller) {
-              if (pc.signalingState !== 'stable' && pc.currentRemoteDescription) {
-                // Already negotiated — ignore duplicate offers
+              if (pc.currentRemoteDescription?.sdp === payload.offer?.sdp) {
+                flushLocalIceCandidates();
                 return;
               }
               await pc.setRemoteDescription(new RTCSessionDescription(payload.offer));
@@ -203,6 +205,7 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
                 event: 'signal',
                 payload: { type: 'answer', answer, from: user?.id },
               });
+              flushLocalIceCandidates();
             } else if (payload.type === 'answer' && isCaller) {
               if (pc.currentRemoteDescription) return; // already set
               await pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
@@ -215,6 +218,7 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
                 try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
               }
               pendingIceRef.current = [];
+              flushLocalIceCandidates();
             } else if (payload.type === 'ice-candidate' && payload.candidate) {
               if (pc.remoteDescription) {
                 await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
@@ -271,18 +275,32 @@ export default function CallInterface({ callId, isVideo, onEnd }: CallInterfaceP
             event: 'signal',
             payload: { type: 'offer', offer: pc.localDescription, from: user?.id },
           });
+          flushLocalIceCandidates();
         } catch (e) {
           console.error('sendOffer error', e);
         }
       }
 
+      function flushLocalIceCandidates() {
+        if (!channelRef.current || localIceCandidatesRef.current.length === 0) return;
+        localIceCandidatesRef.current.forEach((candidate) => {
+          channelRef.current?.send({
+            type: 'broadcast',
+            event: 'signal',
+            payload: { type: 'ice-candidate', candidate, from: user?.id },
+          });
+        });
+      }
+
       // ICE candidates
       pc.onicecandidate = (event) => {
         if (event.candidate && channelRef.current) {
+          const candidate = event.candidate.toJSON();
+          localIceCandidatesRef.current.push(candidate);
           channelRef.current.send({
             type: 'broadcast',
             event: 'signal',
-            payload: { type: 'ice-candidate', candidate: event.candidate.toJSON(), from: user?.id },
+            payload: { type: 'ice-candidate', candidate, from: user?.id },
           });
         }
       };
