@@ -543,11 +543,6 @@ export default function Chat() {
   const startCall = async (type: 'voice' | 'video') => {
     if (!user || !friendId) return;
 
-    if (!isOnline) {
-      toast.error('Este usuário está offline agora');
-      return;
-    }
-
     try {
       const mediaPreview = await navigator.mediaDevices.getUserMedia({
         audio: {

@@ -332,32 +332,32 @@ export default function Profile() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-background overflow-y-auto native-scroll pb-[72px]">
+      <div className="h-screen bg-mobile-surface overflow-y-auto native-scroll pb-[88px]">
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="sticky top-0 z-50 safe-area-top"
           style={{
-            background: 'hsl(var(--background) / 0.85)',
+            background: 'hsl(var(--mobile-header) / 0.92)',
             backdropFilter: 'blur(40px) saturate(180%)',
             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
             borderBottom: '0.5px solid hsl(var(--border) / 0.15)',
           }}
         >
-          <div className="flex items-center justify-between px-4 h-11">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full h-8 w-8 press-effect">
+          <div className="flex items-center justify-between px-4 h-12 text-mobile-header-foreground">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full h-8 w-8 press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
               <ArrowLeft className="h-[18px] w-[18px]" />
             </Button>
             <span className="text-[15px] font-bold">@{profile.username}</span>
             <div className="flex items-center gap-1">
               {isOwnProfile && (
-                <Button variant="ghost" size="icon" onClick={() => navigate('/settings/edit-profile')} className="rounded-full h-8 w-8">
+                <Button variant="ghost" size="icon" onClick={() => navigate('/settings/edit-profile')} className="rounded-full h-8 w-8 text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
                   <Settings className="h-[18px] w-[18px]" />
                 </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
                     <MoreHorizontal className="h-[18px] w-[18px]" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -382,7 +382,7 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        <div className="relative h-36 bg-gradient-to-br from-primary/20 via-primary/10 to-accent/5">
+        <div className="relative h-44 bg-gradient-to-br from-mobile-header via-mobile-header-soft to-primary/30">
           {profile.banner_url && (
             <img src={profile.banner_url} alt="" className="w-full h-full object-cover" />
           )}
@@ -397,11 +397,12 @@ export default function Profile() {
           )}
         </div>
 
-        <div className="px-4 -mt-10 relative z-10">
-          <div className="flex items-end justify-between mb-3">
+        <div className="px-4 -mt-14 relative z-10">
+          <div className="rounded-[28px] bg-card border border-border/50 shadow-xl shadow-primary/5 p-4 mb-4">
+          <div className="flex items-end justify-between mb-4">
             <div className="relative">
-              <div className={`p-[3px] rounded-full bg-background ${stories.length > 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}>
-                <Avatar className="h-20 w-20 border-4 border-background">
+              <div className={`p-[3px] rounded-full bg-card ${stories.length > 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}`}>
+                <Avatar className="h-24 w-24 border-4 border-card shadow-lg">
                   <AvatarImage src={profile.avatar_url} className="object-cover" />
                   <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/30 to-accent/20">
                     {profile.first_name?.[0]?.toUpperCase()}
@@ -425,11 +426,11 @@ export default function Profile() {
             <div className="flex gap-2 pb-1">
               {isOwnProfile ? (
                 <>
-                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-8 px-4"
+                  <Button size="sm" className="rounded-full text-[12px] font-bold h-9 px-4"
                     onClick={() => navigate('/settings/edit-profile')}>
                     Editar perfil
                   </Button>
-                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-8 px-4"
+                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-9 px-4"
                     onClick={handleShare}>
                     Partilhar
                   </Button>
@@ -439,12 +440,12 @@ export default function Profile() {
                   <Button 
                     variant={isFollowing ? "outline" : "default"}
                     size="sm"
-                    className="rounded-full text-[12px] font-semibold h-8 px-5"
+                    className="rounded-full text-[12px] font-bold h-9 px-5"
                     onClick={handleFollow}
                   >
-                    {isFollowing ? 'A seguir' : 'Seguir'}
+                    {isFollowing ? 'Filhou' : 'Filhar'}
                   </Button>
-                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-8 px-4"
+                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-9 px-4"
                     onClick={() => navigate(`/chat/${profile.id}`)}>
                     Mensagem
                   </Button>
@@ -453,9 +454,9 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="mb-2">
+          <div className="mb-3">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-[22px] font-extrabold tracking-tight">{profile.full_name || profile.first_name}</h1>
+              <h1 className="text-[24px] font-extrabold tracking-normal leading-tight">{profile.full_name || profile.first_name}</h1>
               {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-5 h-5" />}
             </div>
             <div className="flex items-center gap-2">
@@ -481,18 +482,18 @@ export default function Profile() {
             )}
           </div>
 
-          <div className="flex items-center gap-5 mb-4">
-            <button onClick={() => handleOpenModal("followers")} className="group">
-              <span className="text-[15px] font-bold group-hover:text-primary transition-colors">{formatNumber(followersCount)}</span>
-              <span className="text-[13px] text-muted-foreground ml-1">seguidores</span>
+          <div className="grid grid-cols-3 gap-2 mb-4 rounded-2xl border border-border/50 bg-muted/25 p-2">
+            <button onClick={() => handleOpenModal("followers")} className="group py-2 rounded-xl hover:bg-background/60">
+              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(followersCount)}</span>
+              <span className="block text-[11px] text-muted-foreground">seguidores</span>
             </button>
-            <button onClick={() => handleOpenModal("following")} className="group">
-              <span className="text-[15px] font-bold group-hover:text-primary transition-colors">{formatNumber(followingCount)}</span>
-              <span className="text-[13px] text-muted-foreground ml-1">a seguir</span>
+            <button onClick={() => handleOpenModal("following")} className="group py-2 rounded-xl hover:bg-background/60">
+              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(followingCount)}</span>
+              <span className="block text-[11px] text-muted-foreground">filhou</span>
             </button>
-            <button onClick={() => handleOpenModal("friends")} className="group">
-              <span className="text-[15px] font-bold group-hover:text-primary transition-colors">{formatNumber(friendsCount)}</span>
-              <span className="text-[13px] text-muted-foreground ml-1">amigos</span>
+            <button onClick={() => handleOpenModal("friends")} className="group py-2 rounded-xl hover:bg-background/60">
+              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(friendsCount)}</span>
+              <span className="block text-[11px] text-muted-foreground">amigos</span>
             </button>
           </div>
 
@@ -518,6 +519,7 @@ export default function Profile() {
               ))}
             </div>
           )}
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">

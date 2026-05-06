@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -158,6 +159,130 @@ function BoostPanel({ users }: { users: User[] }) {
           </Card>
         ))}
       </div>
+    </div>
+  );
+}
+
+function AdminModerationPanel({ users, onRefresh }: { users: User[]; onRefresh: () => void }) {
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [reason, setReason] = useState("Violação das regras da comunidade Blynk");
+  const [postSearch, setPostSearch] = useState("");
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [actioning, setActioning] = useState<string | null>(null);
+
+  const selectedUser = users.find((u) => u.id === selectedUserId);
+  const isProtected = selectedUser?.email === PROTECTED_EMAIL;
+  const filteredUsers = users.filter((user) =>
+    user.username?.toLowerCase().includes(postSearch.toLowerCase()) ||
+    user.full_name?.toLowerCase().includes(postSearch.toLowerCase()) ||
+    user.first_name?.toLowerCase().includes(postSearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (!selectedUserId) {
+      setUserPosts([]);
+      return;
+    }
+    loadUserPosts(selectedUserId);
+  }, [selectedUserId]);
+
+  const loadUserPosts = async (userId: string) => {
+    setLoadingPosts(true);
+    const { data } = await supabase
+      .from("posts")
+      .select("id, content, media_url, media_urls, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    setUserPosts(data || []);
+    setLoadingPosts(false);
+  };
+
+  const runModeration = async (action: string, payload: Record<string, string>, successMessage: string) => {
+    if (isProtected) {
+      toast.error("Esta conta admin não pode ser moderada");
+      return;
+    }
+
+    setActioning(action + (payload.postId || payload.targetUserId || ""));
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-moderation", {
+        body: { action, reason, ...payload },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      toast.success(successMessage);
+      if (selectedUserId) await loadUserPosts(selectedUserId);
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || "Erro na moderação");
+    } finally {
+      setActioning(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4 border-destructive/20 bg-destructive/5">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-destructive/10 flex items-center justify-center">
+            <Shield className="h-5 w-5 text-destructive" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm">Centro de moderação</h3>
+            <p className="text-xs text-muted-foreground mt-1">Bloqueia usuários, apaga publicações e remove contas da rede social.</p>
+          </div>
+        </div>
+      </Card>
+
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input placeholder="Pesquisar usuário..." value={postSearch} onChange={(e) => setPostSearch(e.target.value)} className="pl-12 h-12 rounded-xl bg-muted/50 border-0" />
+      </div>
+
+      <div className="grid gap-2 max-h-64 overflow-y-auto native-scroll pr-1">
+        {filteredUsers.slice(0, 12).map((user) => (
+          <button key={user.id} onClick={() => setSelectedUserId(user.id)} className={`w-full p-3 rounded-2xl border text-left transition-colors ${selectedUserId === user.id ? 'border-primary bg-primary/10' : 'border-border/50 bg-card hover:bg-muted/40'}`}>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-11 w-11"><AvatarImage src={user.avatar_url} /><AvatarFallback>{user.first_name?.[0] || '?'}</AvatarFallback></Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm truncate">{user.full_name || user.first_name || user.username}</p>
+                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+              </div>
+              {user.email === PROTECTED_EMAIL && <Badge variant="outline" className="rounded-full">Admin</Badge>}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {selectedUser && (
+        <div className="space-y-3">
+          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} className="min-h-20 rounded-2xl bg-muted/40 text-base" placeholder="Motivo da moderação" />
+          <div className="grid grid-cols-1 gap-2">
+            <Button variant="destructive" className="rounded-2xl h-11" disabled={!!actioning || isProtected} onClick={() => runModeration("block-user", { targetUserId: selectedUser.id }, "Usuário bloqueado")}>Bloquear usuário</Button>
+            <Button variant="outline" className="rounded-2xl h-11 border-destructive/30 text-destructive" disabled={!!actioning || isProtected} onClick={() => runModeration("delete-user-content", { targetUserId: selectedUser.id }, "Publicações e stories removidos")}>Eliminar publicações do usuário</Button>
+            <Button variant="destructive" className="rounded-2xl h-11" disabled={!!actioning || isProtected} onClick={() => runModeration("delete-account", { targetUserId: selectedUser.id }, "Conta eliminada permanentemente")}>Eliminar conta permanente</Button>
+          </div>
+
+          <Card className="p-3">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-sm">Publicações recentes</h4>
+              {loadingPosts && <span className="text-xs text-muted-foreground">Carregando...</span>}
+            </div>
+            <div className="space-y-2">
+              {userPosts.map((post) => (
+                <div key={post.id} className="flex items-center gap-3 p-2 rounded-xl bg-muted/35">
+                  <p className="flex-1 text-xs line-clamp-2">{post.content || "Publicação com mídia"}</p>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-destructive" disabled={!!actioning || isProtected} onClick={() => runModeration("delete-post", { postId: post.id }, "Publicação eliminada")}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {!loadingPosts && userPosts.length === 0 && <p className="text-center text-sm text-muted-foreground py-6">Sem publicações recentes</p>}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
@@ -551,7 +676,7 @@ export default function Admin() {
 
           {/* Tabs */}
           <Tabs defaultValue="users" className="w-full px-4">
-            <TabsList className="w-full grid grid-cols-5 mb-4 h-12 bg-muted/50 p-1 rounded-xl">
+            <TabsList className="w-full grid grid-cols-6 mb-4 h-12 bg-muted/50 p-1 rounded-xl overflow-x-auto">
               <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-background">
                 <Users className="h-4 w-4 mr-1" />
                 Usuários
@@ -559,6 +684,10 @@ export default function Admin() {
               <TabsTrigger value="boost" className="rounded-lg text-xs data-[state=active]:bg-background">
                 <Zap className="h-4 w-4 mr-1" />
                 Boost
+              </TabsTrigger>
+              <TabsTrigger value="moderation" className="rounded-lg text-xs data-[state=active]:bg-background">
+                <Shield className="h-4 w-4 mr-1" />
+                Mod.
               </TabsTrigger>
               <TabsTrigger value="reports" className="rounded-lg text-xs data-[state=active]:bg-background relative">
                 <FileWarning className="h-4 w-4 mr-1" />
@@ -682,6 +811,10 @@ export default function Admin() {
             {/* Boost Tab */}
             <TabsContent value="boost" className="space-y-3 mt-0">
               <BoostPanel users={filteredUsers} />
+            </TabsContent>
+
+            <TabsContent value="moderation" className="space-y-3 mt-0">
+              <AdminModerationPanel users={filteredUsers} onRefresh={loadData} />
             </TabsContent>
 
             <TabsContent value="reports" className="space-y-3 mt-0">
