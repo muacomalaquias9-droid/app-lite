@@ -500,6 +500,7 @@ export default function Feed() {
                             musicName={post.music_name}
                             musicArtist={post.music_artist}
                             musicUrl={post.music_url}
+                            autoPlayInView
                           />
                         </div>
                       )}

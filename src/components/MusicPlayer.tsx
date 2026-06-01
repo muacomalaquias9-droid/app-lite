@@ -12,6 +12,8 @@ interface MusicPlayerProps {
   musicUrl?: string | null;
   coverUrl?: string | null;
   overlay?: boolean;
+  /** Instagram-style: auto-play when card scrolls into view, pause when out. */
+  autoPlayInView?: boolean;
 }
 
 // Generate album art color based on music name
@@ -30,13 +32,14 @@ function generateCoverGradient(name: string): string {
   return colors[index];
 }
 
-export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overlay = false }: MusicPlayerProps) {
+export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const retryCountRef = useRef(0);
   const instanceId = useId();
 
@@ -98,6 +101,44 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
       audio.removeEventListener('error', handleError);
     };
   }, [instanceId, musicUrl]);
+
+  // Instagram-style auto-play when in viewport
+  useEffect(() => {
+    if (!autoPlayInView) return;
+    const audio = audioRef.current;
+    const node = containerRef.current;
+    if (!audio || !node || !musicUrl) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+          // Pause any other playing audio
+          if (currentPlayingAudio && currentPlayingId !== instanceId) {
+            currentPlayingAudio.pause();
+          }
+          currentPlayingAudio = audio;
+          currentPlayingId = instanceId;
+          // Start muted to bypass autoplay restrictions, then unmute
+          audio.muted = false;
+          audio.play().catch(() => {
+            audio.muted = true;
+            audio.play().catch(() => {});
+          });
+        } else {
+          if (!audio.paused) audio.pause();
+          if (currentPlayingId === instanceId) {
+            currentPlayingAudio = null;
+            currentPlayingId = null;
+          }
+        }
+      },
+      { threshold: [0, 0.6, 1], rootMargin: '0px 0px -15% 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [autoPlayInView, musicUrl, instanceId]);
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -253,6 +294,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      ref={containerRef}
       className="flex items-center gap-3 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-3 cursor-pointer border border-pink-500/20 hover:border-pink-500/40 transition-colors"
       onClick={togglePlay}
     >

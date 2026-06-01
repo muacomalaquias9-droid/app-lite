@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Search, ArrowLeft, Edit, Check, CheckCheck, Camera, SlidersHorizontal, ChevronDown, TrendingUp } from 'lucide-react';
+import { Search, ArrowLeft, Edit, Check, CheckCheck, Camera, SlidersHorizontal, ChevronDown, TrendingUp, Map as MapIcon } from 'lucide-react';
 import { MessagesSkeleton } from '@/components/loading/MessagesSkeleton';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import VerificationBadge, { hasSpecialBadgeEmoji } from '@/components/VerificationBadge';
 import BottomNav from '@/components/BottomNav';
 import { useUserPresence } from '@/hooks/useUserPresence';
+import FriendsMap from '@/components/FriendsMap';
 
 interface Conversation {
   id: string;
@@ -181,7 +182,7 @@ export default function Messages() {
 
           {/* Tabs */}
           <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto">
-            {['principal', 'pedidos', 'geral'].map((tab) => (
+            {['principal', 'mapa', 'pedidos', 'geral'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -191,6 +192,7 @@ export default function Messages() {
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
+                {tab === 'mapa' && <MapIcon className="h-3.5 w-3.5 inline-block mr-1 -mt-0.5" />}
                 {tab === 'principal' && totalUnread > 0 && activeTab !== tab && (
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-destructive mr-1" />
                 )}
@@ -201,7 +203,12 @@ export default function Messages() {
           </div>
         </header>
 
-        {/* Conversations List */}
+        {activeTab === 'mapa' ? (
+          <div className="flex-1 p-3 overflow-hidden">
+            <FriendsMap />
+          </div>
+        ) : (
+        /* Conversations List */
         <ScrollArea className="flex-1 native-scroll">
           {filteredConversations.length === 0 ? (
             <motion.div
@@ -289,6 +296,7 @@ export default function Messages() {
             </div>
           )}
         </ScrollArea>
+        )}
 
         <BottomNav />
       </div>
