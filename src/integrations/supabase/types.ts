@@ -2552,6 +2552,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_locations: {
+        Row: {
+          accuracy: number | null
+          latitude: number
+          longitude: number
+          sharing_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          latitude: number
+          longitude: number
+          sharing_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          latitude?: number
+          longitude?: number
+          sharing_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           is_online: boolean | null
