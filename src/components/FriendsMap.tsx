@@ -62,7 +62,7 @@ function buildAvatarIcon(avatarUrl: string | null | undefined, fallbackLetter: s
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
 
-export default function FriendsMap() {
+export default function FriendsMap({ fullscreen = false }: { fullscreen?: boolean } = {}) {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -73,6 +73,7 @@ export default function FriendsMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [permissionPrompt, setPermissionPrompt] = useState(false);
   const [friendsCount, setFriendsCount] = useState(0);
 
   // Initialize map + load friend locations
@@ -105,7 +106,21 @@ export default function FriendsMap() {
           .on('postgres_changes', { event: '*', schema: 'public', table: 'user_locations' }, () => loadLocations())
           .subscribe();
 
-        startWatching();
+        // Check permission state — if not granted, show explicit prompt instead of silently failing
+        try {
+          const perm: any = (navigator as any).permissions
+            ? await (navigator as any).permissions.query({ name: 'geolocation' as PermissionName })
+            : null;
+          if (perm?.state === 'granted') {
+            startWatching();
+          } else if (perm?.state === 'denied') {
+            setPermissionDenied(true);
+          } else {
+            setPermissionPrompt(true);
+          }
+        } catch {
+          setPermissionPrompt(true);
+        }
       } catch (e: any) {
         if (!cancelled) setError(e?.message || 'Erro ao carregar mapa');
       } finally {
@@ -192,6 +207,7 @@ export default function FriendsMap() {
       setError('Geolocalização não suportada neste dispositivo');
       return;
     }
+    setPermissionPrompt(false);
     watchRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
@@ -224,6 +240,25 @@ export default function FriendsMap() {
     );
   }
 
+  function requestPermission() {
+    if (!navigator.geolocation) {
+      setError('Geolocalização não suportada neste dispositivo');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => startWatching(),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setPermissionDenied(true);
+          setPermissionPrompt(false);
+        } else {
+          setError(err.message);
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15_000 }
+    );
+  }
+
   async function disableSharing() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -241,7 +276,11 @@ export default function FriendsMap() {
   }
 
   return (
-    <div className="relative h-[calc(100dvh-220px)] w-full rounded-3xl overflow-hidden bg-muted/30 border border-border/30 shadow-lg">
+    <div className={
+      fullscreen
+        ? "fixed inset-0 z-40 bg-background"
+        : "relative h-[calc(100dvh-220px)] w-full rounded-3xl overflow-hidden bg-muted/30 border border-border/30 shadow-lg"
+    }>
       <div ref={containerRef} className="absolute inset-0" />
 
       {loading && (
@@ -260,6 +299,16 @@ export default function FriendsMap() {
         <div className="absolute top-3 left-3 right-3 rounded-2xl bg-card/95 backdrop-blur-xl border border-border p-3 shadow-lg">
           <p className="text-xs font-semibold mb-1">Localização bloqueada</p>
           <p className="text-[11px] text-muted-foreground">Activa a permissão de localização nas definições do navegador para apareceres no mapa.</p>
+        </div>
+      )}
+
+      {permissionPrompt && !permissionDenied && (
+        <div className="absolute top-3 left-3 right-3 rounded-2xl bg-card/95 backdrop-blur-xl border border-border p-4 shadow-xl flex flex-col gap-2">
+          <p className="text-sm font-bold">Aparecer no mapa</p>
+          <p className="text-xs text-muted-foreground">Permite a localização para veres os teus amigos e apareceres a eles em tempo real.</p>
+          <Button onClick={requestPermission} className="h-9 rounded-full mt-1 text-xs font-bold">
+            Activar localização
+          </Button>
         </div>
       )}
 
