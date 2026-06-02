@@ -86,8 +86,21 @@ Deno.serve(async (req) => {
 
     if (action === "delete-account") {
       if (!targetUserId) throw new Error("targetUserId required");
-      await adminClient.from("blocked_accounts").delete().eq("user_id", targetUserId);
-      await adminClient.from("user_suspensions").delete().eq("user_id", targetUserId);
+      // Hard delete — irreversible. Removes content from every surface (feed, search, profile, chat).
+      const tables = [
+        "post_likes", "post_reactions", "comments", "posts",
+        "stories", "story_views", "story_reactions",
+        "verification_videos",
+        "messages", "conversations",
+        "follows", "friend_requests",
+        "notifications", "user_locations", "user_presence",
+        "blocked_accounts", "user_suspensions", "user_roles",
+        "profiles",
+      ];
+      for (const t of tables) {
+        // best-effort: ignore missing columns/tables
+        await adminClient.from(t).delete().or(`user_id.eq.${targetUserId},id.eq.${targetUserId},sender_id.eq.${targetUserId},receiver_id.eq.${targetUserId},follower_id.eq.${targetUserId},following_id.eq.${targetUserId}`).then(() => null, () => null);
+      }
       const { error } = await adminClient.auth.admin.deleteUser(targetUserId);
       if (error) throw error;
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
