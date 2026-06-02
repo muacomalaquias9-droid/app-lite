@@ -204,9 +204,7 @@ export default function Messages() {
         </header>
 
         {activeTab === 'mapa' ? (
-          <div className="flex-1 p-3 overflow-hidden">
-            <FriendsMap />
-          </div>
+          <FriendsMap fullscreen />
         ) : (
         /* Conversations List */
         <ScrollArea className="flex-1 native-scroll">
