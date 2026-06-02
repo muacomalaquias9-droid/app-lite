@@ -163,9 +163,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
     }
   };
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  // Album Art Component
+  // Album Art Component (no visible controls — Instagram/Threads style)
   const AlbumArt = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
     const sizeClasses = {
       sm: 'h-9 w-9',
@@ -213,32 +211,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
           />
         )}
         
-        <div className="relative">
-          <AlbumArt size="sm" />
-          <AnimatePresence mode="wait">
-            {isPlaying ? (
-              <motion.div
-                key="pause"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full"
-              >
-                <Pause className="h-4 w-4 text-white fill-white" />
-              </motion.div>
-            ) : !hasError && musicUrl ? (
-              <motion.div
-                key="play"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full"
-              >
-                <Play className="h-4 w-4 text-white fill-white ml-0.5" />
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
+        <AlbumArt size="sm" />
         
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -269,15 +242,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
               </motion.div>
             )}
           </div>
-          
-          {musicUrl && duration > 0 && (
-            <div className="mt-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-white rounded-full"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          )}
         </div>
       </motion.div>
     );
@@ -300,32 +264,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
         />
       )}
       
-      <div className="relative">
-        <AlbumArt size="md" />
-        <AnimatePresence mode="wait">
-          {isPlaying ? (
-            <motion.div
-              key="pause"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full"
-            >
-              <Pause className="h-5 w-5 text-white fill-white" />
-            </motion.div>
-          ) : !hasError && musicUrl ? (
-            <motion.div
-              key="play"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full"
-            >
-              <Play className="h-5 w-5 text-white fill-white ml-0.5" />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
+      <AlbumArt size="md" />
       
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
@@ -352,16 +291,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
             </motion.div>
           )}
         </div>
-        
-        {musicUrl && duration > 0 && (
-          <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-pink-500 to-purple-600 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
-        
         {hasError && (
           <p className="text-xs text-red-500 mt-1">Erro ao carregar áudio</p>
         )}
