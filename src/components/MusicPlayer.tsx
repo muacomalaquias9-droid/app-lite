@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useId } from 'react';
-import { Music, Play, Pause, Disc3 } from 'lucide-react';
+import { Disc3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Global audio manager - only one audio plays at a time
@@ -34,8 +34,6 @@ function generateCoverGradient(name: string): string {
 
 export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -49,9 +47,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
       setIsLoaded(true);
       setHasError(false);
     };
@@ -61,7 +57,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
     };
     const handleEnded = () => {
       setIsPlaying(false);
-      setCurrentTime(0);
       if (currentPlayingId === instanceId) {
         currentPlayingAudio = null;
         currentPlayingId = null;
@@ -80,7 +75,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
       }
     };
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('ended', handleEnded);
@@ -92,7 +86,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
     audio.load();
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
