@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useId } from 'react';
 import { Disc3 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // Global audio manager - only one audio plays at a time
 let currentPlayingAudio: HTMLAudioElement | null = null;
