@@ -382,7 +382,8 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        <div className="relative h-44 bg-gradient-to-br from-mobile-header via-mobile-header-soft to-primary/30">
+        {/* LinkedIn-style large banner */}
+        <div className="relative h-52 bg-gradient-to-br from-mobile-header via-mobile-header-soft to-primary/30">
           {profile.banner_url && (
             <img src={profile.banner_url} alt="" className="w-full h-full object-cover" />
           )}
@@ -390,115 +391,126 @@ export default function Profile() {
             <>
               <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
               <button onClick={() => bannerInputRef.current?.click()}
-                className="absolute bottom-2 right-2 h-8 w-8 bg-black/40 backdrop-blur-sm text-white rounded-full flex items-center justify-center">
-                <Camera className="h-4 w-4" />
+                className="absolute top-3 right-3 h-9 w-9 bg-black/50 backdrop-blur-md text-white rounded-full flex items-center justify-center">
+                <Camera className="h-[18px] w-[18px]" />
               </button>
             </>
           )}
         </div>
 
-        <div className="px-4 -mt-14 relative z-10">
-          <div className="rounded-[28px] bg-card border border-border/50 shadow-xl shadow-primary/5 p-4 mb-4">
-          <div className="flex items-end justify-between mb-4">
-            <div className="relative">
+        {/* LinkedIn-style header card */}
+        <div className="px-3 -mt-16 relative z-10">
+          <div className="rounded-[20px] bg-card border border-border/50 shadow-lg shadow-foreground/5 pt-4 pb-4 px-4 mb-3">
+            {/* Avatar overlapping banner, aligned left LinkedIn-style */}
+            <div className="relative -mt-16 mb-3 w-fit">
               <div className={`p-[3px] rounded-full bg-card ${stories.length > 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}`}>
-                <Avatar className="h-24 w-24 border-4 border-card shadow-lg">
+                <Avatar className="h-28 w-28 border-4 border-card shadow-lg">
                   <AvatarImage src={profile.avatar_url} className="object-cover" />
-                  <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/30 to-accent/20">
+                  <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-primary/30 to-accent/20">
                     {profile.first_name?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>
               {!isOwnProfile && (
-                <div className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-[2px] border-background ${isOnline ? 'bg-green-500' : 'bg-muted-foreground/40'}`} />
+                <div className={`absolute bottom-2 right-2 h-5 w-5 rounded-full border-[3px] border-card ${isOnline ? 'bg-green-500' : 'bg-muted-foreground/40'}`} />
               )}
               {isOwnProfile && (
                 <>
                   <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
                   <button onClick={() => avatarInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 h-6 w-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 border-background">
-                    <Plus className="h-3 w-3" />
+                    className="absolute bottom-1 right-1 h-7 w-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-[3px] border-card shadow-md">
+                    <Camera className="h-3.5 w-3.5" />
                   </button>
                 </>
               )}
             </div>
 
-            <div className="flex gap-2 pb-1">
+            {/* Name + verification */}
+            <div className="mb-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h1 className="text-[22px] font-extrabold tracking-tight leading-tight">{profile.full_name || profile.first_name}</h1>
+                {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-5 h-5" />}
+              </div>
+              <p className="text-[13px] text-muted-foreground">@{profile.username}</p>
+            </div>
+
+            {/* Headline (LinkedIn-style) */}
+            {profile.category && (
+              <p className="text-[15px] font-medium text-foreground mt-1 mb-1.5">{profile.category}</p>
+            )}
+
+            {/* Bio */}
+            {profile.bio && (
+              <p className="text-[13.5px] leading-[19px] text-foreground/85 mb-2 whitespace-pre-wrap">{profile.bio}</p>
+            )}
+
+            {/* Location + website meta */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-[12.5px] text-muted-foreground">
+              {profile.location && (
+                <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{profile.location}</span>
+              )}
+              {profile.website && (
+                <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
+                  <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, '')}
+                </a>
+              )}
+            </div>
+
+            {/* Connections row LinkedIn-style: clickable summary */}
+            <button onClick={() => handleOpenModal("followers")} className="flex items-center gap-3 mb-3 text-left">
+              <span className="text-[13px] font-bold text-primary hover:underline">{formatNumber(followersCount)} seguidores</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="text-[13px] text-muted-foreground">{formatNumber(friendsCount)} amigos</span>
+            </button>
+
+            {/* Pill action buttons row */}
+            <div className="flex gap-2 mb-2">
               {isOwnProfile ? (
                 <>
-                  <Button size="sm" className="rounded-full text-[12px] font-bold h-9 px-4"
+                  <Button size="sm" className="flex-1 rounded-full text-[13px] font-bold h-10"
                     onClick={() => navigate('/settings/edit-profile')}>
                     Editar perfil
                   </Button>
-                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-9 px-4"
+                  <Button variant="outline" size="sm" className="rounded-full text-[13px] font-semibold h-10 px-4 border-2"
                     onClick={handleShare}>
                     Partilhar
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button 
-                    variant={isFollowing ? "outline" : "default"}
-                    size="sm"
-                    className="rounded-full text-[12px] font-bold h-9 px-5"
-                    onClick={handleFollow}
-                  >
+                  <Button variant={isFollowing ? "outline" : "default"} size="sm"
+                    className={`flex-1 rounded-full text-[13px] font-bold h-10 ${!isFollowing ? '' : 'border-2'}`}
+                    onClick={handleFollow}>
+                    <UserPlus className="h-4 w-4 mr-1" />
                     {isFollowing ? 'Filhou' : 'Filhar'}
                   </Button>
-                  <Button variant="outline" size="sm" className="rounded-full text-[12px] font-semibold h-9 px-4"
+                  <Button variant="outline" size="sm" className="flex-1 rounded-full text-[13px] font-semibold h-10 border-2"
                     onClick={() => navigate(`/chat/${profile.id}`)}>
+                    <MessageCircle className="h-4 w-4 mr-1" />
                     Mensagem
                   </Button>
                 </>
               )}
             </div>
-          </div>
 
-          <div className="mb-3">
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-[24px] font-extrabold tracking-normal leading-tight">{profile.full_name || profile.first_name}</h1>
-              {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-5 h-5" />}
+            {/* Compact stats strip */}
+            <div className="grid grid-cols-3 gap-1 mt-3 pt-3 border-t border-border/40">
+              <button onClick={() => handleOpenModal("followers")} className="py-1">
+                <span className="block text-[15px] font-extrabold">{formatNumber(followersCount)}</span>
+                <span className="block text-[11px] text-muted-foreground">seguidores</span>
+              </button>
+              <button onClick={() => handleOpenModal("following")} className="py-1 border-x border-border/40">
+                <span className="block text-[15px] font-extrabold">{formatNumber(followingCount)}</span>
+                <span className="block text-[11px] text-muted-foreground">filhou</span>
+              </button>
+              <button onClick={() => handleOpenModal("friends")} className="py-1">
+                <span className="block text-[15px] font-extrabold">{formatNumber(friendsCount)}</span>
+                <span className="block text-[11px] text-muted-foreground">amigos</span>
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[14px] text-muted-foreground">@{profile.username}</span>
-              {profile.category && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{profile.category}</span>
-              )}
-            </div>
-          </div>
-
-          {profile.bio && (
-            <p className="text-[14px] leading-[20px] text-foreground/90 mb-3 whitespace-pre-wrap">{profile.bio}</p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4 text-[12px] text-muted-foreground">
-            {profile.location && (
-              <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{profile.location}</span>
-            )}
-            {profile.website && (
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                <LinkIcon className="h-3 w-3" />{profile.website.replace(/https?:\/\//, '')}
-              </a>
-            )}
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 mb-4 rounded-2xl border border-border/50 bg-muted/25 p-2">
-            <button onClick={() => handleOpenModal("followers")} className="group py-2 rounded-xl hover:bg-background/60">
-              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(followersCount)}</span>
-              <span className="block text-[11px] text-muted-foreground">seguidores</span>
-            </button>
-            <button onClick={() => handleOpenModal("following")} className="group py-2 rounded-xl hover:bg-background/60">
-              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(followingCount)}</span>
-              <span className="block text-[11px] text-muted-foreground">filhou</span>
-            </button>
-            <button onClick={() => handleOpenModal("friends")} className="group py-2 rounded-xl hover:bg-background/60">
-              <span className="block text-[16px] font-extrabold group-hover:text-primary transition-colors">{formatNumber(friendsCount)}</span>
-              <span className="block text-[11px] text-muted-foreground">amigos</span>
-            </button>
-          </div>
 
           {isOwnProfile && (
-            <div className="grid grid-cols-4 gap-2 mb-2">
+            <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-border/40">
               {[
                 { icon: Plus, label: "Criar", onClick: () => navigate('/create') },
                 { icon: Briefcase, label: "Profissional", onClick: () => navigate('/professional-panel') },
