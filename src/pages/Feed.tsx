@@ -442,108 +442,89 @@ export default function Feed() {
                   >
                     {showAd && <div className="mb-3"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
-                    {/* Card with subtle glass effect */}
-                    <article className="rounded-[28px] overflow-hidden bg-card shadow-[var(--shadow-card)]"
-                      style={{
-                        background: 'hsl(var(--card) / 0.92)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: '1px solid hsl(var(--border) / 0.08)',
-                        boxShadow: '0 2px 16px hsl(var(--foreground) / 0.03)',
-                      }}
-                    >
-                      {/* User Header */}
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <div className="relative">
-                          <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-border/10" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
+                    {/* Threads-style card: avatar column + threadline, content column */}
+                    <article className="px-3 pt-3 pb-1 border-b border-border/40 bg-transparent">
+                      <div className="flex gap-3">
+                        {/* Left column: avatar + threadline */}
+                        <div className="flex flex-col items-center gap-2 shrink-0">
+                          <Avatar className="h-10 w-10 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
                             <AvatarImage src={post.profiles.avatar_url} className="object-cover" />
                             <AvatarFallback className="bg-muted text-sm font-semibold">
                               {post.profiles.first_name?.[0] || post.profiles.username?.[0]}
                             </AvatarFallback>
                           </Avatar>
+                          <div className="flex-1 w-[2px] rounded-full bg-border/60" />
                         </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
-                            <span className="font-semibold text-[14px] leading-tight">{post.profiles.first_name || post.profiles.username}</span>
+
+                        {/* Right column: content */}
+                        <div className="flex-1 min-w-0 pb-3">
+                          {/* Header line: name • time + more */}
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="font-bold text-[15px] cursor-pointer hover:underline truncate" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
+                              {post.profiles.username}
+                            </span>
                             {(post.profiles.verified || hasSpecialBadgeEmoji(post.profiles.username) || hasSpecialBadgeEmoji(post.profiles.full_name)) && (
                               <VerificationBadge verified={post.profiles.verified} badgeType={post.profiles.badge_type} username={post.profiles.username} fullName={post.profiles.full_name} className="w-3.5 h-3.5" />
                             )}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-muted-foreground text-[11px]">@{post.profiles.username}</span>
-                            <span className="text-muted-foreground/40 text-[11px]">·</span>
-                            <span className="text-muted-foreground text-[11px]">
+                            <span className="text-muted-foreground text-[13px] ml-1">
                               {formatDistanceToNow(new Date(post.created_at), { locale: ptBR, addSuffix: false })}
                             </span>
+                            <div className="flex-1" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7 -mr-2 rounded-full" onClick={() => setOptionsSheet({ open: true, post })}>
+                              <MoreHorizontal className="h-[18px] w-[18px] text-muted-foreground" />
+                            </Button>
+                          </div>
+
+                          {/* Text */}
+                          {post.content && (
+                            <p className="text-[15px] leading-[21px] text-foreground whitespace-pre-wrap break-words mb-2">
+                              {parseTextWithLinksAndMentions(post.content)}
+                            </p>
+                          )}
+
+                          {/* Music */}
+                          {post.music_name && post.music_url && (
+                            <div className="mb-2">
+                              <MusicPlayer musicName={post.music_name} musicArtist={post.music_artist} musicUrl={post.music_url} autoPlayInView />
+                            </div>
+                          )}
+
+                          {/* Media */}
+                          {post.media_urls && post.media_urls.length > 0 && (
+                            <div className="rounded-2xl overflow-hidden mb-2 border border-border/40">
+                              {renderMediaGrid(post.media_urls, post.id)}
+                            </div>
+                          )}
+
+                          {/* Threads-style minimal actions */}
+                          <div className="flex items-center gap-1 -ml-2">
+                            <motion.button onClick={() => handleLike(post.id)} whileTap={{ scale: 0.85 }}
+                              className="flex items-center gap-1 h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
+                              <Heart className={`h-[20px] w-[20px] transition-all ${userReaction ? 'text-red-500 fill-red-500' : 'text-foreground'}`} strokeWidth={1.5} />
+                              {totalReactions > 0 && (
+                                <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{totalReactions}</span>
+                              )}
+                            </motion.button>
+                            <button onClick={() => navigate(`/comments/${post.id}`)}
+                              className="flex items-center gap-1 h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
+                              <MessageCircle className="h-[20px] w-[20px] text-foreground" strokeWidth={1.5} />
+                              {post.comments.length > 0 && (
+                                <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{post.comments.length}</span>
+                              )}
+                            </button>
+                            <button onClick={() => {
+                              navigator.share?.({ title: 'Publicação', text: post.content?.slice(0, 100), url: `${window.location.origin}/post/${post.id}` })
+                                .catch(() => { navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`); toast.success("Link copiado!"); });
+                            }} className="h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
+                              <Send className="h-[18px] w-[18px] text-foreground" strokeWidth={1.5} />
+                            </button>
+                            <div className="flex-1" />
+                            <motion.button onClick={() => handleSave(post.id)} whileTap={{ scale: 0.85 }}
+                              className="h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
+                              <Bookmark className={`h-[20px] w-[20px] ${isSaved ? 'fill-foreground text-foreground' : 'text-foreground'}`} strokeWidth={1.5} />
+                            </motion.button>
                           </div>
                         </div>
-                        
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setOptionsSheet({ open: true, post })}>
-                          <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-                        </Button>
-                      </div>
-
-                      {/* Text Content */}
-                      {post.content && (
-                        <div className="px-4 pb-2.5">
-                          <p className="text-[14px] leading-[22px] text-foreground/90">
-                            {parseTextWithLinksAndMentions(post.content)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Music tag - minimal */}
-                      {post.music_name && post.music_url && (
-                        <div className="px-4 pb-2">
-                          <MusicPlayer
-                            musicName={post.music_name}
-                            musicArtist={post.music_artist}
-                            musicUrl={post.music_url}
-                            autoPlayInView
-                          />
-                        </div>
-                      )}
-
-                      {/* Media */}
-                      {post.media_urls && post.media_urls.length > 0 && (
-                        <div className="px-3 pb-2">
-                          {renderMediaGrid(post.media_urls, post.id)}
-                        </div>
-                      )}
-
-                      {/* Interaction bar */}
-                      <div className="flex items-center px-4 py-2.5 gap-0.5">
-                        <motion.button onClick={() => handleLike(post.id)} whileTap={{ scale: 0.8 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          className="flex items-center gap-1.5 h-9 px-3 rounded-2xl hover:bg-muted/50 active:bg-muted transition-colors">
-                          <Heart className={`h-[20px] w-[20px] transition-all duration-200 ${userReaction ? 'text-red-500 fill-red-500 scale-110' : 'text-muted-foreground'}`} strokeWidth={1.5} />
-                          {totalReactions > 0 && (
-                            <span className={`text-[13px] font-medium tabular-nums ${userReaction ? 'text-red-500' : 'text-muted-foreground'}`}>{totalReactions}</span>
-                          )}
-                        </motion.button>
-                        
-                        <button onClick={() => navigate(`/comments/${post.id}`)}
-                          className="flex items-center gap-1.5 h-9 px-3 rounded-2xl hover:bg-muted/50 active:bg-muted transition-colors">
-                          <MessageCircle className="h-[20px] w-[20px] text-muted-foreground" strokeWidth={1.5} />
-                          {post.comments.length > 0 && (
-                            <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{post.comments.length}</span>
-                          )}
-                        </button>
-                        
-                        <button onClick={() => {
-                          navigator.share?.({ title: 'Publicação', text: post.content?.slice(0, 100), url: `${window.location.origin}/post/${post.id}` })
-                            .catch(() => { navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`); toast.success("Link copiado!"); });
-                        }} className="h-9 px-3 rounded-2xl hover:bg-muted/50 active:bg-muted transition-colors">
-                          <Send className="h-[18px] w-[18px] text-muted-foreground" strokeWidth={1.5} />
-                        </button>
-                        
-                        <div className="flex-1" />
-                        
-                        <motion.button onClick={() => handleSave(post.id)} whileTap={{ scale: 0.8 }}
-                          className="h-9 px-3 rounded-2xl hover:bg-muted/50 active:bg-muted transition-colors">
-                          <Bookmark className={`h-[20px] w-[20px] transition-all duration-200 ${isSaved ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} strokeWidth={1.5} />
-                        </motion.button>
                       </div>
                     </article>
                   </motion.div>
