@@ -240,8 +240,11 @@ function AdminModerationPanel({ users, onRefresh }: { users: User[]; onRefresh: 
         <Input placeholder="Pesquisar usuário..." value={postSearch} onChange={(e) => setPostSearch(e.target.value)} className="pl-12 h-12 rounded-xl bg-muted/50 border-0" />
       </div>
 
-      <div className="grid gap-2 max-h-64 overflow-y-auto native-scroll pr-1">
-        {filteredUsers.slice(0, 12).map((user) => (
+      <div className="text-[11px] text-muted-foreground px-1">
+        {filteredUsers.length} usuário(s) — todos visíveis para moderação
+      </div>
+      <div className="grid gap-2 max-h-[60vh] overflow-y-auto native-scroll pr-1">
+        {filteredUsers.map((user) => (
           <button key={user.id} onClick={() => setSelectedUserId(user.id)} className={`w-full p-3 rounded-2xl border text-left transition-colors ${selectedUserId === user.id ? 'border-primary bg-primary/10' : 'border-border/50 bg-card hover:bg-muted/40'}`}>
             <div className="flex items-center gap-3">
               <Avatar className="h-11 w-11"><AvatarImage src={user.avatar_url} /><AvatarFallback>{user.first_name?.[0] || '?'}</AvatarFallback></Avatar>
@@ -355,7 +358,7 @@ export default function Admin() {
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(1000);
     
     setUsers(data || []);
   };
