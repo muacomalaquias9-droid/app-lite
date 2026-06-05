@@ -8,7 +8,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { ActiveProfileProvider } from "@/contexts/ActiveProfileContext";
 import { useStoryReactions } from "@/hooks/useStoryReactions";
 import { useGlobalUserPresence } from "@/hooks/useGlobalUserPresence";
-import { MessageNotification } from "@/components/MessageNotification";
+// In-app message toast removed — push only on native device
 // FreeDataBanner removed - no longer showing "Sistema Grátis"
 import Auth from "./pages/Auth";
 import SavedAccounts from "./pages/SavedAccounts";
@@ -106,7 +106,6 @@ const AppContent = () => {
     <>
       {/* FreeDataBanner removed */}
       <IncomingCallNotification />
-      <MessageNotification />
       <Routes>
         <Route path="/" element={<SavedAccounts />} />
         <Route path="/auth" element={<Auth />} />
