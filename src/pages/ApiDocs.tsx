@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Check, BookOpen, Code, Globe, Lock, Zap, Wifi, Package } from "lucide-react";
+import { ArrowLeft, Copy, Check, BookOpen, Code, Globe, Lock, Zap, Wifi, Package, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/public-api`;
+const APP_VIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/app-view-api`;
 const SDK_URL = `${window.location.origin}/blynk-sdk.js`;
 
 const endpoints = [
@@ -312,6 +313,33 @@ supa.channel("any").on("postgres_changes",
             <li>Chaves podem ter data de expiração</li>
             <li>Todas as requisições ficam registadas em logs</li>
           </ul>
+        </section>
+
+        {/* App-View API (Native WebView) */}
+        <section>
+          <h2 className="text-lg font-semibold mb-2 flex items-center gap-2"><Smartphone className="h-4 w-4" /> App-View API · Native (WebView)</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            Endpoint dedicado para o app nativo iOS/Android (estilo Facebook) carregar o Blynk dentro de uma WebView.
+            Devolve URL, tema, branding e features. Requer chave pública <code className="bg-muted px-1 rounded text-xs">X-API-Key</code> + segredo
+            <code className="bg-muted px-1 rounded text-xs ml-1">X-View-Secret</code> (cria/activa em <button className="text-primary underline" onClick={() => navigate("/api-keys")}>/api-keys</button>).
+          </p>
+          <CodeBlock lang="bash" code={`curl "${APP_VIEW_URL}/v1/view/config" \\
+  -H "X-API-Key: pk_live_xxx" \\
+  -H "X-View-Secret: sk_live_xxx"`} />
+          <p className="text-xs text-muted-foreground mt-3 mb-2">Resposta:</p>
+          <CodeBlock lang="json" code={`{
+  "app": { "name": "Blynk", "bundle_id": "app.lovable.blynk", "version": "1.0.0" },
+  "url": "https://blynks.lovable.app",
+  "entrypoint": "https://blynks.lovable.app/feed",
+  "theme":   { "primary": "#3B82F6", "background": "#0F172A", "statusbar": "light" },
+  "branding":{ "logo": ".../logo-192.png", "splash": ".../logo-192.png" },
+  "features":{ "push": true, "camera": true, "geolocation": true, "webrtc": true }
+}`} />
+          <p className="text-xs text-muted-foreground mt-3">
+            Endpoints: <code className="bg-muted px-1 rounded">GET /v1/view/config</code> ·
+            <code className="bg-muted px-1 rounded ml-1">GET /v1/view/manifest</code> ·
+            <code className="bg-muted px-1 rounded ml-1">GET /v1/view/health</code> (público).
+          </p>
         </section>
 
         <p className="text-xs text-muted-foreground/60 text-center pt-8">© 2026/2027 Blynk API · v1</p>

@@ -322,6 +322,17 @@ html, body, button, input, textarea, select {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   }
 
+  /* Inline iOS emoji <img> injected by iosEmojis.ts */
+  img.ios-emoji {
+    height: 1.1em;
+    width: 1.1em;
+    display: inline-block;
+    vertical-align: -0.18em;
+    margin: 0 0.02em;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   /* Fade in animation */
   .fade-in {
     animation: fadeIn 0.25s cubic-bezier(0.2, 0, 0, 1);

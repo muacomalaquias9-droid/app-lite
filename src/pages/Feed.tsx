@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { MessageNotification } from "@/components/MessageNotification";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -375,7 +374,6 @@ export default function Feed() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <MessageNotification />
         <div className="min-h-screen bg-background"><FeedSkeleton /></div>
       </ProtectedRoute>
     );
@@ -383,7 +381,6 @@ export default function Feed() {
 
   return (
     <ProtectedRoute>
-      <MessageNotification />
       <div className="fixed inset-0 bg-mobile-surface overflow-hidden">
         {/* Header - Floating glass */}
         <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-mobile-header text-mobile-header-foreground shadow-lg shadow-mobile-header/20">
