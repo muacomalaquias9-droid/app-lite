@@ -171,6 +171,17 @@ export default function Feed() {
   };
 
   const loadSponsoredAds = async () => {
+    // Check global ads toggle first
+    const { data: setting } = await supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "ads_enabled")
+      .maybeSingle();
+    const adsEnabled = setting?.value === true || setting?.value === "true";
+    if (!adsEnabled) {
+      setSponsoredAds([]);
+      return;
+    }
     const { data } = await supabase.from("sponsored_ads").select("*").eq("is_active", true);
     if (data) setSponsoredAds(data);
   };
