@@ -763,6 +763,7 @@ export default function Admin() {
             </TabsList>
 
             <TabsContent value="users" className="space-y-3 mt-0">
+              <AdsToggleCard />
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
