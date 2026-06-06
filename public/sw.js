@@ -1,8 +1,8 @@
 // Enhanced Service Worker for PWA with Aggressive Caching and Offline Support
-const CACHE_NAME = 'blynk-v3';
-const STATIC_CACHE = 'blynk-static-v3';
-const DYNAMIC_CACHE = 'blynk-dynamic-v3';
-const MEDIA_CACHE = 'blynk-media-v3';
+const CACHE_NAME = 'paji-v3';
+const STATIC_CACHE = 'paji-static-v3';
+const DYNAMIC_CACHE = 'paji-dynamic-v3';
+const MEDIA_CACHE = 'paji-media-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -181,7 +181,7 @@ async function refreshCache(request, cacheName) {
 // Push notification handling
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Blynk';
+  const title = data.title || 'Paji';
   
   const options = {
     body: data.body || 'Nova notificação',

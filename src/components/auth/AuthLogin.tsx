@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Eye, EyeOff, Sparkles, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import logo from '@/assets/blynk-logo.jpg';
+import logo from '@/assets/paji-logo.jpg';
 import { PhoneVerification } from '@/components/auth/PhoneVerification';
 import { requestNotificationPermission, showNotification } from '@/utils/pushNotifications';
 import { motion } from 'framer-motion';
@@ -35,7 +35,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
       setCredential(prefilledEmail);
       setRememberMe(true);
     } else {
-      const savedCredential = localStorage.getItem('blynk_saved_credential');
+      const savedCredential = localStorage.getItem('paji_saved_credential');
       if (savedCredential) {
         setCredential(savedCredential);
         setRememberMe(true);
@@ -54,7 +54,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
         .single();
 
       if (profile) {
-        const accounts = JSON.parse(localStorage.getItem('blynk_saved_accounts') || '[]');
+        const accounts = JSON.parse(localStorage.getItem('paji_saved_accounts') || '[]');
         const existingIndex = accounts.findIndex((acc: any) => acc.userId === userId);
         
         const accountData = {
@@ -71,12 +71,12 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
           accounts.push(accountData);
         }
 
-        localStorage.setItem('blynk_saved_accounts', JSON.stringify(accounts));
-        localStorage.setItem('blynk_saved_credential', email);
+        localStorage.setItem('paji_saved_accounts', JSON.stringify(accounts));
+        localStorage.setItem('paji_saved_credential', email);
 
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          localStorage.setItem(`blynk_session_${userId}`, JSON.stringify({
+          localStorage.setItem(`paji_session_${userId}`, JSON.stringify({
             access_token: session.access_token,
             refresh_token: session.refresh_token,
           }));
@@ -155,7 +155,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
         
         const hasPermission = await requestNotificationPermission();
         if (hasPermission) {
-          showNotification('Código de Verificação Blynk', {
+          showNotification('Código de Verificação Paji', {
             body: `Seu código de autenticação de dois fatores é: ${code}`,
             icon: logo,
             requireInteraction: true,
@@ -181,7 +181,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
         if (rememberMe) {
           await saveAccount(data.user.id, credential.trim());
         } else {
-          localStorage.removeItem('blynk_saved_credential');
+          localStorage.removeItem('paji_saved_credential');
         }
         toast.success('Login realizado com sucesso!');
         navigate('/feed');
@@ -264,7 +264,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
             >
               <img 
                 src={logo} 
-                alt="Blynk" 
+                alt="Paji" 
                 className="h-20 w-20 mx-auto rounded-2xl shadow-xl ring-4 ring-primary/20" 
               />
               <motion.div 
@@ -282,7 +282,7 @@ export const AuthLogin = ({ onBack, onForgotPassword, onSwitchToSignup }: AuthLo
                 Bem-vindo!
               </h1>
               <p className="text-muted-foreground mt-1">
-                Entre na sua conta Blynk
+                Entre na sua conta Paji
               </p>
             </div>
           </motion.div>

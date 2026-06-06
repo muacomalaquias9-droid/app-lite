@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://blynk-social.vercel.app/</loc>
+    <loc>https://blynks.lovable.app/</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/feed</loc>
+    <loc>https://blynks.lovable.app/feed</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/videos</loc>
+    <loc>https://blynks.lovable.app/videos</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/messages</loc>
+    <loc>https://blynks.lovable.app/messages</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/notifications</loc>
+    <loc>https://blynks.lovable.app/notifications</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/friends</loc>
+    <loc>https://blynks.lovable.app/friends</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/groups</loc>
+    <loc>https://blynks.lovable.app/groups</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/channels</loc>
+    <loc>https://blynks.lovable.app/channels</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://blynk-social.vercel.app/auth</loc>
+    <loc>https://blynks.lovable.app/auth</loc>
     <lastmod>2025-11-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

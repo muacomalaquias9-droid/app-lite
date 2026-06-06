@@ -71,7 +71,7 @@ export default function Auth() {
     return (
       <div className="h-full flex items-center justify-center bg-background">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
-          <h1 className="text-4xl font-bold text-primary">blynk</h1>
+          <h1 className="text-4xl font-bold text-primary">paji</h1>
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </motion.div>
       </div>
@@ -161,7 +161,7 @@ export default function Auth() {
     try {
       const verified = await verifyPhoneCode();
       if (!verified) { toast.error('Código inválido'); return; }
-      const tempEmail = `${formData.phone.replace(/\+/g, '')}@phone.blynk.app`;
+      const tempEmail = `${formData.phone.replace(/\+/g, '')}@phone.paji.app`;
       const { data, error } = await supabase.auth.signUp({
         email: tempEmail, password: formData.password,
         options: { emailRedirectTo: `${window.location.origin}/`, data: { first_name: formData.firstName, username: formData.username, phone: formData.phone, phone_verified: true } }
@@ -283,7 +283,7 @@ export default function Auth() {
                 </Button>
               </div>
 
-              <p className="text-[11px] text-muted-foreground/60">© 2026/2027 Blynk</p>
+              <p className="text-[11px] text-muted-foreground/60">© 2026/2027 Paji</p>
             </motion.div>
           )}
 

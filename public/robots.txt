@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://blynk.vercel.app/sitemap.xml
+Sitemap: https://blynks.lovable.app/sitemap.xml

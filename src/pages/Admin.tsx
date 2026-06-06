@@ -12,8 +12,9 @@ import { Slider } from "@/components/ui/slider";
 import { 
   ArrowLeft, Users, FileWarning, Shield, Ban, CheckCircle2, Search,
   Trash2, Eye, AlertTriangle, UserCheck, Clock, Unlock, RefreshCw,
-  Heart, UserPlus, Zap
+  Heart, UserPlus, Zap, Megaphone
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import VerificationBadge from "@/components/VerificationBadge";
 import { toast } from "sonner";
@@ -73,6 +74,56 @@ interface Suspension {
 }
 
 const PROTECTED_EMAIL = "isaacmuaco582@gmail.com";
+
+function AdsToggleCard() {
+  const [adsEnabled, setAdsEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", "ads_enabled")
+        .maybeSingle();
+      setAdsEnabled(data?.value === true || data?.value === "true");
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const toggle = async (next: boolean) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "ads_enabled", value: next as any }, { onConflict: "key" });
+    setSaving(false);
+    if (error) {
+      toast.error("Erro ao atualizar");
+      return;
+    }
+    setAdsEnabled(next);
+    toast.success(next ? "Anúncios ativados em toda a app" : "Anúncios desativados em toda a app");
+  };
+
+  return (
+    <Card className="p-4 mb-3">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Megaphone className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">Anúncios no App</p>
+          <p className="text-xs text-muted-foreground">
+            {adsEnabled ? "Mostrando anúncios para todos os usuários" : "Anúncios escondidos em toda a app"}
+          </p>
+        </div>
+        <Switch checked={adsEnabled} onCheckedChange={toggle} disabled={loading || saving} />
+      </div>
+    </Card>
+  );
+}
 
 function BoostPanel({ users }: { users: User[] }) {
   const [boostSearch, setBoostSearch] = useState("");
@@ -165,7 +216,7 @@ function BoostPanel({ users }: { users: User[] }) {
 
 function AdminModerationPanel({ users, onRefresh }: { users: User[]; onRefresh: () => void }) {
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [reason, setReason] = useState("Violação das regras da comunidade Blynk");
+  const [reason, setReason] = useState("Violação das regras da comunidade Paji");
   const [postSearch, setPostSearch] = useState("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
@@ -712,6 +763,7 @@ export default function Admin() {
             </TabsList>
 
             <TabsContent value="users" className="space-y-3 mt-0">
+              <AdsToggleCard />
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input

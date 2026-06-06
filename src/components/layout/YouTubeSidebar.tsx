@@ -205,7 +205,7 @@ export default function YouTubeSidebar() {
                 <Play className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Blynk
+                Paji
               </span>
             </Link>
           )}
@@ -356,7 +356,7 @@ export default function YouTubeSidebar() {
           {!collapsed && (
             <div className="pt-3 text-center">
               <p className="text-[10px] text-muted-foreground/60">
-                © 2026/2027 Blynk
+                © 2026/2027 Paji
               </p>
             </div>
           )}

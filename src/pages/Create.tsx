@@ -226,7 +226,7 @@ export default function Create() {
               <div className="flex-1 pb-4">
                 <p className="font-semibold text-sm mb-1">{displayName || 'User'}</p>
                 <MentionTextarea
-                  placeholder="Comece uma Blincada na Blynk..."
+                  placeholder="Comece uma Blincada na Paji..."
                   value={content}
                   onChange={setContent}
                   rows={4}

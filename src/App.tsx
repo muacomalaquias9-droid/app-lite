@@ -79,7 +79,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-5xl font-bold animate-pulse">Blynk</div>
+          <div className="text-5xl font-bold animate-pulse">Paji</div>
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </div>

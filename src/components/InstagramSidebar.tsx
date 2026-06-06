@@ -94,7 +94,7 @@ export default function InstagramSidebar() {
             "text-3xl font-extrabold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent transition-opacity",
             collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
           )}>
-            Blynk
+            Paji
           </h1>
           {collapsed && <Menu className="h-7 w-7 mx-auto text-primary" />}
         </div>

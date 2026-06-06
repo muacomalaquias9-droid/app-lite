@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { X, ChevronRight } from 'lucide-react';
-import logo from '@/assets/blynk-logo.jpg';
+import logo from '@/assets/paji-logo.jpg';
 
 interface SavedAccount {
   userId: string;
@@ -33,7 +33,7 @@ export default function SavedAccounts() {
   }, []);
 
   const loadSavedAccounts = () => {
-    const accounts = localStorage.getItem('blynk_saved_accounts');
+    const accounts = localStorage.getItem('paji_saved_accounts');
     if (accounts) {
       setSavedAccounts(JSON.parse(accounts));
     }
@@ -42,7 +42,7 @@ export default function SavedAccounts() {
   const handleAccountClick = async (account: SavedAccount) => {
     try {
       // Login automático com a sessão salva
-      const savedSession = localStorage.getItem(`blynk_session_${account.userId}`);
+      const savedSession = localStorage.getItem(`paji_session_${account.userId}`);
       if (savedSession) {
         const session = JSON.parse(savedSession);
         const { error } = await supabase.auth.setSession({
@@ -70,8 +70,8 @@ export default function SavedAccounts() {
     e.stopPropagation();
     const updatedAccounts = savedAccounts.filter(acc => acc.userId !== userId);
     setSavedAccounts(updatedAccounts);
-    localStorage.setItem('blynk_saved_accounts', JSON.stringify(updatedAccounts));
-    localStorage.removeItem(`blynk_session_${userId}`);
+    localStorage.setItem('paji_saved_accounts', JSON.stringify(updatedAccounts));
+    localStorage.removeItem(`paji_session_${userId}`);
     toast.success('Conta removida');
   };
 
@@ -82,7 +82,7 @@ export default function SavedAccounts() {
           <div className="relative inline-block">
             <img 
               src={logo} 
-              alt="Blynk" 
+              alt="Paji" 
               className="h-16 w-16 mx-auto rounded-full shadow-lg ring-2 ring-primary/20 animate-in zoom-in duration-500" 
             />
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 to-transparent animate-pulse" />

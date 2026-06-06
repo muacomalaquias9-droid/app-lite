@@ -3,8 +3,8 @@ import { Wifi, WifiOff, Zap, TrendingDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FREE_DATA_LIMIT = 100 * 1024 * 1024; // 100MB in bytes
-const STORAGE_KEY = 'blynk_free_data_used';
-const RESET_KEY = 'blynk_free_data_reset';
+const STORAGE_KEY = 'paji_free_data_used';
+const RESET_KEY = 'paji_free_data_reset';
 
 export const FreeDataBanner = () => {
   const [dataUsed, setDataUsed] = useState(0);

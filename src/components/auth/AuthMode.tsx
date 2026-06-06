@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import logo from '@/assets/blynk-logo.jpg';
+import logo from '@/assets/paji-logo.jpg';
 
 interface AuthModeProps {
   onSelectMode: (mode: 'login' | 'signup') => void;
@@ -12,13 +12,13 @@ export const AuthMode = ({ onSelectMode }: AuthModeProps) => {
         <div className="relative inline-block">
           <img 
             src={logo} 
-            alt="Blynk" 
+            alt="Paji" 
             className="h-28 w-28 mx-auto rounded-full shadow-2xl ring-4 ring-primary/30 animate-in zoom-in duration-500" 
           />
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/30 to-transparent animate-pulse" />
         </div>
         <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary-glow to-primary bg-clip-text text-transparent animate-in slide-in-from-bottom-2 duration-500">
-          Blynk
+          Paji
         </h1>
         <p className="text-muted-foreground text-xl font-medium animate-in slide-in-from-bottom-3 duration-500">
           Conecte-se com seus amigos e compartilhe momentos

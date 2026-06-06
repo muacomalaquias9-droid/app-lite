@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import TwoFactorCodeInput from '@/components/TwoFactorCodeInput';
-import logo from '@/assets/blynk-logo.jpg';
+import logo from '@/assets/paji-logo.jpg';
 import { requestNotificationPermission, showNotification } from '@/utils/pushNotifications';
 
 export default function TwoFactorVerification() {
@@ -91,7 +91,7 @@ export default function TwoFactorVerification() {
       // Enviar notificação push
       const hasPermission = await requestNotificationPermission();
       if (hasPermission) {
-        showNotification('Novo Código de Verificação Blynk', {
+        showNotification('Novo Código de Verificação Paji', {
           body: `Seu novo código de autenticação é: ${code}`,
           icon: logo,
           requireInteraction: true,
@@ -120,7 +120,7 @@ export default function TwoFactorVerification() {
         </Button>
         
         <div className="text-center space-y-4 mb-8">
-          <img src={logo} alt="Blynk" className="h-16 w-16 mx-auto rounded-full" />
+          <img src={logo} alt="Paji" className="h-16 w-16 mx-auto rounded-full" />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Autenticação de Dois Fatores</h1>
             <p className="text-muted-foreground mt-2">
