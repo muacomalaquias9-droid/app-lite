@@ -389,7 +389,7 @@ export default function Feed() {
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl active:scale-90 transition-transform text-mobile-header-foreground hover:bg-mobile-header-foreground/10" onClick={() => navigate("/sidebar")}>
                 <Menu className="h-5 w-5" strokeWidth={1.5} />
               </Button>
-              <span className="font-display text-[22px] font-extrabold tracking-normal text-mobile-header-foreground">Blynk</span>
+              <span className="font-display text-[22px] font-extrabold tracking-normal text-mobile-header-foreground">Paji</span>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl active:scale-90 transition-transform text-mobile-header-foreground hover:bg-mobile-header-foreground/10" onClick={() => navigate("/notifications")}>

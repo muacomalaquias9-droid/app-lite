@@ -1,20 +1,20 @@
 /*!
- * Blynk SDK v1.0  —  Public REST + Realtime + Offline queue (IndexedDB)
+ * Paji SDK v1.0  —  Public REST + Realtime + Offline queue (IndexedDB)
  *
  * Usage (in any external website or app):
  *
- *   <script src="https://blynks.lovable.app/blynk-sdk.js"></script>
+ *   <script src="https://pajis.lovable.app/paji-sdk.js"></script>
  *   <script>
- *     const blynk = new Blynk({
+ *     const paji = new Paji({
  *       publicKey: "pk_live_xxx",
  *       secret:    "sk_live_xxx",            // keep on server in production
- *       baseUrl:   "https://blynks.lovable.app",
+ *       baseUrl:   "https://pajis.lovable.app",
  *     });
  *
- *     await blynk.auth.login("a@b.com", "secret");
- *     await blynk.posts.create({ content: "Olá mundo!" });
+ *     await paji.auth.login("a@b.com", "secret");
+ *     await paji.posts.create({ content: "Olá mundo!" });
  *
- *     blynk.realtime.on("posts", (event) => {
+ *     paji.realtime.on("posts", (event) => {
  *       console.log("novo evento de post:", event);
  *     });
  *   </script>
@@ -26,7 +26,7 @@
   "use strict";
 
   // ----------- IndexedDB tiny helper -----------
-  const DB_NAME = "blynk-sdk";
+  const DB_NAME = "paji-sdk";
   const STORE = "outbox";
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -66,14 +66,14 @@
     });
   }
 
-  class Blynk {
+  class Paji {
     constructor(opts) {
-      if (!opts || !opts.publicKey) throw new Error("Blynk: publicKey is required");
+      if (!opts || !opts.publicKey) throw new Error("Paji: publicKey is required");
       this.publicKey = opts.publicKey;
       this.secret = opts.secret || "";
-      this.baseUrl = (opts.baseUrl || "https://blynks.lovable.app").replace(/\/+$/, "");
+      this.baseUrl = (opts.baseUrl || "https://pajis.lovable.app").replace(/\/+$/, "");
       this.apiUrl = this.baseUrl + "/functions/v1/public-api";
-      this.session = JSON.parse(localStorage.getItem("blynk_session") || "null");
+      this.session = JSON.parse(localStorage.getItem("paji_session") || "null");
       this._listeners = new Map();
       this._realtimeChannel = null;
       this._setupOnlineListener();
@@ -82,7 +82,7 @@
       this.auth = {
         login: (email, password) => this._post("/v1/auth/login", { email, password }, true).then((r) => this._setSession(r.session, r.user)),
         signup: (email, password, username, full_name) => this._post("/v1/auth/signup", { email, password, username, full_name }, true).then((r) => this._setSession(r.session, r.user)),
-        logout: () => { this.session = null; localStorage.removeItem("blynk_session"); },
+        logout: () => { this.session = null; localStorage.removeItem("paji_session"); },
         currentUser: () => this.session?.user || null,
       };
       this.posts = {
@@ -142,7 +142,7 @@
 
     _setSession(session, user) {
       this.session = { ...session, user };
-      localStorage.setItem("blynk_session", JSON.stringify(this.session));
+      localStorage.setItem("paji_session", JSON.stringify(this.session));
       return this.session;
     }
 
@@ -232,7 +232,7 @@
         this._supabaseClient = global.supabase.createClient(supaUrl, info.anon_key, {
           auth: { persistSession: false },
         });
-        this._realtimeChannel = this._supabaseClient.channel("blynk-sdk");
+        this._realtimeChannel = this._supabaseClient.channel("paji-sdk");
       }
       this._realtimeChannel.on("postgres_changes", { event: "*", schema: "public", table }, (payload) => {
         const cb = this._listeners.get(table);
@@ -244,5 +244,5 @@
     }
   }
 
-  global.Blynk = Blynk;
+  global.Paji = Paji;
 })(typeof window !== "undefined" ? window : globalThis);

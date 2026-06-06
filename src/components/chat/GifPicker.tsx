@@ -32,7 +32,7 @@ export default function GifPicker({ open, onClose, onGifSelect }: GifPickerProps
 
   // Tenor API key público (pode ser usado em produção)
   const TENOR_API_KEY = 'AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ';
-  const TENOR_CLIENT_KEY = 'blynk_chat';
+  const TENOR_CLIENT_KEY = 'paji_chat';
 
   const searchGifs = async (query: string) => {
     if (!query.trim()) {

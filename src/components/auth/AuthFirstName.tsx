@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
-import logo from '@/assets/blynk-logo.jpg';
+import logo from '@/assets/paji-logo.jpg';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -50,13 +50,13 @@ export const AuthFirstName = ({ onNext, onBack }: AuthFirstNameProps) => {
         <div className="relative inline-block">
           <img 
             src={logo} 
-            alt="Blynk" 
+            alt="Paji" 
             className="h-24 w-24 mx-auto rounded-full shadow-xl ring-4 ring-primary/30 animate-in zoom-in duration-500" 
           />
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/30 to-transparent animate-pulse" />
         </div>
         <h1 className="text-4xl font-bold text-foreground animate-in slide-in-from-bottom-2 duration-500">
-          Bem-vindo ao Blynk
+          Bem-vindo ao Paji
         </h1>
         <p className="text-lg text-muted-foreground animate-in slide-in-from-bottom-3 duration-500">
           Conecte-se com seus amigos

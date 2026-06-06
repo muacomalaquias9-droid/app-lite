@@ -342,7 +342,7 @@ export default function VerificationCheckout() {
             Verificação Oficial
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight">Escolha o seu plano</h2>
-          <p className="text-muted-foreground max-w-sm mx-auto">Obtém o selo verificado e desbloqueia funcionalidades premium do Blynk</p>
+          <p className="text-muted-foreground max-w-sm mx-auto">Obtém o selo verificado e desbloqueia funcionalidades premium do Paji</p>
         </div>
 
         {/* User Data Section */}

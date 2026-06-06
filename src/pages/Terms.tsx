@@ -22,7 +22,7 @@ export default function Terms() {
             <section>
               <h3 className="text-xl font-semibold mb-3">1. Aceitação dos Termos</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Ao acessar e usar o Blynk, você aceita e concorda em cumprir estes Termos de Serviço. 
+                Ao acessar e usar o Paji, você aceita e concorda em cumprir estes Termos de Serviço. 
                 Se você não concordar com qualquer parte destes termos, não deverá usar nosso serviço.
               </p>
             </section>
@@ -32,7 +32,7 @@ export default function Terms() {
             <section>
               <h3 className="text-xl font-semibold mb-3">2. Uso do Serviço</h3>
               <p className="text-muted-foreground leading-relaxed mb-2">
-                Você concorda em usar o Blynk apenas para fins legais e de acordo com estes Termos. É proibido:
+                Você concorda em usar o Paji apenas para fins legais e de acordo com estes Termos. É proibido:
               </p>
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-4">
                 <li>Publicar conteúdo ilegal, ofensivo ou inadequado</li>
@@ -58,7 +58,7 @@ export default function Terms() {
             <section>
               <h3 className="text-xl font-semibold mb-3">4. Conteúdo do Usuário</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Você mantém todos os direitos sobre o conteúdo que publica no Blynk. 
+                Você mantém todos os direitos sobre o conteúdo que publica no Paji. 
                 No entanto, ao publicar conteúdo, você nos concede uma licença para exibir, 
                 distribuir e modificar esse conteúdo conforme necessário para operar o serviço.
               </p>
@@ -91,7 +91,7 @@ export default function Terms() {
             <section>
               <h3 className="text-xl font-semibold mb-3">7. Limitação de Responsabilidade</h3>
               <p className="text-muted-foreground leading-relaxed">
-                O Blynk é fornecido "como está". Não garantimos que o serviço será 
+                O Paji é fornecido "como está". Não garantimos que o serviço será 
                 ininterrupto ou livre de erros. Não somos responsáveis por quaisquer 
                 danos resultantes do uso ou incapacidade de usar nosso serviço.
               </p>
@@ -114,7 +114,7 @@ export default function Terms() {
               <h3 className="text-xl font-semibold mb-3">9. Contato</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Se você tiver dúvidas sobre estes Termos, entre em contato conosco em: 
-                legal@blynk.com
+                legal@paji.com
               </p>
             </section>
           </div>
@@ -123,12 +123,12 @@ export default function Terms() {
         <Card className="p-6 bg-primary/5 border-primary/20">
           <h3 className="font-bold mb-2">Políticas de Cookies</h3>
           <p className="text-sm text-muted-foreground mb-3">
-            Usamos cookies para melhorar sua experiência no Blynk. Cookies são pequenos 
+            Usamos cookies para melhorar sua experiência no Paji. Cookies são pequenos 
             arquivos de texto armazenados no seu dispositivo que nos ajudam a entender 
             como você usa nosso serviço.
           </p>
           <p className="text-sm text-muted-foreground">
-            Ao continuar usando o Blynk, você concorda com o uso de cookies conforme 
+            Ao continuar usando o Paji, você concorda com o uso de cookies conforme 
             descrito em nossa política.
           </p>
         </Card>

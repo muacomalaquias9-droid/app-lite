@@ -171,7 +171,7 @@ export default function ProfileSwitcher() {
               <Separator className="my-4" />
               <div className="mb-3">
                 <h3 className="text-sm font-semibold text-muted-foreground px-4 mb-3">
-                  Os teus perfis do Blynk
+                  Os teus perfis do Paji
                 </h3>
                 {pageProfiles.map((page) => (
                   <div
@@ -211,7 +211,7 @@ export default function ProfileSwitcher() {
             <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
               <Plus className="h-7 w-7" />
             </div>
-            <span className="font-semibold text-lg">Criar perfil do Blynk</span>
+            <span className="font-semibold text-lg">Criar perfil do Paji</span>
           </div>
 
           <Separator className="my-4" />

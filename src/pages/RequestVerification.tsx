@@ -137,7 +137,7 @@ export default function RequestVerification() {
             >
               {step > 1 ? <ChevronLeft className="h-6 w-6" /> : <X className="h-6 w-6" />}
             </Button>
-            <span className="font-semibold">Blynk</span>
+            <span className="font-semibold">Paji</span>
           </div>
           {/* Progress Bar */}
           <div className="flex gap-1 px-4 pb-2">
@@ -160,10 +160,10 @@ export default function RequestVerification() {
                     <BadgeCheck className="h-16 w-16 text-blue-500" />
                   </div>
                   <h1 className="text-2xl font-bold mb-3">
-                    Mostra a toda a gente que tens a Verificação Blynk
+                    Mostra a toda a gente que tens a Verificação Paji
                   </h1>
                   <p className="text-muted-foreground">
-                    Os perfis com Verificação Blynk obtêm, em média, mais interações.
+                    Os perfis com Verificação Paji obtêm, em média, mais interações.
                   </p>
                 </div>
 
@@ -181,7 +181,7 @@ export default function RequestVerification() {
                       </div>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <VerificationBadge type="blue" size="sm" />
-                        <span>Blynk associado</span>
+                        <span>Paji associado</span>
                       </div>
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export default function RequestVerification() {
                 </Card>
 
                 <p className="text-sm text-muted-foreground text-center">
-                  A Verificação Blynk só está disponível para{" "}
+                  A Verificação Paji só está disponível para{" "}
                   <span className="text-primary">alguns perfis</span>. A tua foto de perfil e o teu nome vão ser sincronizados durante a verificação.{" "}
                   <span className="text-primary">Saber mais</span>
                 </p>
@@ -299,7 +299,7 @@ export default function RequestVerification() {
                 </div>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  A Verificação Blynk está disponível para pessoas com mais de 18 anos.
+                  A Verificação Paji está disponível para pessoas com mais de 18 anos.
                 </p>
 
                 <Button 
@@ -324,7 +324,7 @@ export default function RequestVerification() {
                     <VerificationBadge type={selectedPlan === "plus" ? "gold" : "blue"} size="lg" />
                   </div>
                   <p className="text-muted-foreground mt-1">
-                    Verificação Blynk {selectedPlan === "plus" ? "Plus" : "Standard"}
+                    Verificação Paji {selectedPlan === "plus" ? "Plus" : "Standard"}
                   </p>
                 </div>
 
@@ -362,7 +362,7 @@ export default function RequestVerification() {
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Ao continuares, concordas que os <span className="text-primary">Termos de Serviço</span> se aplicam à tua subscrição da Verificação Blynk. Vais inscrever-te na <span className="text-primary">Proteção Avançada</span>. Cancela 24 horas antes da tua próxima data de pagamento para evitar cobranças.{" "}
+                  Ao continuares, concordas que os <span className="text-primary">Termos de Serviço</span> se aplicam à tua subscrição da Verificação Paji. Vais inscrever-te na <span className="text-primary">Proteção Avançada</span>. Cancela 24 horas antes da tua próxima data de pagamento para evitar cobranças.{" "}
                   <span className="text-primary">Saber mais</span>
                 </p>
 

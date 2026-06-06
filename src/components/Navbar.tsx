@@ -20,7 +20,7 @@ export default function Navbar() {
   ];
 
   return (
-    // Header com logo, pesquisa e menu - Estilo Blynk
+    // Header com logo, pesquisa e menu - Estilo Paji
     <div className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md">
       <div className="container mx-auto px-4">
         <div className="flex h-14 items-center justify-between gap-3">
@@ -28,18 +28,18 @@ export default function Navbar() {
             <SideMenu />
             <Link to="/feed" className="flex items-center flex-shrink-0 hover:opacity-80 transition-opacity">
               <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Blynk
+                Paji
               </span>
             </Link>
           </div>
 
-          {/* Barra de pesquisa - Estilo Blynk */}
+          {/* Barra de pesquisa - Estilo Paji */}
           <div className="flex-1 max-w-md hidden sm:block">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Pesquisar no Blynk"
+                placeholder="Pesquisar no Paji"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-10 bg-secondary/50 border-0 focus-visible:ring-2 focus-visible:ring-primary rounded-full"
