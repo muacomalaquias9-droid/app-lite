@@ -190,7 +190,7 @@ export default function Stories() {
           { icon: Music, label: 'Música' },
           { icon: Clock, label: '24h' },
         ].map(({ icon: Icon, label }) => (
-          <div key={label} className="pointer-events-auto h-10 rounded-2xl bg-card/80 backdrop-blur-2xl border border-border/30 flex items-center justify-center gap-1.5 text-xs font-semibold shadow-[var(--shadow-card)]">
+          <div key={label} className="pointer-events-auto h-10 rounded-2xl bg-card border border-border flex items-center justify-center gap-1.5 text-xs font-semibold shadow-[var(--shadow-card)]">
             <Icon className="h-3.5 w-3.5 text-primary" />
             {label}
           </div>

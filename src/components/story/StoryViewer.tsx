@@ -263,13 +263,13 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
       {/* Navigation Arrows - Desktop */}
       {currentIndex > 0 && (
         <button onClick={handlePrevious}
-          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center hover:bg-white/20 transition-all">
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-all">
           <ChevronLeft className="h-5 w-5 text-white" />
         </button>
       )}
       {currentIndex < stories.length - 1 && (
         <button onClick={handleNext}
-          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center hover:bg-white/20 transition-all">
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-30 h-10 w-10 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-all">
           <ChevronRight className="h-5 w-5 text-white" />
         </button>
       )}
@@ -399,7 +399,7 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center bg-white/10 backdrop-blur-xl rounded-full px-4 py-2.5 border border-white/15">
+              <div className="flex-1 flex items-center bg-white/15 rounded-full px-4 py-2.5 border border-white/25">
                 <input type="text" value={replyText} onChange={(e) => setReplyText(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Enviar mensagem..."
@@ -419,7 +419,7 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
         {isOwnStory && (
           <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/60 to-transparent pt-12 pb-6 px-4">
             <button onClick={() => setViewersSheetOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/10">
+              className="w-full flex items-center justify-center gap-2 py-3 bg-white/15 rounded-full border border-white/20">
               <Eye className="h-4 w-4 text-white" />
               <span className="text-white text-sm font-medium">
                 <motion.span key={views} initial={{ scale: 1.2 }} animate={{ scale: 1 }} className="tabular-nums">{views}</motion.span>
