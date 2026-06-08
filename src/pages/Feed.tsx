@@ -393,24 +393,22 @@ export default function Feed() {
   return (
     <ProtectedRoute>
       <div className="fixed inset-0 bg-mobile-surface overflow-hidden">
-        {/* Header - Blue canvas, rounded hamburger, search bar */}
-        <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-gradient-to-b from-sky-500 via-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/20">
-          <div className="flex items-center gap-2 h-14 px-3 max-w-lg mx-auto">
-            <button onClick={() => navigate("/sidebar")}
-              className="h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center active:scale-90 transition shrink-0">
-              <Menu className="h-5 w-5 text-white" strokeWidth={2.2} />
+        {/* Header — Instagram-style flat white */}
+        <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-background border-b border-border">
+          <div className="flex items-center gap-2 h-14 px-4 max-w-lg mx-auto">
+            <button onClick={() => navigate("/sidebar")} aria-label="Menu"
+              className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
+              <Menu className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
-            <span className="font-display text-[20px] font-extrabold tracking-tight text-white">Paji</span>
-
-            <button onClick={() => navigate("/videos")}
-              className="flex-1 ml-2 h-10 rounded-full bg-white/20 backdrop-blur flex items-center gap-2 px-4 text-white/90 active:scale-[0.98] transition">
-              <Search className="h-4 w-4" strokeWidth={2.2} />
-              <span className="text-[13px] font-medium truncate">Pesquisar no Paji</span>
+            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Paji</span>
+            <div className="flex-1" />
+            <button onClick={() => navigate("/videos")} aria-label="Pesquisar"
+              className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
+              <Search className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
-
-            <button onClick={() => navigate("/notifications")}
-              className="relative h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center active:scale-90 transition shrink-0">
-              <Bell className="h-5 w-5 text-white" strokeWidth={2.2} />
+            <button onClick={() => navigate("/notifications")} aria-label="Notificações"
+              className="relative h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
+              <Bell className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
           </div>
         </header>

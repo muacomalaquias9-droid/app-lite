@@ -268,37 +268,14 @@ html, body, button, input, textarea, select {
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
-  /* Liquid Glass iOS Style */
+  /* Liquid Glass replaced with flat Instagram-style surfaces */
   .liquid-glass {
-    background: hsl(var(--card) / 0.55);
-    backdrop-filter: saturate(200%) blur(30px) brightness(1.05);
-    -webkit-backdrop-filter: saturate(200%) blur(30px) brightness(1.05);
-    border-bottom: 0.5px solid hsl(var(--border) / 0.3);
-    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.04);
+    background: hsl(var(--background));
+    border-bottom: 1px solid hsl(var(--border));
   }
-
-  .dark .liquid-glass {
-    background: hsl(var(--card) / 0.45);
-    backdrop-filter: saturate(200%) blur(30px) brightness(0.95);
-    -webkit-backdrop-filter: saturate(200%) blur(30px) brightness(0.95);
-    border-bottom: 0.5px solid hsl(var(--border) / 0.2);
-    box-shadow: 0 1px 6px hsl(var(--foreground) / 0.08);
-  }
-
   .liquid-glass-bottom {
-    background: hsl(var(--card) / 0.55);
-    backdrop-filter: saturate(200%) blur(30px) brightness(1.05);
-    -webkit-backdrop-filter: saturate(200%) blur(30px) brightness(1.05);
-    border-top: 0.5px solid hsl(var(--border) / 0.3);
-    box-shadow: 0 -1px 3px hsl(var(--foreground) / 0.04);
-  }
-
-  .dark .liquid-glass-bottom {
-    background: hsl(var(--card) / 0.45);
-    backdrop-filter: saturate(200%) blur(30px) brightness(0.95);
-    -webkit-backdrop-filter: saturate(200%) blur(30px) brightness(0.95);
-    border-top: 0.5px solid hsl(var(--border) / 0.2);
-    box-shadow: 0 -1px 6px hsl(var(--foreground) / 0.08);
+    background: hsl(var(--background));
+    border-top: 1px solid hsl(var(--border));
   }
 
   /* Native card */
