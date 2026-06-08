@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2 } from "lucide-react";
+import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
 import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -393,23 +393,25 @@ export default function Feed() {
   return (
     <ProtectedRoute>
       <div className="fixed inset-0 bg-mobile-surface overflow-hidden">
-        {/* Header - Floating glass */}
-        <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-mobile-header text-mobile-header-foreground shadow-lg shadow-mobile-header/20">
-          <div className="flex items-center justify-between h-12 px-4 max-w-lg mx-auto">
-            <div className="flex items-center gap-2.5">
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl active:scale-90 transition-transform text-mobile-header-foreground hover:bg-mobile-header-foreground/10" onClick={() => navigate("/sidebar")}>
-                <Menu className="h-5 w-5" strokeWidth={1.5} />
-              </Button>
-              <span className="font-display text-[22px] font-extrabold tracking-normal text-mobile-header-foreground">Paji</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl active:scale-90 transition-transform text-mobile-header-foreground hover:bg-mobile-header-foreground/10" onClick={() => navigate("/notifications")}>
-                <Heart className="h-5 w-5" strokeWidth={1.5} />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-2xl active:scale-90 transition-transform text-mobile-header-foreground hover:bg-mobile-header-foreground/10" onClick={() => navigate("/messages")}>
-                <Send className="h-5 w-5" strokeWidth={1.5} />
-              </Button>
-            </div>
+        {/* Header - Blue canvas, rounded hamburger, search bar */}
+        <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-gradient-to-b from-sky-500 via-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/20">
+          <div className="flex items-center gap-2 h-14 px-3 max-w-lg mx-auto">
+            <button onClick={() => navigate("/sidebar")}
+              className="h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center active:scale-90 transition shrink-0">
+              <Menu className="h-5 w-5 text-white" strokeWidth={2.2} />
+            </button>
+            <span className="font-display text-[20px] font-extrabold tracking-tight text-white">Paji</span>
+
+            <button onClick={() => navigate("/videos")}
+              className="flex-1 ml-2 h-10 rounded-full bg-white/20 backdrop-blur flex items-center gap-2 px-4 text-white/90 active:scale-[0.98] transition">
+              <Search className="h-4 w-4" strokeWidth={2.2} />
+              <span className="text-[13px] font-medium truncate">Pesquisar no Paji</span>
+            </button>
+
+            <button onClick={() => navigate("/notifications")}
+              className="relative h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur flex items-center justify-center active:scale-90 transition shrink-0">
+              <Bell className="h-5 w-5 text-white" strokeWidth={2.2} />
+            </button>
           </div>
         </header>
 
@@ -422,7 +424,7 @@ export default function Feed() {
         </div>
 
         <div ref={scrollContainerRef}
-          className="pt-12 pb-[92px] h-[100dvh] overflow-y-auto overscroll-contain native-scroll"
+          className="pt-14 pb-[100px] h-[100dvh] overflow-y-auto overscroll-contain native-scroll"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
