@@ -17,6 +17,7 @@ interface CreateStoryProps {
 interface SelectedMusic {
   name: string;
   artist: string;
+  url?: string;
 }
 
 interface EditedData {
@@ -105,7 +106,7 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
 
           const { error: uploadError } = await supabase.storage
             .from("stories")
-            .upload(fileName, mediaFile, { cacheControl: "3600", upsert: false });
+            .upload(fileName, mediaFile, { cacheControl: "0", upsert: false });
 
           if (uploadError) throw uploadError;
 
@@ -118,6 +119,7 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
             media_type: mediaType,
             music_name: selectedMusic?.name || null,
             music_artist: selectedMusic?.artist || null,
+            custom_music_url: selectedMusic?.url || null,
           });
 
           if (error) throw error;
@@ -129,6 +131,7 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
           media_type: "text",
           music_name: selectedMusic?.name || null,
           music_artist: selectedMusic?.artist || null,
+          custom_music_url: selectedMusic?.url || null,
         });
         if (error) throw error;
       }
@@ -270,7 +273,7 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
           {mode === "music" && (
             <div className="h-full p-4">
               <MusicSearch onSelect={(music) => {
-                setSelectedMusic({ name: music.name, artist: music.artist });
+                setSelectedMusic({ name: music.name, artist: music.artist, url: music.preview });
                 toast.success(`Música "${music.name}" selecionada`);
                 setMode(textContent ? "text" : mediaFiles.length > 0 ? "camera" : "select");
               }} />

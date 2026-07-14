@@ -23,7 +23,8 @@ interface MusicSearchProps {
 const searchDeezerMusic = async (query: string): Promise<Music[]> => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/music-search?query=${encodeURIComponent(query)}`
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/music-search?query=${encodeURIComponent(query)}`,
+      { cache: 'no-store' }
     );
     const data = await response.json();
 
@@ -203,19 +204,6 @@ export default function MusicSearch({ onSelect, onClose }: MusicSearchProps) {
                   onClick={() => onSelect(track)}
                   className="flex items-center gap-3 p-3 hover:bg-accent/50 rounded-lg cursor-pointer transition-all active:scale-98"
                 >
-                  <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 relative bg-secondary">
-                    {track.cover ? (
-                      <img 
-                        src={track.cover} 
-                        alt={track.name} 
-                        className="w-full h-full object-cover" 
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-secondary">
-                        <div className="w-8 h-8 rounded-full bg-background/50" />
-                      </div>
-                    )}
-                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate text-foreground">{track.name}</p>
                     <p className="text-sm text-muted-foreground truncate">

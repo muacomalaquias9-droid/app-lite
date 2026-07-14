@@ -17,6 +17,7 @@ interface Story {
   expires_at?: string | null;
   music_name?: string | null;
   music_artist?: string | null;
+  custom_music_url?: string | null;
   profile: {
     username: string;
     first_name: string;

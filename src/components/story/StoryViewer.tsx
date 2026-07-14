@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { showNotification } from '@/utils/pushNotifications';
 import { StoryViewersSheet } from './StoryViewersSheet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isGlobalTrackPlaying, playGlobalMusic, subscribeToGlobalMusic, toggleGlobalMusic } from '@/components/MusicPlayer';
 import heartIcon from "@/assets/reactions/heart.png";
 import laughingIcon from "@/assets/reactions/laughing.png";
 import thumbsUpIcon from "@/assets/reactions/thumbs-up.png";
@@ -23,6 +24,7 @@ interface Story {
   created_at: string;
   music_name?: string | null;
   music_artist?: string | null;
+  custom_music_url?: string | null;
   profile: {
     username: string;
     first_name: string;
@@ -44,14 +46,18 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
   const [progress, setProgress] = useState(0);
   const [replyText, setReplyText] = useState('');
   const [userReaction, setUserReaction] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [musicCover, setMusicCover] = useState<string | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [viewersSheetOpen, setViewersSheetOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   
   const currentStory = stories[currentIndex];
   const isOwnStory = currentStory.user_id === user?.id;
+  const storyMusicTrack = currentStory.music_name ? {
+    id: `story-${currentStory.id}`,
+    musicName: currentStory.music_name,
+    musicArtist: currentStory.music_artist,
+    musicUrl: currentStory.custom_music_url,
+  } : null;
 
   // Real-time view counter
   useEffect(() => {
@@ -68,23 +74,15 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
   useEffect(() => {
     if (!user || !currentStory) return;
 
-    setMusicCover(null);
     setAudioEnabled(false);
     setIsPaused(false);
-
-    // Cleanup previous audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current = null;
-    }
 
     if (!isOwnStory) recordView();
     loadViewCount();
     loadUserReaction();
 
     if (currentStory.music_name) {
-      loadMusicData();
+      playStoryMusic();
     }
 
     // Story duration: 45s if music, 15s otherwise
@@ -106,71 +104,23 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
     };
   }, [currentIndex, currentStory?.id, user]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-    };
-  }, []);
+    if (!storyMusicTrack) return;
+    const syncState = () => setAudioEnabled(isGlobalTrackPlaying(storyMusicTrack.id));
+    syncState();
+    return subscribeToGlobalMusic(syncState);
+  }, [storyMusicTrack?.id]);
 
-  const loadMusicData = async () => {
-    try {
-      if (!currentStory.music_name) return;
-      const searchQuery = `${currentStory.music_artist || ''} ${currentStory.music_name}`.trim();
-      
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/music-search?query=${encodeURIComponent(searchQuery)}`,
-        {
-          method: 'GET',
-          headers: {
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      if (!response.ok) return;
-      const data = await response.json();
-      
-      if (data.tracks && data.tracks.length > 0) {
-        const track = data.tracks[0];
-        if (!track.preview) return;
-
-        const newAudio = new Audio();
-        newAudio.crossOrigin = "anonymous";
-        newAudio.preload = "auto";
-        newAudio.volume = 0.7;
-        newAudio.src = track.preview;
-        newAudio.load();
-        
-        audioRef.current = newAudio;
-        if (track.cover) setMusicCover(track.cover);
-
-        try {
-          await newAudio.play();
-          setAudioEnabled(true);
-        } catch {
-          console.log('Autoplay blocked');
-        }
-      }
-    } catch (error) {
-      console.error('Music load error:', error);
-    }
+  const playStoryMusic = async () => {
+    if (!storyMusicTrack) return;
+    const played = await playGlobalMusic(storyMusicTrack);
+    setAudioEnabled(played);
   };
 
   const playMusic = async () => {
-    if (!audioRef.current) {
-      await loadMusicData();
-      return;
-    }
-    try {
-      if (audioRef.current.paused) { await audioRef.current.play(); setAudioEnabled(true); }
-      else { audioRef.current.pause(); setAudioEnabled(false); }
-    } catch { setAudioEnabled(false); }
+    if (!storyMusicTrack) return;
+    const played = await toggleGlobalMusic(storyMusicTrack);
+    setAudioEnabled(played);
   };
 
   const recordView = async () => {
@@ -190,7 +140,6 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
   };
 
   const handleClose = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
     onClose();
   };
 
@@ -310,7 +259,6 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
             {currentStory.music_name && (
               <button onClick={playMusic}
                 className={`h-8 px-2.5 rounded-full flex items-center gap-1.5 text-white text-[11px] font-medium transition-all ${audioEnabled ? 'bg-white/15' : 'bg-white/10 animate-pulse'}`}>
-                {musicCover && <img src={musicCover} alt="" className="h-4 w-4 rounded-sm object-cover" />}
                 <Music className="h-3 w-3" />
                 <span className="truncate max-w-[60px]">{currentStory.music_name}</span>
               </button>
@@ -356,7 +304,7 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
             <img src={currentStory.media_url} alt="Story" className="w-full h-full object-cover" />
           ) : currentStory.media_type === 'video' ? (
             <video key={currentStory.id} src={currentStory.media_url}
-              className="w-full h-full object-cover" autoPlay muted={false} playsInline controls={false} />
+              className="w-full h-full object-cover" autoPlay muted={!!currentStory.music_name} playsInline controls={false} />
           ) : currentStory.media_type === 'text' ? (
             <div className="w-full h-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center p-8">
               <p className="text-white text-2xl font-bold text-center leading-relaxed drop-shadow-lg">

@@ -37,11 +37,19 @@
     <meta name="theme-color" content="#2563eb" />
     <link rel="manifest" href="/manifest.json" />
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {});
-        });
-      }
+      window.addEventListener('load', () => {
+        if ('caches' in window) {
+          caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))).catch(() => {});
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+            .then((registration) => {
+              registration.update().catch(() => {});
+              navigator.serviceWorker.controller?.postMessage({ type: 'CLEAR_CACHES' });
+            })
+            .catch(() => {});
+        }
+      });
     </script>
   </head>
 

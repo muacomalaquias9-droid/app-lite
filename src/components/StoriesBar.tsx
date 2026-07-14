@@ -11,6 +11,9 @@ interface Story {
   media_url: string;
   media_type: string;
   created_at: string;
+  music_name?: string | null;
+  music_artist?: string | null;
+  custom_music_url?: string | null;
   profile: {
     username: string;
     first_name: string;
