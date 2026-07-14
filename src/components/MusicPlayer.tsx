@@ -1,10 +1,24 @@
-import { useState, useRef, useEffect, useId } from 'react';
-import { Disc3 } from 'lucide-react';
+import { useState, useRef, useEffect, useId, useMemo } from 'react';
+import { Music2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Global audio manager - only one audio plays at a time
+// Global audio manager: one audio element for the whole app.
 let currentPlayingAudio: HTMLAudioElement | null = null;
 let currentPlayingId: string | null = null;
+let currentTrack: GlobalMusicTrack | null = null;
+let currentResolvedUrl = '';
+let currentErrorId: string | null = null;
+let audioUnlockRegistered = false;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+const fallbackAttempts = new Map<string, number>();
+const musicListeners = new Set<() => void>();
+
+export interface GlobalMusicTrack {
+  id: string;
+  musicName: string;
+  musicArtist?: string | null;
+  musicUrl?: string | null;
+}
 
 interface MusicPlayerProps {
   musicName: string;
@@ -16,215 +30,226 @@ interface MusicPlayerProps {
   autoPlayInView?: boolean;
 }
 
-// Generate album art color based on music name
-function generateCoverGradient(name: string): string {
-  const colors = [
-    'from-pink-500 to-purple-600',
-    'from-blue-500 to-cyan-500',
-    'from-orange-500 to-red-500',
-    'from-green-500 to-emerald-500',
-    'from-violet-500 to-purple-600',
-    'from-rose-500 to-pink-600',
-    'from-amber-500 to-orange-500',
-    'from-teal-500 to-green-500',
-  ];
-  const index = name.length % colors.length;
-  return colors[index];
+const notifyMusicListeners = () => musicListeners.forEach((listener) => listener());
+
+export function subscribeToGlobalMusic(listener: () => void) {
+  musicListeners.add(listener);
+  return () => {
+    musicListeners.delete(listener);
+  };
 }
 
-export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const retryCountRef = useRef(0);
-  const instanceId = useId();
+export function isGlobalTrackPlaying(trackId: string) {
+  return currentPlayingId === trackId && !!currentPlayingAudio && !currentPlayingAudio.paused;
+}
 
-  const gradientClass = generateCoverGradient(musicName);
+export function isGlobalTrackErrored(trackId: string) {
+  return currentErrorId === trackId;
+}
+
+async function resolveFreshMusicUrl(track: GlobalMusicTrack) {
+  const query = `${track.musicArtist || ''} ${track.musicName}`.trim();
+  if (!query) return null;
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/music-search?query=${encodeURIComponent(query)}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const freshTrack = data.tracks?.find((item: { preview?: string }) => item.preview) || data.tracks?.[0];
+    return freshTrack?.preview || null;
+  } catch {
+    return null;
+  }
+}
+
+function ensureGlobalAudio() {
+  if (!currentPlayingAudio) {
+    const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
+    audio.preload = 'auto';
+    audio.loop = true;
+    audio.volume = 0.86;
+
+    audio.addEventListener('play', notifyMusicListeners);
+    audio.addEventListener('pause', notifyMusicListeners);
+    audio.addEventListener('canplaythrough', notifyMusicListeners);
+    audio.addEventListener('waiting', notifyMusicListeners);
+    audio.addEventListener('ended', notifyMusicListeners);
+    audio.addEventListener('error', () => {
+      const track = currentTrack;
+      if (!track) return;
+
+      const attempts = fallbackAttempts.get(track.id) || 0;
+      if (attempts >= 2) {
+        currentErrorId = track.id;
+        notifyMusicListeners();
+        return;
+      }
+
+      fallbackAttempts.set(track.id, attempts + 1);
+      if (retryTimer) clearTimeout(retryTimer);
+      retryTimer = setTimeout(async () => {
+        const freshUrl = await resolveFreshMusicUrl(track);
+        if (!freshUrl || !currentPlayingAudio || currentTrack?.id !== track.id) {
+          currentErrorId = track.id;
+          notifyMusicListeners();
+          return;
+        }
+
+        currentErrorId = null;
+        currentResolvedUrl = freshUrl;
+        currentPlayingAudio.src = freshUrl;
+        currentPlayingAudio.load();
+        currentPlayingAudio.play().catch(() => {
+          currentErrorId = track.id;
+          notifyMusicListeners();
+        });
+      }, 700);
+    });
+
+    currentPlayingAudio = audio;
+  }
+
+  if (!audioUnlockRegistered && typeof window !== 'undefined') {
+    audioUnlockRegistered = true;
+    window.addEventListener('pointerdown', () => {
+      if (currentPlayingAudio && currentPlayingId && currentPlayingAudio.muted) {
+        currentPlayingAudio.muted = false;
+        currentPlayingAudio.play().catch(() => {});
+      }
+    }, { passive: true });
+  }
+
+  return currentPlayingAudio;
+}
+
+export async function playGlobalMusic(track: GlobalMusicTrack) {
+  const audio = ensureGlobalAudio();
+  const sameTrack = currentPlayingId === track.id;
+
+  currentTrack = track;
+  currentPlayingId = track.id;
+  currentErrorId = null;
+  notifyMusicListeners();
+
+  let playableUrl = sameTrack && currentResolvedUrl ? currentResolvedUrl : track.musicUrl || '';
+  if (!playableUrl) playableUrl = await resolveFreshMusicUrl(track) || '';
+
+  if (!playableUrl) {
+    currentErrorId = track.id;
+    notifyMusicListeners();
+    return false;
+  }
+
+  if (!sameTrack || currentResolvedUrl !== playableUrl || audio.src !== playableUrl) {
+    audio.pause();
+    currentResolvedUrl = playableUrl;
+    audio.src = playableUrl;
+    audio.currentTime = 0;
+    audio.load();
+  }
+
+  try {
+    audio.muted = false;
+    await audio.play();
+    notifyMusicListeners();
+    return true;
+  } catch {
+    try {
+      audio.muted = true;
+      await audio.play();
+      notifyMusicListeners();
+      return true;
+    } catch {
+      currentErrorId = track.id;
+      notifyMusicListeners();
+      return false;
+    }
+  }
+}
+
+export async function toggleGlobalMusic(track: GlobalMusicTrack) {
+  if (isGlobalTrackPlaying(track.id)) {
+    currentPlayingAudio?.pause();
+    notifyMusicListeners();
+    return false;
+  }
+
+  return playGlobalMusic(track);
+}
+
+export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
+  const instanceId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const track = useMemo<GlobalMusicTrack>(() => ({
+    id: `feed-${instanceId}-${musicName}-${musicArtist || ''}`,
+    musicName,
+    musicArtist,
+    musicUrl,
+  }), [instanceId, musicName, musicArtist, musicUrl]);
+  const [isPlaying, setIsPlaying] = useState(() => isGlobalTrackPlaying(track.id));
+  const [hasError, setHasError] = useState(() => isGlobalTrackErrored(track.id));
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleLoadedMetadata = () => {
-      setIsLoaded(true);
-      setHasError(false);
+    const syncState = () => {
+      setIsPlaying(isGlobalTrackPlaying(track.id));
+      setHasError(isGlobalTrackErrored(track.id));
     };
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-      setHasError(false);
-    };
-    const handleEnded = () => {
-      setIsPlaying(false);
-      if (currentPlayingId === instanceId) {
-        currentPlayingAudio = null;
-        currentPlayingId = null;
-      }
-    };
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleError = () => {
-      console.log('Music load error for:', musicUrl);
-      retryCountRef.current++;
-      if (retryCountRef.current <= 2 && audio) {
-        setTimeout(() => { audio.load(); }, 1500);
-      } else {
-        setHasError(true);
-        setIsLoaded(false);
-      }
-    };
-
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('error', handleError);
-
-    // Preload the audio
-    audio.load();
-
-    return () => {
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('error', handleError);
-    };
-  }, [instanceId, musicUrl]);
+    syncState();
+    return subscribeToGlobalMusic(syncState);
+  }, [track.id]);
 
   // Instagram-style auto-play when in viewport
   useEffect(() => {
     if (!autoPlayInView) return;
-    const audio = audioRef.current;
     const node = containerRef.current;
-    if (!audio || !node || !musicUrl) return;
+    if (!node) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
         if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-          // Pause any other playing audio
-          if (currentPlayingAudio && currentPlayingId !== instanceId) {
-            currentPlayingAudio.pause();
-          }
-          currentPlayingAudio = audio;
-          currentPlayingId = instanceId;
-          // Start muted to bypass autoplay restrictions, then unmute
-          audio.muted = false;
-          audio.play().catch(() => {
-            audio.muted = true;
-            audio.play().catch(() => {});
-          });
-        } else {
-          if (!audio.paused) audio.pause();
-          if (currentPlayingId === instanceId) {
-            currentPlayingAudio = null;
-            currentPlayingId = null;
-          }
+          playGlobalMusic(track).then((played) => setHasError(!played));
         }
       },
       { threshold: [0, 0.6, 1], rootMargin: '0px 0px -15% 0px' }
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [autoPlayInView, musicUrl, instanceId]);
+  }, [autoPlayInView, track]);
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const audio = audioRef.current;
-    if (!audio || !musicUrl || hasError) return;
-
-    if (isPlaying) {
-      audio.pause();
-      if (currentPlayingId === instanceId) {
-        currentPlayingAudio = null;
-        currentPlayingId = null;
-      }
-    } else {
-      // Pause any other playing audio
-      if (currentPlayingAudio && currentPlayingId !== instanceId) {
-        currentPlayingAudio.pause();
-      }
-      
-      // Set this as the current playing audio
-      currentPlayingAudio = audio;
-      currentPlayingId = instanceId;
-      
-      audio.play().catch(() => {
-        // Retry on error
-        setTimeout(() => {
-          audio.play().catch(console.log);
-        }, 100);
-      });
-    }
+    toggleGlobalMusic(track).then((played) => setHasError(!played && !isPlaying));
   };
 
-  // Album Art Component (no visible controls — Instagram/Threads style)
-  const AlbumArt = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
-    const sizeClasses = {
-      sm: 'h-9 w-9',
-      md: 'h-12 w-12',
-      lg: 'h-16 w-16'
-    };
-
-    return (
-      <motion.div
-        animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
-        transition={isPlaying ? { duration: 3, repeat: Infinity, ease: 'linear' } : { duration: 0.3 }}
-        className={`${sizeClasses[size]} rounded-full bg-gradient-to-br ${gradientClass} flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden relative`}
-      >
-        {coverUrl ? (
-          <img src={coverUrl} alt={musicName} className="w-full h-full object-cover" />
-        ) : (
-          <>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-3 w-3 rounded-full bg-white/30" />
-            </div>
-            <Disc3 className={`${size === 'sm' ? 'h-5 w-5' : 'h-6 w-6'} text-white/80`} />
-          </>
-        )}
-        {/* Vinyl record effect */}
-        <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-        <div className="absolute inset-[20%] rounded-full border border-white/20" />
-      </motion.div>
-    );
-  };
+  const label = musicArtist ? `${musicName} • ${musicArtist}` : musicName;
+  const marquee = isPlaying && label.length > 24;
 
   if (overlay) {
     return (
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-2 max-w-fit cursor-pointer"
+        ref={containerRef}
+        className="flex max-w-[240px] items-center gap-2 rounded-full bg-black/80 px-3 py-2 cursor-pointer"
         onClick={togglePlay}
       >
-        {musicUrl && (
-          <audio 
-            ref={audioRef} 
-            src={musicUrl} 
-            preload="auto"
-            crossOrigin="anonymous"
-          />
-        )}
-        
-        <AlbumArt size="sm" />
-        
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-white text-xs font-semibold truncate max-w-[150px]">
-                {musicName}
-              </p>
-              {musicArtist && (
-                <p className="text-white/70 text-[10px] truncate max-w-[150px]">
-                  {musicArtist}
-                </p>
-              )}
-            </div>
+        <Music2 className="h-3.5 w-3.5 text-white shrink-0" />
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <motion.p
+            className="whitespace-nowrap text-white text-xs font-semibold"
+            animate={marquee ? { x: ['0%', '-35%', '0%'] } : { x: 0 }}
+            transition={marquee ? { duration: 8, repeat: Infinity, ease: 'linear' } : undefined}
+          >
+            {hasError ? 'Música indisponível' : label}
+          </motion.p>
+        </div>
             {isPlaying && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -241,8 +266,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
                 ))}
               </motion.div>
             )}
-          </div>
-        </div>
       </motion.div>
     );
   }
@@ -252,28 +275,19 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       ref={containerRef}
-      className="flex items-center gap-3 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-xl p-3 cursor-pointer border border-pink-500/20 hover:border-pink-500/40 transition-colors"
+      className="flex h-8 max-w-full items-center gap-2 cursor-pointer overflow-hidden text-muted-foreground"
       onClick={togglePlay}
     >
-      {musicUrl && (
-        <audio 
-          ref={audioRef} 
-          src={musicUrl} 
-          preload="auto"
-          crossOrigin="anonymous"
-        />
-      )}
-      
-      <AlbumArt size="md" />
-      
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm truncate">{musicName}</p>
-            {musicArtist && (
-              <p className="text-muted-foreground text-xs truncate">{musicArtist}</p>
-            )}
-          </div>
+      <Music2 className={`h-4 w-4 shrink-0 ${isPlaying ? 'text-primary' : 'text-muted-foreground'}`} />
+      <div className="min-w-0 flex-1 overflow-hidden">
+        <motion.p
+          className="whitespace-nowrap text-[13px] font-semibold leading-none"
+          animate={marquee ? { x: ['0%', '-30%', '0%'] } : { x: 0 }}
+          transition={marquee ? { duration: 9, repeat: Infinity, ease: 'linear' } : undefined}
+        >
+          {hasError ? 'Música indisponível' : label}
+        </motion.p>
+      </div>
           {isPlaying && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -290,11 +304,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
               ))}
             </motion.div>
           )}
-        </div>
-        {hasError && (
-          <p className="text-xs text-red-500 mt-1">Erro ao carregar áudio</p>
-        )}
-      </div>
     </motion.div>
   );
 }
@@ -303,7 +312,6 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overla
 export function pauseAllAudio() {
   if (currentPlayingAudio) {
     currentPlayingAudio.pause();
-    currentPlayingAudio = null;
-    currentPlayingId = null;
+    notifyMusicListeners();
   }
 }

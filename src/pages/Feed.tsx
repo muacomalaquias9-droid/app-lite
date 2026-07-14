@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
-import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
+import { MusicPlayer } from "@/components/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StoriesBar from "@/components/StoriesBar";
@@ -145,9 +145,7 @@ export default function Feed() {
         entries.forEach((entry) => {
           const video = entry.target as HTMLVideoElement;
           if (entry.isIntersecting) {
-            pauseAllAudio();
             observedVideosRef.current.forEach((v) => { if (v !== video && !v.paused) v.pause(); });
-            video.muted = false;
             video.play().catch(() => { video.muted = true; video.play().catch(console.log); });
           } else { if (!video.paused) video.pause(); }
         });
@@ -285,7 +283,7 @@ export default function Feed() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
-    const isMuted = mutedVideos[postId] ?? false;
+    const isMuted = mutedVideos[postId] ?? true;
 
     const handleError = () => {
       if (retryCount < 2) {
@@ -311,7 +309,7 @@ export default function Feed() {
     return (
       <div className="relative bg-black/5 dark:bg-white/5 overflow-hidden rounded-3xl" onClick={() => {
         const video = videoRefs.current[postId];
-        if (video) { if (video.paused) { pauseAllAudio(); video.play(); } else { video.pause(); } }
+        if (video) { if (video.paused) { video.play(); } else { video.pause(); } }
       }}>
         <video ref={registerVideoRef(postId)} className="w-full max-h-[520px] object-contain cursor-pointer"
           playsInline muted={isMuted} loop preload="auto"
@@ -361,7 +359,7 @@ export default function Feed() {
             {isVideo(url) ? (
               <div className="relative aspect-square bg-black/5 dark:bg-white/5">
                 <video src={url} className="w-full h-full object-cover" playsInline muted preload="metadata"
-                  onClick={(e) => { e.stopPropagation(); pauseAllAudio(); const vid = e.currentTarget; if (vid.paused) vid.play(); else vid.pause(); }} />
+                  onClick={(e) => { e.stopPropagation(); const vid = e.currentTarget; if (vid.paused) vid.play(); else vid.pause(); }} />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <Play className="h-8 w-8 text-white/80 fill-white/80" />
                 </div>
@@ -491,7 +489,7 @@ export default function Feed() {
                           )}
 
                           {/* Music */}
-                          {post.music_name && post.music_url && (
+                          {post.music_name && (
                             <div className="mb-2">
                               <MusicPlayer musicName={post.music_name} musicArtist={post.music_artist} musicUrl={post.music_url} autoPlayInView />
                             </div>

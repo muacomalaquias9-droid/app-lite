@@ -132,7 +132,7 @@ export default function Create() {
       for (const file of mediaFiles) {
         const fileExt = file.name.split(".").pop()?.toLowerCase();
         const fileName = `${user.id}/${Date.now()}-${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from("post-images").upload(fileName, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+        const { error: uploadError } = await supabase.storage.from("post-images").upload(fileName, file, { cacheControl: "0", upsert: false, contentType: file.type });
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from("post-images").getPublicUrl(fileName);
         mediaUrls.push(publicUrl);
