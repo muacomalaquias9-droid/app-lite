@@ -248,19 +248,10 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
                       )}
                       <div className="absolute top-2 right-2 flex gap-1">
                         <Button variant="ghost" size="icon" className="bg-black/50 hover:bg-black/70 h-8 w-8"
-                          onClick={() => { setEditingFileIndex(index); setMode("editor"); }}>
-                          <Type className="h-4 w-4 text-white" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="bg-black/50 hover:bg-black/70 h-8 w-8"
                           onClick={() => removeMedia(index)}>
                           <X className="h-4 w-4 text-white" />
                         </Button>
                       </div>
-                      {editedDataMap[index] && (
-                        <div className="absolute bottom-2 left-2 bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded-full">
-                          ✨ Editado
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
