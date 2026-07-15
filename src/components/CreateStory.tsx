@@ -6,7 +6,6 @@ import { Type, Music, Camera, X, ImageIcon, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import MusicSearch from "@/components/MusicSearch";
-import { StoryEditor } from "@/components/story/StoryEditor";
 import { cn } from "@/lib/utils";
 
 interface CreateStoryProps {
@@ -20,22 +19,13 @@ interface SelectedMusic {
   url?: string;
 }
 
-interface EditedData {
-  textOverlays: any[];
-  drawings: string | null;
-  filter: string;
-  mentions: string[];
-}
-
 export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
-  const [mode, setMode] = useState<"select" | "text" | "music" | "camera" | "editor">("select");
+  const [mode, setMode] = useState<"select" | "text" | "music" | "camera">("select");
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [textContent, setTextContent] = useState("");
   const [selectedMusic, setSelectedMusic] = useState<SelectedMusic | null>(null);
   const [loading, setLoading] = useState(false);
-  const [editingFileIndex, setEditingFileIndex] = useState(0);
-  const [editedDataMap, setEditedDataMap] = useState<Record<number, EditedData>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,29 +52,7 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
     if (validFiles.length > 0) {
       setMediaFiles(validFiles);
       setMediaPreviews(previews);
-      setEditingFileIndex(0);
-      setMode("editor"); // Go directly to editor
-    }
-  };
-
-  const handleEditorConfirm = (editedData: EditedData) => {
-    setEditedDataMap(prev => ({ ...prev, [editingFileIndex]: editedData }));
-    
-    // If more files to edit, go to next; otherwise go to camera mode for publish
-    if (editingFileIndex < mediaFiles.length - 1) {
-      setEditingFileIndex(editingFileIndex + 1);
-    } else {
-      setMode("camera");
-    }
-  };
-
-  const handleEditorCancel = () => {
-    if (editingFileIndex > 0) {
-      setEditingFileIndex(editingFileIndex - 1);
-    } else {
-      setMode("select");
-      setMediaFiles([]);
-      setMediaPreviews([]);
+      setMode("camera"); // Skip editor — go straight to preview + publish
     }
   };
 
@@ -101,12 +69,12 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
 
       if (mediaFiles.length > 0) {
         for (const mediaFile of mediaFiles) {
-          const fileExt = mediaFile.name.split(".").pop();
+          const fileExt = (mediaFile.name.split(".").pop() || (mediaFile.type.startsWith("image/") ? "jpg" : "mp4")).toLowerCase();
           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
           const { error: uploadError } = await supabase.storage
             .from("stories")
-            .upload(fileName, mediaFile, { cacheControl: "0", upsert: false });
+            .upload(fileName, mediaFile, { cacheControl: "0", upsert: false, contentType: mediaFile.type });
 
           if (uploadError) throw uploadError;
 
@@ -157,21 +125,8 @@ export default function CreateStory({ open, onOpenChange }: CreateStoryProps) {
     setMediaPreviews([]);
     setTextContent("");
     setSelectedMusic(null);
-    setEditedDataMap({});
     onOpenChange(false);
   };
-
-  // Show editor fullscreen when in editor mode
-  if (mode === "editor" && mediaFiles[editingFileIndex]) {
-    return (
-      <StoryEditor
-        mediaFile={mediaFiles[editingFileIndex]}
-        mediaPreview={mediaPreviews[editingFileIndex]}
-        onConfirm={handleEditorConfirm}
-        onCancel={handleEditorCancel}
-      />
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
