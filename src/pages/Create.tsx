@@ -133,8 +133,7 @@ export default function Create() {
               variant="ghost" 
               size="sm"
               onClick={() => {
-                if (step === 'edit') setStep('compose');
-                else if (step === 'music') setStep('edit');
+                if (step === 'music') setStep('compose');
                 else navigate(-1);
               }}
               className="font-medium text-muted-foreground"
@@ -142,17 +141,9 @@ export default function Create() {
               Cancelar
             </Button>
             <h1 className="text-base font-bold">
-              {step === 'compose' ? 'Nova Blincada de publicação' : step === 'edit' ? 'Editar' : 'Música'}
+              {step === 'compose' ? 'Nova Blincada de publicação' : 'Música'}
             </h1>
-            {step === 'compose' && hasVideo ? (
-              <Button onClick={() => setStep('edit')} size="sm" variant="ghost" className="font-semibold text-primary">
-                Seguinte
-              </Button>
-            ) : step === 'edit' ? (
-              <Button onClick={() => setStep('music')} size="sm" variant="ghost" className="font-semibold text-primary">
-                Seguinte
-              </Button>
-            ) : (
+            {(
               <Button
                 onClick={handleCreatePost}
                 disabled={loading || (!content.trim() && mediaFiles.length === 0)}
