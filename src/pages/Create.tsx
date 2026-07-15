@@ -12,10 +12,6 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight, 
-  Sparkles,
-  Sliders,
-  Play,
-  Pause,
   Volume2,
   Hash,
   AtSign,
@@ -31,25 +27,8 @@ import { useHashtagsAndMentions } from "@/hooks/useHashtagsAndMentions";
 import { useActiveProfile } from "@/contexts/ActiveProfileContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import MusicSearch from "@/components/MusicSearch";
 import { Card } from "@/components/ui/card";
-
-interface VideoFilter {
-  name: string;
-  style: string;
-}
-
-const videoFilters: VideoFilter[] = [
-  { name: 'Normal', style: '' },
-  { name: 'Clarendon', style: 'contrast(1.2) saturate(1.35)' },
-  { name: 'Gingham', style: 'brightness(1.05) hue-rotate(-10deg)' },
-  { name: 'Moon', style: 'grayscale(1) contrast(1.1) brightness(1.1)' },
-  { name: 'Lark', style: 'contrast(0.9) brightness(1.1) saturate(0.9)' },
-  { name: 'Reyes', style: 'sepia(0.22) brightness(1.1) contrast(0.85) saturate(0.75)' },
-  { name: 'Juno', style: 'sepia(0.35) contrast(1.15) brightness(1.15) saturate(1.8)' },
-  { name: 'Aden', style: 'hue-rotate(-20deg) contrast(0.9) saturate(0.85) brightness(1.2)' },
-];
 
 const visibilityOptions = [
   { value: 'public', label: 'Público', icon: Globe, desc: 'Todos podem ver' },
@@ -62,15 +41,10 @@ export default function Create() {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'compose' | 'edit' | 'music'>('compose');
-  const [selectedFilter, setSelectedFilter] = useState<VideoFilter>(videoFilters[0]);
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [saturation, setSaturation] = useState(100);
+  const [step, setStep] = useState<'compose' | 'music'>('compose');
   const [selectedMusic, setSelectedMusic] = useState<{ name: string; artist: string; url: string } | null>(null);
   const [musicVolume, setMusicVolume] = useState(50);
   const [videoVolume, setVideoVolume] = useState(100);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [musicDialogOpen, setMusicDialogOpen] = useState(false);
   const [visibility, setVisibility] = useState('public');
   const [showVisibility, setShowVisibility] = useState(false);
@@ -99,23 +73,7 @@ export default function Create() {
     setMediaPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const hasVideo = mediaFiles.some(f => f.type.startsWith('video/'));
-
-  const getFilterStyle = () => {
-    let style = selectedFilter.style;
-    if (brightness !== 100 || contrast !== 100 || saturation !== 100) {
-      style += ` brightness(${brightness / 100}) contrast(${contrast / 100}) saturate(${saturation / 100})`;
-    }
-    return style.trim();
-  };
-
-  const togglePlayback = () => {
-    if (videoRef.current) {
-      if (isPlaying) { videoRef.current.pause(); audioRef.current?.pause(); }
-      else { videoRef.current.play(); audioRef.current?.play(); }
-      setIsPlaying(!isPlaying);
-    }
-  };
+  const hasMedia = mediaFiles.length > 0;
 
   const handleMusicSelect = (music: { name: string; artist: string; preview?: string }) => {
     if (music.preview) setSelectedMusic({ name: music.name, artist: music.artist, url: music.preview });
@@ -175,8 +133,7 @@ export default function Create() {
               variant="ghost" 
               size="sm"
               onClick={() => {
-                if (step === 'edit') setStep('compose');
-                else if (step === 'music') setStep('edit');
+                if (step === 'music') setStep('compose');
                 else navigate(-1);
               }}
               className="font-medium text-muted-foreground"
@@ -184,17 +141,9 @@ export default function Create() {
               Cancelar
             </Button>
             <h1 className="text-base font-bold">
-              {step === 'compose' ? 'Nova Blincada de publicação' : step === 'edit' ? 'Editar' : 'Música'}
+              {step === 'compose' ? 'Nova Blincada de publicação' : 'Música'}
             </h1>
-            {step === 'compose' && hasVideo ? (
-              <Button onClick={() => setStep('edit')} size="sm" variant="ghost" className="font-semibold text-primary">
-                Seguinte
-              </Button>
-            ) : step === 'edit' ? (
-              <Button onClick={() => setStep('music')} size="sm" variant="ghost" className="font-semibold text-primary">
-                Seguinte
-              </Button>
-            ) : (
+            {(
               <Button
                 onClick={handleCreatePost}
                 disabled={loading || (!content.trim() && mediaFiles.length === 0)}
@@ -343,75 +292,15 @@ export default function Create() {
           </div>
         )}
 
-        {/* Video Editor Step */}
-        {step === 'edit' && mediaPreviews.length > 0 && (
-          <div className="max-w-2xl mx-auto">
-            <div className="relative bg-black aspect-[9/16] max-h-[60vh] mx-4 mt-4 rounded-2xl overflow-hidden">
-              {mediaFiles[0]?.type.startsWith('video/') ? (
-                <video ref={videoRef} src={mediaPreviews[0]} className="w-full h-full object-contain"
-                  style={{ filter: getFilterStyle() }} loop playsInline muted={videoVolume === 0}
-                  onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
-              ) : (
-                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" style={{ filter: getFilterStyle() }} />
-              )}
-              <button className="absolute inset-0 flex items-center justify-center" onClick={togglePlayback}>
-                {!isPlaying && (
-                  <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="h-7 w-7 text-foreground fill-foreground ml-0.5" />
-                  </div>
-                )}
-              </button>
-            </div>
-
-            <div className="px-4 mt-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-                <Sparkles className="h-4 w-4" /> Filtros
-              </h3>
-              <ScrollArea className="w-full">
-                <div className="flex gap-2 pb-2">
-                  {videoFilters.map((filter) => (
-                    <button key={filter.name} onClick={() => setSelectedFilter(filter)}
-                      className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                        selectedFilter.name === filter.name ? 'bg-primary/20 ring-2 ring-primary' : 'bg-muted/50 hover:bg-muted'
-                      }`}>
-                      <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-pink-400 to-purple-600" style={{ filter: filter.style || 'none' }} />
-                      <span className="text-[10px] font-medium">{filter.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-
-            <div className="px-4 mt-4 space-y-3 pb-8">
-              <h3 className="font-semibold flex items-center gap-2 text-sm">
-                <Sliders className="h-4 w-4" /> Ajustes
-              </h3>
-              {[
-                { label: 'Brilho', value: brightness, set: setBrightness, min: 50, max: 150 },
-                { label: 'Contraste', value: contrast, set: setContrast, min: 50, max: 150 },
-                { label: 'Saturação', value: saturation, set: setSaturation, min: 0, max: 200 },
-              ].map(s => (
-                <div key={s.label}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-xs">{s.label}</span>
-                    <span className="text-xs text-muted-foreground">{s.value}%</span>
-                  </div>
-                  <Slider value={[s.value]} onValueChange={([v]) => s.set(v)} min={s.min} max={s.max} step={1} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Music Step */}
         {step === 'music' && (
           <div className="max-w-2xl mx-auto p-4">
             <div className="relative bg-black aspect-[9/16] max-h-[50vh] rounded-2xl overflow-hidden mb-6">
               {mediaFiles[0]?.type.startsWith('video/') ? (
                 <video ref={videoRef} src={mediaPreviews[0]} className="w-full h-full object-contain"
-                  style={{ filter: getFilterStyle() }} loop playsInline />
+                  loop playsInline />
               ) : (
-                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" style={{ filter: getFilterStyle() }} />
+                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" />
               )}
               {selectedMusic && <audio ref={audioRef} src={selectedMusic.url} loop />}
             </div>

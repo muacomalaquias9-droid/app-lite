@@ -8,10 +8,29 @@ let currentPlayingId: string | null = null;
 let currentTrack: GlobalMusicTrack | null = null;
 let currentResolvedUrl = '';
 let currentErrorId: string | null = null;
-let audioUnlockRegistered = false;
+let audioUnlocked = false;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 const fallbackAttempts = new Map<string, number>();
 const musicListeners = new Set<() => void>();
+
+// Register a one-time global user-gesture listener at module load so we can
+// unlock autoplay for the singleton <audio> element on the first tap/click
+// anywhere in the app. This mirrors Instagram's behaviour: the first
+// interaction unlocks audio for the rest of the session.
+if (typeof window !== 'undefined') {
+  const unlock = () => {
+    audioUnlocked = true;
+    if (currentPlayingAudio && currentPlayingAudio.paused && currentPlayingId) {
+      currentPlayingAudio.muted = false;
+      currentPlayingAudio.play().catch(() => {});
+    } else if (currentPlayingAudio) {
+      currentPlayingAudio.muted = false;
+    }
+  };
+  window.addEventListener('pointerdown', unlock, { passive: true, once: false });
+  window.addEventListener('touchstart', unlock, { passive: true, once: false });
+  window.addEventListener('keydown', unlock, { once: false });
+}
 
 export interface GlobalMusicTrack {
   id: string;
@@ -112,16 +131,6 @@ function ensureGlobalAudio() {
     });
 
     currentPlayingAudio = audio;
-  }
-
-  if (!audioUnlockRegistered && typeof window !== 'undefined') {
-    audioUnlockRegistered = true;
-    window.addEventListener('pointerdown', () => {
-      if (currentPlayingAudio && currentPlayingId && currentPlayingAudio.muted) {
-        currentPlayingAudio.muted = false;
-        currentPlayingAudio.play().catch(() => {});
-      }
-    }, { passive: true });
   }
 
   return currentPlayingAudio;
