@@ -428,8 +428,6 @@ export default function Feed() {
           <div className="max-w-lg mx-auto">
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
 
-            <div className="px-3 my-2"><UserSuggestions /></div>
-
             {/* Posts Feed - New unique card design */}
             <div className="space-y-3 px-3 pb-4">
               {visiblePosts.map((post, index) => {
