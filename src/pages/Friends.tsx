@@ -261,64 +261,53 @@ export default function Friends() {
           <div className="p-4 space-y-5 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
             {searchResults.users.length > 0 && (
               <div>
-                <h3 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3">Pessoas</h3>
-                <div className="space-y-1">
+                <h3 className="text-xs font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Pessoas</h3>
+                <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
                   {searchResults.users.map((profile, i) => (
-                    <motion.div
+                    <motion.button
                       key={profile.id}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-muted/40 transition-all active:scale-[0.98]"
                       onClick={() => navigateToProfile(profile.id)}
+                      className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[74px] active:scale-95 transition-transform"
                     >
-                      <Avatar className="h-12 w-12">
+                      <Avatar className="h-16 w-16 border border-border/40">
                         <AvatarImage src={profile.avatar_url || undefined} className="object-cover" />
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 font-bold">
+                        <AvatarFallback className="bg-muted font-bold">
                           {profile.first_name?.[0]}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1">
-                          <span className="font-bold text-sm">{profile.first_name}</span>
-                          {profile.verified && <VerificationBadge verified badgeType={profile.badge_type} size="sm" />}
-                        </div>
-                        <span className="text-xs text-muted-foreground">@{profile.username}</span>
+                      <div className="flex items-center gap-0.5 max-w-full">
+                        <span className="font-semibold text-[11px] truncate">{profile.first_name}</span>
+                        {profile.verified && <VerificationBadge verified badgeType={profile.badge_type} size="sm" />}
                       </div>
-                    </motion.div>
+                      <span className="text-[10px] text-muted-foreground truncate max-w-full">@{profile.username}</span>
+                    </motion.button>
                   ))}
                 </div>
               </div>
             )}
 
-            {searchResults.videos.length > 0 && (
+            {(searchResults.videos.length > 0 || searchResults.posts.length > 0) && (
               <div>
-                <h3 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3">Vídeos</h3>
-                <div className="grid grid-cols-3 gap-0.5 rounded-2xl overflow-hidden">
+                <h3 className="text-xs font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Explorar</h3>
+                <div className="grid grid-cols-3 gap-[2px]">
+                  {searchResults.posts.filter(p => p.media_urls?.[0]).map(post => (
+                    <button key={`p-${post.id}`} className="relative aspect-square bg-muted overflow-hidden active:opacity-80" onClick={() => { setSelectedPost(post); setFullscreenSheet(true); }}>
+                      <img src={post.media_urls![0]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
                   {searchResults.videos.map(video => (
-                    <div key={video.id} className="relative aspect-[9/16] bg-black cursor-pointer" onClick={() => navigate(`/videos?id=${video.id}`)}>
+                    <button key={`v-${video.id}`} className="relative aspect-square bg-black overflow-hidden active:opacity-80" onClick={() => navigate(`/videos?id=${video.id}`)}>
                       <video src={video.video_url} className="w-full h-full object-cover" muted preload="metadata" />
-                      <div className="absolute inset-0 flex items-center justify-center"><Play className="h-6 w-6 text-white/70 fill-white/70" /></div>
-                    </div>
+                      <div className="absolute top-1.5 right-1.5"><Play className="h-4 w-4 text-white fill-white drop-shadow" /></div>
+                    </button>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {searchResults.posts.length > 0 && (
-              <div>
-                <h3 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3">Publicações</h3>
-                <div className="grid grid-cols-3 gap-0.5 rounded-2xl overflow-hidden">
-                  {searchResults.posts.map(post => (
-                    <div key={post.id} className="relative aspect-square bg-muted cursor-pointer" onClick={() => { setSelectedPost(post); setFullscreenSheet(true); }}>
-                      {post.media_urls?.[0] ? (
-                        <img src={post.media_urls[0]} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center p-2">
-                          <p className="text-[10px] text-muted-foreground line-clamp-4">{post.content}</p>
-                        </div>
-                      )}
-                    </div>
+                  {searchResults.posts.filter(p => !p.media_urls?.[0]).map(post => (
+                    <button key={`t-${post.id}`} className="relative aspect-square bg-muted overflow-hidden active:opacity-80 p-2 text-left" onClick={() => { setSelectedPost(post); setFullscreenSheet(true); }}>
+                      <p className="text-[10px] text-muted-foreground line-clamp-6">{post.content}</p>
+                    </button>
                   ))}
                 </div>
               </div>
