@@ -292,75 +292,15 @@ export default function Create() {
           </div>
         )}
 
-        {/* Video Editor Step */}
-        {step === 'edit' && mediaPreviews.length > 0 && (
-          <div className="max-w-2xl mx-auto">
-            <div className="relative bg-black aspect-[9/16] max-h-[60vh] mx-4 mt-4 rounded-2xl overflow-hidden">
-              {mediaFiles[0]?.type.startsWith('video/') ? (
-                <video ref={videoRef} src={mediaPreviews[0]} className="w-full h-full object-contain"
-                  style={{ filter: getFilterStyle() }} loop playsInline muted={videoVolume === 0}
-                  onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
-              ) : (
-                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" style={{ filter: getFilterStyle() }} />
-              )}
-              <button className="absolute inset-0 flex items-center justify-center" onClick={togglePlayback}>
-                {!isPlaying && (
-                  <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="h-7 w-7 text-foreground fill-foreground ml-0.5" />
-                  </div>
-                )}
-              </button>
-            </div>
-
-            <div className="px-4 mt-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-                <Sparkles className="h-4 w-4" /> Filtros
-              </h3>
-              <ScrollArea className="w-full">
-                <div className="flex gap-2 pb-2">
-                  {videoFilters.map((filter) => (
-                    <button key={filter.name} onClick={() => setSelectedFilter(filter)}
-                      className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
-                        selectedFilter.name === filter.name ? 'bg-primary/20 ring-2 ring-primary' : 'bg-muted/50 hover:bg-muted'
-                      }`}>
-                      <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-pink-400 to-purple-600" style={{ filter: filter.style || 'none' }} />
-                      <span className="text-[10px] font-medium">{filter.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-
-            <div className="px-4 mt-4 space-y-3 pb-8">
-              <h3 className="font-semibold flex items-center gap-2 text-sm">
-                <Sliders className="h-4 w-4" /> Ajustes
-              </h3>
-              {[
-                { label: 'Brilho', value: brightness, set: setBrightness, min: 50, max: 150 },
-                { label: 'Contraste', value: contrast, set: setContrast, min: 50, max: 150 },
-                { label: 'Saturação', value: saturation, set: setSaturation, min: 0, max: 200 },
-              ].map(s => (
-                <div key={s.label}>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-xs">{s.label}</span>
-                    <span className="text-xs text-muted-foreground">{s.value}%</span>
-                  </div>
-                  <Slider value={[s.value]} onValueChange={([v]) => s.set(v)} min={s.min} max={s.max} step={1} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Music Step */}
         {step === 'music' && (
           <div className="max-w-2xl mx-auto p-4">
             <div className="relative bg-black aspect-[9/16] max-h-[50vh] rounded-2xl overflow-hidden mb-6">
               {mediaFiles[0]?.type.startsWith('video/') ? (
                 <video ref={videoRef} src={mediaPreviews[0]} className="w-full h-full object-contain"
-                  style={{ filter: getFilterStyle() }} loop playsInline />
+                  loop playsInline />
               ) : (
-                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" style={{ filter: getFilterStyle() }} />
+                <img src={mediaPreviews[0]} alt="" className="w-full h-full object-contain" />
               )}
               {selectedMusic && <audio ref={audioRef} src={selectedMusic.url} loop />}
             </div>
