@@ -12,10 +12,6 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight, 
-  Sparkles,
-  Sliders,
-  Play,
-  Pause,
   Volume2,
   Hash,
   AtSign,
@@ -31,25 +27,8 @@ import { useHashtagsAndMentions } from "@/hooks/useHashtagsAndMentions";
 import { useActiveProfile } from "@/contexts/ActiveProfileContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import MusicSearch from "@/components/MusicSearch";
 import { Card } from "@/components/ui/card";
-
-interface VideoFilter {
-  name: string;
-  style: string;
-}
-
-const videoFilters: VideoFilter[] = [
-  { name: 'Normal', style: '' },
-  { name: 'Clarendon', style: 'contrast(1.2) saturate(1.35)' },
-  { name: 'Gingham', style: 'brightness(1.05) hue-rotate(-10deg)' },
-  { name: 'Moon', style: 'grayscale(1) contrast(1.1) brightness(1.1)' },
-  { name: 'Lark', style: 'contrast(0.9) brightness(1.1) saturate(0.9)' },
-  { name: 'Reyes', style: 'sepia(0.22) brightness(1.1) contrast(0.85) saturate(0.75)' },
-  { name: 'Juno', style: 'sepia(0.35) contrast(1.15) brightness(1.15) saturate(1.8)' },
-  { name: 'Aden', style: 'hue-rotate(-20deg) contrast(0.9) saturate(0.85) brightness(1.2)' },
-];
 
 const visibilityOptions = [
   { value: 'public', label: 'Público', icon: Globe, desc: 'Todos podem ver' },
@@ -62,15 +41,10 @@ export default function Create() {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'compose' | 'edit' | 'music'>('compose');
-  const [selectedFilter, setSelectedFilter] = useState<VideoFilter>(videoFilters[0]);
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [saturation, setSaturation] = useState(100);
+  const [step, setStep] = useState<'compose' | 'music'>('compose');
   const [selectedMusic, setSelectedMusic] = useState<{ name: string; artist: string; url: string } | null>(null);
   const [musicVolume, setMusicVolume] = useState(50);
   const [videoVolume, setVideoVolume] = useState(100);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [musicDialogOpen, setMusicDialogOpen] = useState(false);
   const [visibility, setVisibility] = useState('public');
   const [showVisibility, setShowVisibility] = useState(false);
@@ -99,23 +73,7 @@ export default function Create() {
     setMediaPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const hasVideo = mediaFiles.some(f => f.type.startsWith('video/'));
-
-  const getFilterStyle = () => {
-    let style = selectedFilter.style;
-    if (brightness !== 100 || contrast !== 100 || saturation !== 100) {
-      style += ` brightness(${brightness / 100}) contrast(${contrast / 100}) saturate(${saturation / 100})`;
-    }
-    return style.trim();
-  };
-
-  const togglePlayback = () => {
-    if (videoRef.current) {
-      if (isPlaying) { videoRef.current.pause(); audioRef.current?.pause(); }
-      else { videoRef.current.play(); audioRef.current?.play(); }
-      setIsPlaying(!isPlaying);
-    }
-  };
+  const hasMedia = mediaFiles.length > 0;
 
   const handleMusicSelect = (music: { name: string; artist: string; preview?: string }) => {
     if (music.preview) setSelectedMusic({ name: music.name, artist: music.artist, url: music.preview });
