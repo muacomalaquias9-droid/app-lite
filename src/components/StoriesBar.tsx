@@ -89,7 +89,7 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
 
   return (
     <>
-      {/* Instagram iOS Stories Bar */}
+      {/* Facebook Lite Stories Bar — plain circle avatars, no gradient rings */}
       <div className="border-b border-border/30">
         <div className="flex gap-3 overflow-x-auto py-3 px-3 scrollbar-hide">
           {/* Your Story Button */}
@@ -102,28 +102,24 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
           >
             <div className="relative">
               {hasOwnStory ? (
-                <div className={`p-[2.5px] rounded-full ${
-                  isUserStoriesViewed(groupedStories[currentUserId]) 
-                    ? 'bg-muted-foreground/20' 
-                    : 'bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600'
+                <Avatar className={`h-[64px] w-[64px] border-[1.5px] ${
+                  isUserStoriesViewed(groupedStories[currentUserId])
+                    ? 'border-border'
+                    : 'border-primary'
                 }`}>
-                  <Avatar className="h-[62px] w-[62px] border-[3px] border-background">
-                    <AvatarImage src={groupedStories[currentUserId][0].profile.avatar_url || ''} className="object-cover" />
-                    <AvatarFallback className="bg-muted text-lg font-bold">
-                      {groupedStories[currentUserId][0].profile.first_name?.[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+                  <AvatarImage src={groupedStories[currentUserId][0].profile.avatar_url || ''} className="object-cover" />
+                  <AvatarFallback className="bg-muted text-lg font-bold">
+                    {groupedStories[currentUserId][0].profile.first_name?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               ) : (
-                <div className="relative">
-                  <Avatar className="h-[62px] w-[62px] border-[2px] border-border/50">
-                    <AvatarFallback className="bg-muted">
-                      <Plus className="h-6 w-6 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+                <Avatar className="h-[64px] w-[64px] border border-border/50">
+                  <AvatarFallback className="bg-muted">
+                    <Plus className="h-6 w-6 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
               )}
-              <div className="absolute -bottom-0.5 -right-0.5 h-[22px] w-[22px] rounded-full bg-primary text-primary-foreground flex items-center justify-center border-[2.5px] border-background">
+              <div className="absolute -bottom-0.5 -right-0.5 h-[22px] w-[22px] rounded-full bg-primary text-primary-foreground flex items-center justify-center border-2 border-background">
                 <Plus className="h-3 w-3" strokeWidth={3} />
               </div>
             </div>
@@ -149,18 +145,14 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
                   onClick={() => handleViewStory(userStories, 0)}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[68px]"
                 >
-                  <div className={`p-[2.5px] rounded-full ${
-                    allViewed 
-                      ? 'bg-muted-foreground/20' 
-                      : 'bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600'
+                  <Avatar className={`h-[64px] w-[64px] border-[1.5px] ${
+                    allViewed ? 'border-border' : 'border-primary'
                   }`}>
-                    <Avatar className="h-[62px] w-[62px] border-[3px] border-background">
-                      <AvatarImage src={firstStory.profile.avatar_url || ''} className="object-cover" />
-                      <AvatarFallback className="bg-muted text-lg font-bold">
-                        {firstStory.profile.first_name?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                    <AvatarImage src={firstStory.profile.avatar_url || ''} className="object-cover" />
+                    <AvatarFallback className="bg-muted text-lg font-bold">
+                      {firstStory.profile.first_name?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight truncate w-full">
                     {firstStory.profile.first_name}
                   </span>

@@ -17,7 +17,6 @@ import { FeedSkeleton } from "@/components/loading/FeedSkeleton";
 import { parseTextWithLinksAndMentions } from "@/utils/textUtils";
 import { SponsoredAd } from "@/components/SponsoredAd";
 import { ImageGalleryViewer } from "@/components/ImageGalleryViewer";
-import { UserSuggestions } from "@/components/UserSuggestions";
 import { motion, AnimatePresence } from "framer-motion";
 import PostOptionsSheet from "@/components/PostOptionsSheet";
 import { playLikeSound, playClickSound } from "@/utils/soundEffects";
@@ -428,8 +427,6 @@ export default function Feed() {
         >
           <div className="max-w-lg mx-auto">
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
-
-            <div className="px-3 my-2"><UserSuggestions /></div>
 
             {/* Posts Feed - New unique card design */}
             <div className="space-y-3 px-3 pb-4">
