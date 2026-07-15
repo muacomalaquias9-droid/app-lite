@@ -17,7 +17,6 @@ import { FeedSkeleton } from "@/components/loading/FeedSkeleton";
 import { parseTextWithLinksAndMentions } from "@/utils/textUtils";
 import { SponsoredAd } from "@/components/SponsoredAd";
 import { ImageGalleryViewer } from "@/components/ImageGalleryViewer";
-import { UserSuggestions } from "@/components/UserSuggestions";
 import { motion, AnimatePresence } from "framer-motion";
 import PostOptionsSheet from "@/components/PostOptionsSheet";
 import { playLikeSound, playClickSound } from "@/utils/soundEffects";
