@@ -122,14 +122,8 @@ export default function SidebarPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 safe-area-top"
-        style={{
-          background: 'hsl(var(--background) / 0.8)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          borderBottom: '0.5px solid hsl(var(--border) / 0.15)',
-        }}>
-        <div className="flex items-center justify-between h-12 px-4">
+      <div className="sticky top-0 z-50 safe-area-top bg-background border-b border-border/60">
+        <div className="flex items-center justify-between h-14 px-4">
           <Logo2026 size="md" />
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="icon" onClick={() => updateSettings({ theme: isDarkMode ? 'light' : 'dark' })}
@@ -140,12 +134,12 @@ export default function SidebarPage() {
         </div>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-3rem)]">
+      <ScrollArea className="h-[calc(100vh-3.5rem)]">
         <div className="pb-8">
           {/* Profile Card */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mx-3 mt-3">
-            <Link to="/profile" className="flex items-center gap-3.5 p-4 rounded-2xl bg-muted/20 border border-border/10 hover:bg-muted/30 transition-colors">
-              <Avatar className="h-14 w-14 ring-2 ring-primary/10">
+            <Link to="/profile" className="flex items-center gap-3.5 p-4 rounded-2xl bg-card border border-border/50 hover:bg-muted/30 transition-colors">
+              <Avatar className="h-14 w-14">
                 <AvatarImage src={profile?.avatar_url} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
                   {profile?.first_name?.[0] || profile?.username?.[0]?.toUpperCase()}
@@ -154,7 +148,7 @@ export default function SidebarPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-[15px] truncate">{profile?.full_name || profile?.first_name || 'Utilizador'}</span>
-                  {profile?.verified && <VerificationBadge badgeType={profile.badge_type} />}
+                  {profile?.verified && <VerificationBadge verified badgeType={profile.badge_type} size="sm" clickable={false} />}
                 </div>
                 <p className="text-[12px] text-muted-foreground">@{profile?.username}</p>
               </div>

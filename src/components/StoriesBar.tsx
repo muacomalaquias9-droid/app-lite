@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
 import { StoryViewer } from "@/components/story/StoryViewer";
 import { motion } from "framer-motion";
+import VerificationBadge from "@/components/VerificationBadge";
 
 interface Story {
   id: string;
@@ -18,6 +19,8 @@ interface Story {
     username: string;
     first_name: string;
     avatar_url: string | null;
+    verified?: boolean | null;
+    badge_type?: string | null;
   };
 }
 
@@ -61,7 +64,7 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
   const loadStories = async () => {
     const { data, error } = await supabase
       .from("stories")
-      .select(`*, profile:profiles!stories_user_id_fkey (username, first_name, avatar_url)`)
+      .select(`*, profile:profiles!stories_user_id_fkey (username, first_name, avatar_url, verified, badge_type)`)
       .order("created_at", { ascending: false });
 
     if (!error && data) setStories(data);
@@ -153,8 +156,14 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
                       {firstStory.profile.first_name?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight truncate w-full">
-                    {firstStory.profile.first_name}
+                  <span className="flex items-center justify-center gap-0.5 w-full px-0.5">
+                    <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight truncate">
+                      {firstStory.profile.first_name}
+                    </span>
+                    {firstStory.profile.verified && (
+                      <VerificationBadge verified badgeType={firstStory.profile.badge_type} size="sm"
+                        className="w-3 h-3 shrink-0" clickable={false} />
+                    )}
                   </span>
                 </motion.button>
               );

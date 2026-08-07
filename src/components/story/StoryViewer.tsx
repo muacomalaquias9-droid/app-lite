@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { showNotification } from '@/utils/pushNotifications';
 import { StoryViewersSheet } from './StoryViewersSheet';
+import VerificationBadge from '@/components/VerificationBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isGlobalTrackPlaying, playGlobalMusic, subscribeToGlobalMusic, toggleGlobalMusic } from '@/components/MusicPlayer';
 import heartIcon from "@/assets/reactions/heart.png";
@@ -29,6 +30,8 @@ interface Story {
     username: string;
     first_name: string;
     avatar_url: string | null;
+    verified?: boolean | null;
+    badge_type?: string | null;
   };
 }
 
@@ -251,6 +254,10 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
             </div>
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <p className="text-white font-semibold text-[13px] truncate">{currentStory.profile.first_name}</p>
+              {currentStory.profile.verified && (
+                <VerificationBadge verified badgeType={currentStory.profile.badge_type} size="sm"
+                  className="w-[13px] h-[13px] shrink-0" clickable={false} />
+              )}
               <p className="text-white/50 text-[12px] flex-shrink-0">{formatTime(currentStory.created_at)}</p>
             </div>
           </div>
