@@ -254,10 +254,8 @@ export const StoryViewer = ({ stories, initialIndex, onClose, onDelete }: StoryV
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <p className="text-white font-semibold text-[13px] truncate">{currentStory.profile.first_name}</p>
               {currentStory.profile.verified && (
-                <img src="/badge-blue.svg" alt="Verificado" className="hidden" />
-              )}
-              {currentStory.profile.verified && (
-                <StoryBadge badgeType={currentStory.profile.badge_type} />
+                <VerificationBadge verified badgeType={currentStory.profile.badge_type} size="sm"
+                  className="w-[13px] h-[13px] shrink-0" clickable={false} />
               )}
               <p className="text-white/50 text-[12px] flex-shrink-0">{formatTime(currentStory.created_at)}</p>
             </div>
