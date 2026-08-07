@@ -336,19 +336,16 @@ export default function Profile() {
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="sticky top-0 z-50 safe-area-top"
-          style={{
-            background: 'hsl(var(--mobile-header) / 0.92)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            borderBottom: '0.5px solid hsl(var(--border) / 0.15)',
-          }}
+          className="sticky top-0 z-50 safe-area-top bg-background border-b border-border/60"
         >
-          <div className="flex items-center justify-between px-4 h-12 text-mobile-header-foreground">
+          <div className="flex items-center justify-between px-2 h-14 text-foreground">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full h-8 w-8 press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
               <ArrowLeft className="h-[18px] w-[18px]" />
             </Button>
-            <span className="text-[15px] font-bold">@{profile.username}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[16px] font-bold">@{profile.username}</span>
+                {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-4 h-4" />}
+              </div>
             <div className="flex items-center gap-1">
               {isOwnProfile && (
                 <Button variant="ghost" size="icon" onClick={() => navigate('/settings/edit-profile')} className="rounded-full h-8 w-8 text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
@@ -445,14 +442,14 @@ export default function Profile() {
             )}
           </div>
 
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             {isOwnProfile ? (
               <>
-                <Button variant="secondary" size="sm" className="flex-1 rounded-lg text-[14px] font-semibold h-8 bg-muted hover:bg-muted/80"
+                <Button size="sm" className="flex-1 rounded-full text-[14px] font-semibold h-9"
                   onClick={() => navigate('/settings/edit-profile')}>Editar perfil</Button>
-                <Button variant="secondary" size="sm" className="flex-1 rounded-lg text-[14px] font-semibold h-8 bg-muted hover:bg-muted/80"
+                <Button variant="secondary" size="sm" className="flex-1 rounded-full text-[14px] font-semibold h-9 bg-muted hover:bg-muted/80"
                   onClick={handleShare}>Partilhar</Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8 rounded-lg bg-muted hover:bg-muted/80"
+                <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full bg-muted hover:bg-muted/80"
                   onClick={() => navigate('/professional-panel')}>
                   <UserPlus className="h-4 w-4" />
                 </Button>
@@ -460,13 +457,13 @@ export default function Profile() {
             ) : (
               <>
                 <Button size="sm" variant={isFollowing ? "secondary" : "default"}
-                  className={`flex-1 rounded-lg text-[14px] font-semibold h-8 ${isFollowing ? 'bg-muted hover:bg-muted/80' : ''}`}
+                  className={`flex-1 rounded-full text-[14px] font-semibold h-9 ${isFollowing ? 'bg-muted hover:bg-muted/80' : ''}`}
                   onClick={handleFollow}>
                   {isFollowing ? 'A filhar' : 'Filhar'}
                 </Button>
-                <Button variant="secondary" size="sm" className="flex-1 rounded-lg text-[14px] font-semibold h-8 bg-muted hover:bg-muted/80"
+                <Button variant="secondary" size="sm" className="flex-1 rounded-full text-[14px] font-semibold h-9 bg-muted hover:bg-muted/80"
                   onClick={() => navigate(`/chat/${profile.id}`)}>Mensagem</Button>
-                <Button variant="secondary" size="icon" className="h-8 w-8 rounded-lg bg-muted hover:bg-muted/80"
+                <Button variant="secondary" size="icon" className="h-9 w-9 rounded-full bg-muted hover:bg-muted/80"
                   onClick={handleShare}>
                   <Share2 className="h-4 w-4" />
                 </Button>

@@ -112,12 +112,7 @@ export default function Settings() {
   return (
     <div className="fixed inset-0 bg-background flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-14 border-b border-border/30"
-        style={{
-          backdropFilter: 'blur(40px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-          backgroundColor: 'hsl(var(--background) / 0.8)',
-        }}>
+      <div className="flex items-center gap-3 px-4 h-14 border-b border-border/60 bg-background">
         <button onClick={() => navigate(-1)} className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-muted/50 transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -180,7 +175,7 @@ export default function Settings() {
           {settingsGroups.map(group => (
             <div key={group.title} className="px-4 pt-5 pb-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{group.title}</p>
-              <div className="rounded-2xl overflow-hidden border border-border/20 bg-muted/10">
+              <div className="rounded-2xl overflow-hidden border border-border/50 bg-card">
                 {group.items.map((item, idx) => (
                   <button key={idx} onClick={() => navigate(item.path)}
                     className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-muted/30 transition-colors border-b border-border/10 last:border-b-0">
