@@ -445,89 +445,97 @@ export default function Feed() {
                   >
                     {showAd && <div className="mb-3"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
-                    {/* Threads-style card: avatar column + threadline, content column */}
-                    <article className="px-3 pt-3 pb-1 border-b border-border/40 bg-transparent">
-                      <div className="flex gap-3">
-                        {/* Left column: avatar + threadline */}
-                        <div className="flex flex-col items-center gap-2 shrink-0">
-                          <Avatar className="h-10 w-10 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
-                            <AvatarImage src={post.profiles.avatar_url} className="object-cover" />
-                            <AvatarFallback className="bg-muted text-sm font-semibold">
-                              {post.profiles.first_name?.[0] || post.profiles.username?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 w-[2px] rounded-full bg-border/60" />
-                        </div>
-
-                        {/* Right column: content */}
-                        <div className="flex-1 min-w-0 pb-3">
-                          {/* Header line: name • time + more */}
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="font-bold text-[15px] cursor-pointer hover:underline truncate" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
-                              {post.profiles.username}
+                    {/* Meta-style post card */}
+                    <article className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+                      {/* Header */}
+                      <div className="flex items-center gap-2.5 px-3.5 pt-3.5 pb-2.5">
+                        <Avatar className="h-11 w-11 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
+                          <AvatarImage src={post.profiles.avatar_url} className="object-cover" />
+                          <AvatarFallback className="bg-muted text-sm font-semibold">
+                            {post.profiles.first_name?.[0] || post.profiles.username?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-[15px] truncate cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
+                              {post.profiles.full_name || post.profiles.first_name || post.profiles.username}
                             </span>
                             {(post.profiles.verified || hasSpecialBadgeEmoji(post.profiles.username) || hasSpecialBadgeEmoji(post.profiles.full_name)) && (
-                              <VerificationBadge verified={post.profiles.verified} badgeType={post.profiles.badge_type} username={post.profiles.username} fullName={post.profiles.full_name} className="w-3.5 h-3.5" />
+                              <VerificationBadge verified={post.profiles.verified} badgeType={post.profiles.badge_type} username={post.profiles.username} fullName={post.profiles.full_name} className="w-[15px] h-[15px] shrink-0" />
                             )}
-                            <span className="text-muted-foreground text-[13px] ml-1">
-                              {formatDistanceToNow(new Date(post.created_at), { locale: ptBR, addSuffix: false })}
-                            </span>
-                            <div className="flex-1" />
-                            <Button variant="ghost" size="icon" className="h-7 w-7 -mr-2 rounded-full" onClick={() => setOptionsSheet({ open: true, post })}>
-                              <MoreHorizontal className="h-[18px] w-[18px] text-muted-foreground" />
-                            </Button>
                           </div>
-
-                          {/* Text */}
-                          {post.content && (
-                            <p className="text-[15px] leading-[21px] text-foreground whitespace-pre-wrap break-words mb-2">
-                              {parseTextWithLinksAndMentions(post.content)}
-                            </p>
-                          )}
-
-                          {/* Music */}
-                          {post.music_name && (
-                            <div className="mb-2">
-                              <MusicPlayer musicName={post.music_name} musicArtist={post.music_artist} musicUrl={post.music_url} autoPlayInView />
-                            </div>
-                          )}
-
-                          {/* Media */}
-                          {post.media_urls && post.media_urls.length > 0 && (
-                            <div className="rounded-2xl overflow-hidden mb-2 border border-border/40">
-                              {renderMediaGrid(post.media_urls, post.id)}
-                            </div>
-                          )}
-
-                          {/* Threads-style minimal actions */}
-                          <div className="flex items-center gap-1 -ml-2">
-                            <motion.button onClick={() => handleLike(post.id)} whileTap={{ scale: 0.85 }}
-                              className="flex items-center gap-1 h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
-                              <Heart className={`h-[20px] w-[20px] transition-all ${userReaction ? 'text-red-500 fill-red-500' : 'text-foreground'}`} strokeWidth={1.5} />
-                              {totalReactions > 0 && (
-                                <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{totalReactions}</span>
-                              )}
-                            </motion.button>
-                            <button onClick={() => navigate(`/comments/${post.id}`)}
-                              className="flex items-center gap-1 h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
-                              <MessageCircle className="h-[20px] w-[20px] text-foreground" strokeWidth={1.5} />
-                              {post.comments.length > 0 && (
-                                <span className="text-[13px] font-medium text-muted-foreground tabular-nums">{post.comments.length}</span>
-                              )}
-                            </button>
-                            <button onClick={() => {
-                              navigator.share?.({ title: 'Publicação', text: post.content?.slice(0, 100), url: `${window.location.origin}/post/${post.id}` })
-                                .catch(() => { navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`); toast.success("Link copiado!"); });
-                            }} className="h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
-                              <Send className="h-[18px] w-[18px] text-foreground" strokeWidth={1.5} />
-                            </button>
-                            <div className="flex-1" />
-                            <motion.button onClick={() => handleSave(post.id)} whileTap={{ scale: 0.85 }}
-                              className="h-9 px-2 rounded-full hover:bg-muted/60 transition-colors">
-                              <Bookmark className={`h-[20px] w-[20px] ${isSaved ? 'fill-foreground text-foreground' : 'text-foreground'}`} strokeWidth={1.5} />
-                            </motion.button>
-                          </div>
+                          <span className="text-muted-foreground text-[12.5px]">
+                            {formatDistanceToNow(new Date(post.created_at), { locale: ptBR, addSuffix: false })} · @{post.profiles.username}
+                          </span>
                         </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full shrink-0" onClick={() => setOptionsSheet({ open: true, post })}>
+                          <MoreHorizontal className="h-[19px] w-[19px] text-muted-foreground" />
+                        </Button>
+                      </div>
+
+                      {/* Text */}
+                      {post.content && (
+                        <p className="px-3.5 pb-2.5 text-[15px] leading-[21px] text-foreground whitespace-pre-wrap break-words">
+                          {parseTextWithLinksAndMentions(post.content)}
+                        </p>
+                      )}
+
+                      {/* Music */}
+                      {post.music_name && (
+                        <div className="px-3.5 pb-2.5">
+                          <MusicPlayer musicName={post.music_name} musicArtist={post.music_artist} musicUrl={post.music_url} autoPlayInView />
+                        </div>
+                      )}
+
+                      {/* Media — edge to edge */}
+                      {post.media_urls && post.media_urls.length > 0 && (
+                        <div className="[&_img]:rounded-none [&_video]:rounded-none [&>div]:rounded-none">
+                          {renderMediaGrid(post.media_urls, post.id)}
+                        </div>
+                      )}
+
+                      {/* Counters */}
+                      {(totalReactions > 0 || post.comments.length > 0) && (
+                        <div className="flex items-center gap-3 px-3.5 pt-2.5 text-[13px] text-muted-foreground">
+                          {totalReactions > 0 && (
+                            <span className="flex items-center gap-1">
+                              <span className="h-[18px] w-[18px] rounded-full bg-red-500 flex items-center justify-center">
+                                <Heart className="h-[11px] w-[11px] text-white fill-white" />
+                              </span>
+                              <span className="tabular-nums font-medium">{totalReactions}</span>
+                            </span>
+                          )}
+                          <div className="flex-1" />
+                          {post.comments.length > 0 && (
+                            <button onClick={() => navigate(`/comments/${post.id}`)} className="tabular-nums">
+                              {post.comments.length} comentários
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="mt-2.5 mx-3.5 border-t border-border/50 flex items-center justify-around py-1">
+                        <motion.button onClick={() => handleLike(post.id)} whileTap={{ scale: 0.9 }}
+                          className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl hover:bg-muted/50 transition-colors">
+                          <Heart className={`h-[21px] w-[21px] transition-all ${userReaction ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`} strokeWidth={1.9} />
+                          <span className={`text-[13.5px] font-semibold ${userReaction ? 'text-red-500' : 'text-muted-foreground'}`}>Gostar</span>
+                        </motion.button>
+                        <button onClick={() => navigate(`/comments/${post.id}`)}
+                          className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl hover:bg-muted/50 transition-colors">
+                          <MessageCircle className="h-[21px] w-[21px] text-muted-foreground" strokeWidth={1.9} />
+                          <span className="text-[13.5px] font-semibold text-muted-foreground">Comentar</span>
+                        </button>
+                        <button onClick={() => {
+                          navigator.share?.({ title: 'Publicação', text: post.content?.slice(0, 100), url: `${window.location.origin}/post/${post.id}` })
+                            .catch(() => { navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`); toast.success("Link copiado!"); });
+                        }} className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-muted/50 transition-colors">
+                          <Send className="h-[19px] w-[19px] text-muted-foreground" strokeWidth={1.9} />
+                        </button>
+                        <motion.button onClick={() => handleSave(post.id)} whileTap={{ scale: 0.9 }}
+                          className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-muted/50 transition-colors">
+                          <Bookmark className={`h-[19px] w-[19px] ${isSaved ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} strokeWidth={1.9} />
+                        </motion.button>
                       </div>
                     </article>
                   </motion.div>
