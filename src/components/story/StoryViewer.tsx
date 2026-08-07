@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { showNotification } from '@/utils/pushNotifications';
 import { StoryViewersSheet } from './StoryViewersSheet';
+import VerificationBadge from '@/components/VerificationBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isGlobalTrackPlaying, playGlobalMusic, subscribeToGlobalMusic, toggleGlobalMusic } from '@/components/MusicPlayer';
 import heartIcon from "@/assets/reactions/heart.png";
