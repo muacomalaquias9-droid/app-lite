@@ -133,7 +133,6 @@ export default function Profile() {
   }, [profile?.id]);
 
   const loadProfile = async () => {
-    const startTime = Date.now();
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -153,8 +152,7 @@ export default function Profile() {
         if (profileId !== user.id) await checkFollowing(user.id, profileId);
       }
     } finally {
-      const elapsed = Date.now() - startTime;
-      setTimeout(() => setLoading(false), Math.max(0, 1500 - elapsed));
+      setLoading(false);
     }
   };
 
