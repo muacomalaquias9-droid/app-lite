@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Camera, Link2, MapPin, Briefcase, AtSign, User, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import VerificationBadge from '@/components/VerificationBadge';
+import VerificationBadge, { BADGE_COLORS, BADGE_TYPES } from '@/components/VerificationBadge';
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -72,6 +72,7 @@ export default function EditProfile() {
         website: form.website,
         location: form.location,
         category: form.category,
+        ...(form.verified ? { badge_type: form.badge_type || 'blue' } : {}),
       }).eq('id', user.id);
       if (error) throw error;
       toast.success('Perfil atualizado!');
@@ -126,6 +127,31 @@ export default function EditProfile() {
               {uploading ? 'A enviar...' : 'Alterar foto'}
             </button>
           </div>
+
+          {form.verified && (
+            <div className="px-4 py-4 border-b border-border/40">
+              <p className="text-[12px] font-semibold text-muted-foreground mb-2.5">Selo personalizado</p>
+              <div className="flex gap-2">
+                {BADGE_TYPES.map((t) => {
+                  const active = (form.badge_type || 'blue') === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, badge_type: t }))}
+                      className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border transition active:scale-[0.97] ${
+                        active ? 'border-primary bg-primary/5' : 'border-border/50 bg-muted/20'
+                      }`}
+                    >
+                      <VerificationBadge verified badgeType={t} size="lg" clickable={false} />
+                      <span className="text-[12px] font-semibold">{BADGE_COLORS[t].label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground/70 mt-2">O selo aparece ao lado do teu nome em todo o Paji.</p>
+            </div>
+          )}
 
           <Field icon={User} label="Nome">
             <Input value={form.first_name} onChange={e => setForm(p => ({ ...p, first_name: e.target.value }))}
