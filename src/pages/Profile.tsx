@@ -133,7 +133,6 @@ export default function Profile() {
   }, [profile?.id]);
 
   const loadProfile = async () => {
-    const startTime = Date.now();
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -153,8 +152,7 @@ export default function Profile() {
         if (profileId !== user.id) await checkFollowing(user.id, profileId);
       }
     } finally {
-      const elapsed = Date.now() - startTime;
-      setTimeout(() => setLoading(false), Math.max(0, 1500 - elapsed));
+      setLoading(false);
     }
   };
 
@@ -339,7 +337,7 @@ export default function Profile() {
           className="sticky top-0 z-50 safe-area-top bg-background border-b border-border/60"
         >
           <div className="flex items-center justify-between px-2 h-14 text-foreground">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full h-8 w-8 press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full h-8 w-8 press-effect">
               <ArrowLeft className="h-[18px] w-[18px]" />
             </Button>
               <div className="flex items-center gap-1.5">
@@ -348,13 +346,13 @@ export default function Profile() {
               </div>
             <div className="flex items-center gap-1">
               {isOwnProfile && (
-                <Button variant="ghost" size="icon" onClick={() => navigate('/settings/edit-profile')} className="rounded-full h-8 w-8 text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
+                <Button variant="ghost" size="icon" onClick={() => navigate('/settings/edit-profile')} className="rounded-full h-8 w-8">
                   <Settings className="h-[18px] w-[18px]" />
                 </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
+                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
                     <MoreHorizontal className="h-[18px] w-[18px]" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -379,70 +377,104 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        {/* Instagram-style header — no banner, classic compact layout */}
-        <div className="px-4 pt-5 pb-3">
-          <div className="flex items-center gap-5 mb-4">
+        {/* Professional profile header — cover + overlapping avatar + stat pills */}
+        <div className="relative">
+          <div className="h-[132px] w-full relative overflow-hidden bg-gradient-to-br from-primary via-primary/70 to-primary-glow">
+            {profile.banner_url && (
+              <img src={profile.banner_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
+            {isOwnProfile && (
+              <>
+                <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                <button onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner}
+                  className="absolute top-3 right-3 h-9 w-9 rounded-full bg-background/85 text-foreground flex items-center justify-center shadow active:scale-95 transition">
+                  <Camera className="h-4 w-4" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="px-4 -mt-11 pb-3">
+          <div className="flex items-end justify-between gap-3">
             <div className="relative flex-shrink-0">
-              <div className={`p-[2.5px] rounded-full ${stories.length > 0 ? 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600' : 'bg-border/40'}`}>
-                <div className="p-[2px] rounded-full bg-background">
-                  <Avatar className="h-[86px] w-[86px]">
-                    <AvatarImage src={profile.avatar_url} className="object-cover" />
-                    <AvatarFallback className="text-2xl font-bold">
-                      {profile.first_name?.[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+              <div className={`p-[3px] rounded-full ${stories.length > 0 ? 'bg-primary' : 'bg-background'}`}>
+                <Avatar className="h-[92px] w-[92px] border-[3px] border-background">
+                  <AvatarImage src={profile.avatar_url} className="object-cover" />
+                  <AvatarFallback className="text-2xl font-bold">
+                    {profile.first_name?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <>
                   <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
-                  <button onClick={() => avatarInputRef.current?.click()}
+                  <button onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
                     className="absolute bottom-0 right-0 h-7 w-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-[3px] border-background shadow">
                     <Plus className="h-4 w-4" strokeWidth={3} />
                   </button>
-                  <input ref={bannerInputRef} type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
                 </>
-              )}
-              {!isOwnProfile && isOnline && (
+              ) : isOnline ? (
                 <div className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-[3px] border-background bg-green-500" />
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-2 pb-1">
+              {profile.category && (
+                <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
+                  <Briefcase className="h-3 w-3" /> {profile.category}
+                </span>
+              )}
+              {hasVerification && (
+                <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-muted text-[11px] font-semibold">
+                  <Award className="h-3 w-3" /> Verificado
+                </span>
               )}
             </div>
-
-            <div className="flex-1 grid grid-cols-3 gap-1 text-center">
-              <button className="py-1 active:opacity-60">
-                <span className="block text-[17px] font-bold leading-tight">{formatNumber(postsCount)}</span>
-                <span className="block text-[13px] text-muted-foreground">publicações</span>
-              </button>
-              <button onClick={() => handleOpenModal("followers")} className="py-1 active:opacity-60">
-                <span className="block text-[17px] font-bold leading-tight">{formatNumber(followersCount)}</span>
-                <span className="block text-[13px] text-muted-foreground">seguidores</span>
-              </button>
-              <button onClick={() => handleOpenModal("following")} className="py-1 active:opacity-60">
-                <span className="block text-[17px] font-bold leading-tight">{formatNumber(followingCount)}</span>
-                <span className="block text-[13px] text-muted-foreground">filhou</span>
-              </button>
-            </div>
           </div>
 
-          <div className="mb-3">
+          <div className="mt-3">
             <div className="flex items-center gap-1.5">
-              <h1 className="text-[15px] font-bold leading-tight">{profile.full_name || profile.first_name}</h1>
-              {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-4 h-4" />}
+              <h1 className="text-[19px] font-bold leading-tight tracking-tight">{profile.full_name || profile.first_name}</h1>
+              {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-[18px] h-[18px]" />}
             </div>
-            {profile.category && (
-              <p className="text-[13px] text-muted-foreground leading-tight">{profile.category}</p>
-            )}
+            <p className="text-[13px] text-muted-foreground flex items-center gap-1"><AtSign className="h-3 w-3" />{profile.username}</p>
             {profile.bio && (
-              <p className="text-[14px] leading-[18px] mt-1 whitespace-pre-wrap">{profile.bio}</p>
+              <p className="text-[14px] leading-[19px] mt-2 whitespace-pre-wrap">{profile.bio}</p>
             )}
-            {profile.website && (
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-[14px] text-primary font-semibold mt-0.5 inline-block">
-                {profile.website.replace(/https?:\/\//, '')}
-              </a>
-            )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+              {profile.location && (
+                <span className="text-[12.5px] text-muted-foreground flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />{profile.location}
+                </span>
+              )}
+              {profile.website && (
+                <a href={profile.website} target="_blank" rel="noopener noreferrer"
+                  className="text-[12.5px] text-primary font-semibold flex items-center gap-1">
+                  <LinkIcon className="h-3.5 w-3.5" />{profile.website.replace(/https?:\/\//, '')}
+                </a>
+              )}
+            </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            {[
+              { label: 'Publicações', value: postsCount, onClick: undefined as undefined | (() => void), icon: Grid3X3 },
+              { label: 'Seguidores', value: followersCount, onClick: () => handleOpenModal('followers'), icon: Users },
+              { label: 'Filhou', value: followingCount, onClick: () => handleOpenModal('following'), icon: TrendingUp },
+            ].map(stat => (
+              <button key={stat.label} onClick={stat.onClick}
+                className="rounded-2xl bg-card border border-border/60 py-2.5 active:scale-[0.97] transition">
+                <span className="flex items-center justify-center gap-1 text-[17px] font-bold leading-tight">
+                  {formatNumber(stat.value)}
+                </span>
+                <span className="block text-[11.5px] text-muted-foreground font-medium">{stat.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2 mt-3">
             {isOwnProfile ? (
               <>
                 <Button size="sm" className="flex-1 rounded-full text-[14px] font-semibold h-9"

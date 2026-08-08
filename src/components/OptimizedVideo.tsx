@@ -137,7 +137,7 @@ export const OptimizedVideo = memo(({
 
   return (
     <div className={`relative ${className}`} onClick={onClick}>
-      {/* Loading skeleton with progress */}
+      {/* Loading skeleton (sem progress bar) */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -146,22 +146,6 @@ export const OptimizedVideo = memo(({
             className="absolute inset-0 z-10"
           >
             <Skeleton className="w-full h-full" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                <p className="text-xs text-muted-foreground">
-                  {loadProgress > 0 ? `${loadProgress.toFixed(0)}%` : 'Carregando...'}
-                </p>
-              </div>
-            </div>
-            {/* Progress bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted">
-              <motion.div
-                className="h-full bg-primary"
-                initial={{ width: 0 }}
-                animate={{ width: `${loadProgress}%` }}
-              />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

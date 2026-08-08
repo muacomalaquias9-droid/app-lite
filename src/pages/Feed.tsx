@@ -98,7 +98,6 @@ export default function Feed() {
       setRefreshing(true);
       setPullDistance(60);
       await loadPosts();
-      await new Promise(r => setTimeout(r, 600));
       setRefreshing(false);
     }
     setPullDistance(0);
