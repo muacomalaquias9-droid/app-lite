@@ -224,7 +224,7 @@ export default function Auth() {
   const inputClass = "h-14 rounded-2xl text-base bg-muted/30 border border-border/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all";
 
   return (
-    <div className="h-full flex flex-col bg-background overflow-y-auto">
+    <div className="h-full flex flex-col overflow-y-auto bg-gradient-to-b from-primary/10 via-background to-background">
       {step !== 'welcome' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="sticky top-0 z-10 p-4">
           <Button variant="ghost" size="icon" onClick={goBack} className="rounded-full h-10 w-10 bg-muted/50 backdrop-blur-sm">
