@@ -5,20 +5,30 @@
 // Match most emoji ranges + ZWJ sequences + skin tones + flags
 const EMOJI_REGEX = /(\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F|\uFE0E)?)*|[\u{1F1E6}-\u{1F1FF}]{2})/gu;
 
-function codepoints(emoji: string): string {
+function codepoints(emoji: string, keepVariation = false): string {
   const out: string[] = [];
   for (const c of emoji) {
     const cp = c.codePointAt(0);
-    if (cp && cp !== 0xfe0f) out.push(cp.toString(16));
+    if (!cp) continue;
+    if (cp === 0xfe0f && !keepVariation) continue;
+    out.push(cp.toString(16));
   }
   return out.join("-");
 }
 
+const BASE = "https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160";
+
 function toImg(emoji: string): string {
-  const cp = codepoints(emoji);
-  // emojicdn redirects to canonical Apple PNG for the codepoint
-  const url = `https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/${cp}.png`;
-  return `<img class="ios-emoji" draggable="false" alt="${emoji}" src="${url}" onerror="this.outerHTML=this.getAttribute('alt')" />`;
+  const plain = codepoints(emoji);
+  const withVariation = codepoints(emoji, true);
+  const url = `${BASE}/${plain}.png`;
+  // Some Apple assets are stored with the variation selector (e.g. 263a-fe0f.png).
+  // Try that variant before falling back to the native glyph.
+  const fallback =
+    withVariation !== plain
+      ? `if(!this.dataset.retry){this.dataset.retry='1';this.src='${BASE}/${withVariation}.png';}else{this.outerHTML=this.getAttribute('alt')}`
+      : `this.outerHTML=this.getAttribute('alt')`;
+  return `<img class="ios-emoji" draggable="false" alt="${emoji}" src="${url}" onerror="${fallback}" />`;
 }
 
 function processNode(node: Node) {
