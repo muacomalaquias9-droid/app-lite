@@ -11,7 +11,7 @@ import { useGlobalUserPresence } from "@/hooks/useGlobalUserPresence";
 // In-app message toast removed — push only on native device
 // FreeDataBanner removed - no longer showing "Sistema Grátis"
 import Auth from "./pages/Auth";
-import Landing from "./pages/Landing";
+
 import SavedAccounts from "./pages/SavedAccounts";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
@@ -108,7 +108,7 @@ const AppContent = () => {
       {/* FreeDataBanner removed */}
       <IncomingCallNotification />
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Auth />} />
         <Route path="/saved-accounts" element={<SavedAccounts />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/signup" element={<Signup />} />
