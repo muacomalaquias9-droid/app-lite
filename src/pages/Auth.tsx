@@ -10,10 +10,7 @@ import {
   Eye, EyeOff, ArrowLeft, Loader2, Mail, Lock, User, AtSign, Phone, MessageSquare
 } from 'lucide-react';
 import InputOTP from '@/components/auth/AuthOTPInput';
-import onboarding1 from '@/assets/onboarding-1.png';
-import onboarding2 from '@/assets/onboarding-2.png';
-import onboarding3 from '@/assets/onboarding-3.png';
-import communityAvatars from '@/assets/community-avatars.png';
+import blynkLogo from '@/assets/blynk-logo.jpg';
 
 type AuthStep = 
   | 'welcome' | 'login' 
@@ -24,9 +21,9 @@ type AuthStep =
 type CredentialType = 'email' | 'phone';
 
 const onboardingSlides = [
-  { image: onboarding1, title: 'Conecta-te', subtitle: 'Encontra amigos e faz novas conexões' },
-  { image: onboarding2, title: 'Partilha', subtitle: 'Publica momentos e histórias' },
-  { image: onboarding3, title: 'Descobre', subtitle: 'Explora conteúdo feito para ti' },
+  { title: 'Conecta-te', subtitle: 'Encontra amigos e faz novas conexões' },
+  { title: 'Partilha', subtitle: 'Publica momentos e histórias' },
+  { title: 'Descobre', subtitle: 'Explora conteúdo feito para ti' },
 ];
 
 export default function Auth() {
