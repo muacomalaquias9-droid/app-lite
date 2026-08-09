@@ -15,7 +15,7 @@ const TRACKING_ID = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_
 
 declare global {
   interface Window {
-    __pajiInitMap?: () => void;
+    __blynkInitMap?: () => void;
     google?: any;
   }
 }
@@ -37,10 +37,10 @@ function loadGoogleMaps(): Promise<void> {
   if (!GMAPS_KEY) return Promise.reject(new Error('Missing Google Maps browser key'));
 
   gmapsLoading = new Promise((resolve, reject) => {
-    window.__pajiInitMap = () => resolve();
+    window.__blynkInitMap = () => resolve();
     const script = document.createElement('script');
     const channel = TRACKING_ID ? `&channel=${encodeURIComponent(TRACKING_ID)}` : '';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&loading=async&callback=__pajiInitMap${channel}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&loading=async&callback=__blynkInitMap${channel}`;
     script.async = true;
     script.defer = true;
     script.onerror = () => reject(new Error('Failed to load Google Maps'));

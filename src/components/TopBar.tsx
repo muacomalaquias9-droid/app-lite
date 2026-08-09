@@ -75,7 +75,7 @@ export const TopBar = () => {
         <Link to="/feed" className="flex items-center gap-2">
           <Logo2026 size="sm" />
           <span className="text-white font-bold text-xl tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Paji
+            Blynk
           </span>
         </Link>
 

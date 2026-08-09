@@ -144,7 +144,7 @@ export default function CreateAd() {
                 <Sparkles className="h-6 w-6 text-primary" />
                 Criar Anúncio
               </h1>
-              <p className="text-sm text-muted-foreground">Promova sua empresa no Paji</p>
+              <p className="text-sm text-muted-foreground">Promova sua empresa no Blynk</p>
             </div>
           </div>
 
@@ -206,7 +206,7 @@ export default function CreateAd() {
                             id="company_name"
                             value={formData.company_name}
                             onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                            placeholder="Ex: Paji Technologies"
+                            placeholder="Ex: Blynk Technologies"
                             className="mt-1.5"
                           />
                         </div>

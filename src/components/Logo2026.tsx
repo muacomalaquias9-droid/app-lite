@@ -1,4 +1,4 @@
-import pajiLogo from '@/assets/paji-logo-new.png';
+import blynkLogo from '@/assets/blynk-logo-new.png';
 
 interface Logo2026Props {
   className?: string;
@@ -15,8 +15,8 @@ export const Logo2026 = ({ className = '', size = 'md' }: Logo2026Props) => {
 
   return (
     <img 
-      src={pajiLogo} 
-      alt="Paji" 
+      src={blynkLogo} 
+      alt="Blynk" 
       className={`${sizeClasses[size]} w-auto object-contain ${className}`}
     />
   );

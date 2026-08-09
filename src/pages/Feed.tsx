@@ -396,7 +396,7 @@ export default function Feed() {
               className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
               <Menu className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
-            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Paji</span>
+            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Blynk</span>
             <div className="flex-1" />
             <button onClick={() => navigate("/videos")} aria-label="Pesquisar"
               className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">

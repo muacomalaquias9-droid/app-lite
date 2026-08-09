@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { Heart, MessageCircle, Share2, Sparkles, PartyPopper, Rocket } from "lucide-react";
-import pajiLogo from "@/assets/paji-2026-logo.png";
+import blynkLogo from "@/assets/blynk-2026-logo.png";
 import { toast } from "sonner";
 
 interface Reaction {
@@ -21,7 +21,7 @@ const reactionTypes = [
   { type: "star", emoji: "⭐" },
 ];
 
-export function Paji2026Announcement() {
+export function Blynk2026Announcement() {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [myReaction, setMyReaction] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState(false);
@@ -75,15 +75,15 @@ export function Paji2026Announcement() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent blur-xl opacity-50" />
               <img 
-                src={pajiLogo} 
-                alt="Paji 2026" 
+                src={blynkLogo} 
+                alt="Blynk 2026" 
                 className="h-16 w-16 rounded-2xl relative z-10 shadow-lg"
               />
             </motion.div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Paji 2026
+                  Blynk 2026
                 </h3>
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
@@ -118,7 +118,7 @@ export function Paji2026Announcement() {
             </div>
             <p className="text-foreground leading-relaxed">
               Estamos entusiasmados por começar este novo ano contigo! 
-              O Paji 2026 traz um design renovado, novas funcionalidades e 
+              O Blynk 2026 traz um design renovado, novas funcionalidades e 
               muitas surpresas. Obrigado por fazeres parte da nossa comunidade! 🙏
             </p>
           </div>

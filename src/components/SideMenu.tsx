@@ -171,7 +171,7 @@ export default function SideMenu() {
               </button>
             </div>
 
-            <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© Paji 2026 · Privacidade · Termos</p>
+            <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© Blynk 2026 · Privacidade · Termos</p>
           </div>
         </ScrollArea>
       </SheetContent>

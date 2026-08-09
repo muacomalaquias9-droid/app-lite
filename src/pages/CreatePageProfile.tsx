@@ -59,7 +59,7 @@ export default function CreatePageProfile() {
       }
 
       // Gerar email único para a conta
-      const pageEmail = `${name.toLowerCase().replace(/\s+/g, '')}+${user.id.substring(0, 8)}@paji.page`;
+      const pageEmail = `${name.toLowerCase().replace(/\s+/g, '')}+${user.id.substring(0, 8)}@blynk.page`;
 
       // Criar o perfil de página
       const { error } = await supabase

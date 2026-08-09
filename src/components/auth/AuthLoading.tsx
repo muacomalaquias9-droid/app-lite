@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Zap } from 'lucide-react';
-import logo from '@/assets/paji-logo.jpg';
+import logo from '@/assets/blynk-logo.jpg';
 
 interface AuthLoadingProps {
   onComplete?: () => void;
@@ -19,7 +19,7 @@ export const AuthLoading = ({ onComplete, isInitial }: AuthLoadingProps) => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse">
-          <img src={logo} alt="Paji" className="h-24 w-24 rounded-full" />
+          <img src={logo} alt="Blynk" className="h-24 w-24 rounded-full" />
         </div>
       </div>
     );

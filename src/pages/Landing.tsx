@@ -31,7 +31,7 @@ export default function Landing() {
             <img
               key={src}
               src={src}
-              alt="Paji"
+              alt="Blynk"
               className={`absolute bottom-0 max-h-[78vh] object-contain transition-opacity duration-700 ease-out ${
                 i === index ? "opacity-100" : "opacity-0"
               }`}

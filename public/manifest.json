@@ -1,7 +1,7 @@
 {
-  "name": "Paji",
-  "short_name": "Paji",
-  "description": "Paji - A rede social que conecta você com amigos",
+  "name": "Blynk",
+  "short_name": "Blynk",
+  "description": "Blynk - A rede social que conecta você com amigos",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

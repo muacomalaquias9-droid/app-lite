@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { requestNotificationPermission, showNotification } from '@/utils/pushNotifications';
-import logo from '@/assets/paji-logo.jpg';
+import logo from '@/assets/blynk-logo.jpg';
 
 interface SecurityAlert {
   id: string;
@@ -87,7 +87,7 @@ export function useSecurityAlerts() {
           // Show push notification
           const hasPermission = await requestNotificationPermission();
           if (hasPermission) {
-            showNotification('Alerta de Segurança - Paji', {
+            showNotification('Alerta de Segurança - Blynk', {
               body: newAlert.message,
               icon: logo,
               requireInteraction: true

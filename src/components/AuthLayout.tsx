@@ -37,7 +37,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center">
-          <div className="text-5xl font-bold mb-6">Paji</div>
+          <div className="text-5xl font-bold mb-6">Blynk</div>
           <Loader2 className="h-8 w-8 animate-spin" />
           <div className="mt-4 text-sm text-muted-foreground">Carregando...</div>
         </div>
