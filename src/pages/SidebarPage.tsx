@@ -250,7 +250,7 @@ export default function SidebarPage() {
             </Button>
           </div>
 
-          <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© 2026/2027 Paji · Privacidade · Termos</p>
+          <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© 2026/2027 Blynk · Privacidade · Termos</p>
         </div>
       </ScrollArea>
     </div>

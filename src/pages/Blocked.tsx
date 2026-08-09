@@ -70,7 +70,7 @@ export default function Blocked() {
             Sua conta está bloqueada
           </CardTitle>
           <CardDescription className="text-base">
-            Sua conta foi bloqueada por violar as diretrizes da comunidade Paji
+            Sua conta foi bloqueada por violar as diretrizes da comunidade Blynk
           </CardDescription>
         </CardHeader>
 
@@ -149,7 +149,7 @@ export default function Blocked() {
                 className="min-h-[100px] border-border/50"
               />
               <p className="text-xs text-muted-foreground">
-                Você também pode enviar documentos por e-mail para suporte@paji.com
+                Você também pode enviar documentos por e-mail para suporte@blynk.com
               </p>
             </div>
 
@@ -166,10 +166,10 @@ export default function Blocked() {
           <div className="pt-4 border-t text-center text-sm text-muted-foreground">
             <p>Tem dúvidas? Entre em contato com nosso suporte:</p>
             <a 
-              href="mailto:suporte@paji.com" 
+              href="mailto:suporte@blynk.com" 
               className="text-primary hover:underline font-medium"
             >
-              suporte@paji.com
+              suporte@blynk.com
             </a>
           </div>
         </CardContent>

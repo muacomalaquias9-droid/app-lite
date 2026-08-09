@@ -8,11 +8,11 @@ import { toast } from "sonner";
 
 const BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/public-api`;
 const APP_VIEW_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/app-view-api`;
-const SDK_URL = `${window.location.origin}/paji-sdk.js`;
+const SDK_URL = `${window.location.origin}/blynk-sdk.js`;
 
 const endpoints = [
   { method: "POST", path: "/v1/auth/login", desc: "Autentica um utilizador (email + password). Devolve sessão JWT." },
-  { method: "POST", path: "/v1/auth/signup", desc: "Cria nova conta no Paji via API externa." },
+  { method: "POST", path: "/v1/auth/signup", desc: "Cria nova conta no Blynk via API externa." },
   { method: "GET",  path: "/v1/posts", desc: "Lista publicações (limit ?limit=50)." },
   { method: "GET",  path: "/v1/posts/:id", desc: "Detalhe de uma publicação com autor." },
   { method: "POST", path: "/v1/posts", desc: "Cria publicação (requer Bearer session)." },
@@ -33,7 +33,7 @@ const endpoints = [
   { method: "POST", path: "/v1/payments/reference", desc: "Cria pagamento PliqPay por entidade/referência (Bearer)." },
   { method: "GET",  path: "/v1/payments/:id/status", desc: "Consulta estado do pagamento por referência (Bearer)." },
   { method: "GET",  path: "/v1/music", desc: "Lista músicas disponíveis." },
-  { method: "POST", path: "/v1/music", desc: "Regista música externa no Paji (Bearer)." },
+  { method: "POST", path: "/v1/music", desc: "Regista música externa no Blynk (Bearer)." },
   { method: "POST", path: "/v1/music/:id/play", desc: "Incrementa reprodução de uma música." },
   { method: "GET",  path: "/v1/stories", desc: "Lista stories ativos." },
   { method: "POST", path: "/v1/stories", desc: "Cria story com media e música opcional (Bearer)." },
@@ -78,7 +78,7 @@ const res = await fetch("${BASE_URL}/v1/posts", {
 const { data } = await res.json();
 console.log(data);`;
 
-  const loginExample = `// Login externo (usar a API do Paji como backend de auth)
+  const loginExample = `// Login externo (usar a API do Blynk como backend de auth)
 const res = await fetch("${BASE_URL}/v1/auth/login", {
   method: "POST",
   headers: {
@@ -102,26 +102,26 @@ print_r($response['data']);`;
   const sdkExample = `<!-- Funciona em qualquer site/app web -->
 <script src="${SDK_URL}"></script>
 <script>
-  const paji = new Paji({
+  const blynk = new Blynk({
     publicKey: "pk_live_xxx",
     secret:    "sk_live_xxx",
     baseUrl:   "${window.location.origin}",
   });
 
-  // 1. Login com a tua conta Paji (mesmo backend de auth)
-  await paji.auth.login("a@b.com", "password");
+  // 1. Login com a tua conta Blynk (mesmo backend de auth)
+  await blynk.auth.login("a@b.com", "password");
 
   // 2. Publicar, mensagens, stories, música e pagamento — tudo com fila offline
-  await paji.posts.create({ content: "Olá mundo!" });
-  await paji.messages.send("user-uuid", "Oi pelo SDK");
-  await paji.stories.create({ media_url: "https://.../story.jpg", media_type: "image" });
-  await paji.music.create({ name: "Minha música", artist: "Artista", audio_url: "https://.../audio.mp3", duration: 180 });
-  const pay = await paji.payments.createReference(500, { title: "Plano", plan_type: "premium" });
+  await blynk.posts.create({ content: "Olá mundo!" });
+  await blynk.messages.send("user-uuid", "Oi pelo SDK");
+  await blynk.stories.create({ media_url: "https://.../story.jpg", media_type: "image" });
+  await blynk.music.create({ name: "Minha música", artist: "Artista", audio_url: "https://.../audio.mp3", duration: 180 });
+  const pay = await blynk.payments.createReference(500, { title: "Plano", plan_type: "premium" });
   console.log(pay.payment.entity, pay.payment.reference);
 
   // 3. Realtime — escuta novos posts em tempo real (WebSocket)
-  paji.realtime.on("posts",  (e) => console.log("post:", e));
-  paji.realtime.on("messages", (e) => console.log("nova msg:", e));
+  blynk.realtime.on("posts",  (e) => console.log("post:", e));
+  blynk.realtime.on("messages", (e) => console.log("nova msg:", e));
 </script>`;
 
   const offlineExample = `// Modo offline-first (estilo Facebook antigo / Zero)
@@ -132,10 +132,10 @@ window.addEventListener("offline", () => console.log("offline mode ON"));
 window.addEventListener("online",  () => console.log("a sincronizar fila..."));
 
 // Esta chamada NUNCA falha por falta de internet:
-await paji.likes.like("post-uuid");
-await paji.comments.create("post-uuid", "Excelente!");
-await paji.messages.send("user-uuid", "Mensagem offline");
-await paji.payments.createReference(500, { title: "Compra" });
+await blynk.likes.like("post-uuid");
+await blynk.comments.create("post-uuid", "Excelente!");
+await blynk.messages.send("user-uuid", "Mensagem offline");
+await blynk.payments.createReference(500, { title: "Compra" });
 // Em segundo plano, a fila é drenada quando a ligação voltar.`;
 
 
@@ -179,8 +179,8 @@ supa.channel("any").on("postgres_changes",
         <div className="flex items-center gap-3 px-4 h-14 max-w-4xl mx-auto">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft className="h-5 w-5" /></Button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold flex items-center gap-2"><BookOpen className="h-4 w-4" /> Paji API · Documentação</h1>
-            <p className="text-xs text-muted-foreground">Integra Paji em qualquer site ou aplicativo</p>
+            <h1 className="text-lg font-bold flex items-center gap-2"><BookOpen className="h-4 w-4" /> Blynk API · Documentação</h1>
+            <p className="text-xs text-muted-foreground">Integra Blynk em qualquer site ou aplicativo</p>
           </div>
         </div>
       </div>
@@ -190,9 +190,9 @@ supa.channel("any").on("postgres_changes",
         <section>
           <h2 className="text-2xl font-bold mb-2">Introdução</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            A API REST do Paji dá-te acesso programático a publicações, perfis, comentários, curtidas, mensagens e
+            A API REST do Blynk dá-te acesso programático a publicações, perfis, comentários, curtidas, mensagens e
             autenticação. Funciona a partir de qualquer domínio — usa-a como backend para um site novo, app móvel, ou para
-            sincronizar dados entre Paji e outras plataformas.
+            sincronizar dados entre Blynk e outras plataformas.
           </p>
         </section>
 
@@ -319,7 +319,7 @@ supa.channel("any").on("postgres_changes",
         <section>
           <h2 className="text-lg font-semibold mb-2 flex items-center gap-2"><Smartphone className="h-4 w-4" /> App-View API · Native (WebView)</h2>
           <p className="text-sm text-muted-foreground mb-3">
-            Endpoint dedicado para o app nativo iOS/Android (estilo Facebook) carregar o Paji dentro de uma WebView.
+            Endpoint dedicado para o app nativo iOS/Android (estilo Facebook) carregar o Blynk dentro de uma WebView.
             Devolve URL, tema, branding e features. Requer chave pública <code className="bg-muted px-1 rounded text-xs">X-API-Key</code> + segredo
             <code className="bg-muted px-1 rounded text-xs ml-1">X-View-Secret</code> (cria/activa em <button className="text-primary underline" onClick={() => navigate("/api-keys")}>/api-keys</button>).
           </p>
@@ -328,9 +328,9 @@ supa.channel("any").on("postgres_changes",
   -H "X-View-Secret: sk_live_xxx"`} />
           <p className="text-xs text-muted-foreground mt-3 mb-2">Resposta:</p>
           <CodeBlock lang="json" code={`{
-  "app": { "name": "Paji", "bundle_id": "app.lovable.paji", "version": "1.0.0" },
-  "url": "https://pajis.lovable.app",
-  "entrypoint": "https://pajis.lovable.app/feed",
+  "app": { "name": "Blynk", "bundle_id": "app.lovable.blynk", "version": "1.0.0" },
+  "url": "https://blynks.lovable.app",
+  "entrypoint": "https://blynks.lovable.app/feed",
   "theme":   { "primary": "#3B82F6", "background": "#0F172A", "statusbar": "light" },
   "branding":{ "logo": ".../logo-192.png", "splash": ".../logo-192.png" },
   "features":{ "push": true, "camera": true, "geolocation": true, "webrtc": true }
@@ -342,7 +342,7 @@ supa.channel("any").on("postgres_changes",
           </p>
         </section>
 
-        <p className="text-xs text-muted-foreground/60 text-center pt-8">© 2026/2027 Paji API · v1</p>
+        <p className="text-xs text-muted-foreground/60 text-center pt-8">© 2026/2027 Blynk API · v1</p>
       </div>
     </div>
   );

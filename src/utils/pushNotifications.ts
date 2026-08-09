@@ -73,7 +73,7 @@ export const showNotification = (title: string, options?: ExtendedNotificationOp
   const notificationOptions: ExtendedNotificationOptions = {
     icon: options?.icon || '/logo-192.png',
     badge: '/favicon.png',
-    tag: options?.tag || 'paji-notification',
+    tag: options?.tag || 'blynk-notification',
     requireInteraction: false,
     silent: true, // We handle sound ourselves
     vibrate: [200, 100, 200, 100, 200],

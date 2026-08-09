@@ -9,7 +9,7 @@ interface TwoFactorQRCodeProps {
 }
 
 export default function TwoFactorQRCode({ secret, userEmail }: TwoFactorQRCodeProps) {
-  const appName = 'Paji';
+  const appName = 'Blynk';
   const otpauthUrl = `otpauth://totp/${appName}:${userEmail}?secret=${secret}&issuer=${appName}`;
 
   const handleCopySecret = () => {
@@ -29,7 +29,7 @@ export default function TwoFactorQRCode({ secret, userEmail }: TwoFactorQRCodePr
               <li>• Nunca compartilhe este QR code ou código com ninguém</li>
               <li>• Guarde o código em local seguro</li>
               <li>• Qualquer pessoa com acesso pode acessar sua conta</li>
-              <li>• Paji nunca pedirá este código por mensagem ou telefone</li>
+              <li>• Blynk nunca pedirá este código por mensagem ou telefone</li>
             </ul>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function TwoFactorQRCode({ secret, userEmail }: TwoFactorQRCodePr
           <li>2. Abra o app e escolha "Adicionar conta"</li>
           <li>3. Escaneie o QR code acima ou digite o código manualmente</li>
           <li>4. O app gerará códigos de 6 dígitos que mudam a cada 30 segundos</li>
-          <li>5. Use esses códigos ao fazer login no Paji</li>
+          <li>5. Use esses códigos ao fazer login no Blynk</li>
         </ol>
       </div>
     </div>

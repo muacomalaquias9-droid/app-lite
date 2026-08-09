@@ -149,7 +149,7 @@ export default function EditProfile() {
                   );
                 })}
               </div>
-              <p className="text-[11px] text-muted-foreground/70 mt-2">O selo aparece ao lado do teu nome em todo o Paji.</p>
+              <p className="text-[11px] text-muted-foreground/70 mt-2">O selo aparece ao lado do teu nome em todo o Blynk.</p>
             </div>
           )}
 

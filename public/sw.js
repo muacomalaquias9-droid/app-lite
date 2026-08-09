@@ -1,4 +1,4 @@
-// Paji Service Worker: native push only, zero app/media/API caching.
+// Blynk Service Worker: native push only, zero app/media/API caching.
 const clearEveryCache = async () => {
   if (!self.caches) return;
   const keys = await caches.keys();
@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
 // Push notification handling
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Paji';
+  const title = data.title || 'Blynk';
   
   const options = {
     body: data.body || 'Nova notificação',

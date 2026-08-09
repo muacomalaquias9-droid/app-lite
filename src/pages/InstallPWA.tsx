@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Smartphone, X } from 'lucide-react';
-import pajiLogo from '@/assets/paji-logo.jpg';
+import blynkLogo from '@/assets/blynk-logo.jpg';
 
 export default function InstallPWA() {
   const navigate = useNavigate();
@@ -50,9 +50,9 @@ export default function InstallPWA() {
             </Button>
           </div>
           <div className="flex justify-center mb-4">
-            <img src={pajiLogo} alt="Paji" className="h-24 w-auto" />
+            <img src={blynkLogo} alt="Blynk" className="h-24 w-auto" />
           </div>
-          <CardTitle className="text-2xl">Instalar Paji</CardTitle>
+          <CardTitle className="text-2xl">Instalar Blynk</CardTitle>
           <CardDescription>
             Instale o app no seu dispositivo para uma melhor experiência
           </CardDescription>

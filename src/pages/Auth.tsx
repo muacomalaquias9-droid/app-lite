@@ -10,10 +10,7 @@ import {
   Eye, EyeOff, ArrowLeft, Loader2, Mail, Lock, User, AtSign, Phone, MessageSquare
 } from 'lucide-react';
 import InputOTP from '@/components/auth/AuthOTPInput';
-import onboarding1 from '@/assets/onboarding-1.png';
-import onboarding2 from '@/assets/onboarding-2.png';
-import onboarding3 from '@/assets/onboarding-3.png';
-import communityAvatars from '@/assets/community-avatars.png';
+import blynkLogo from '@/assets/blynk-logo.jpg';
 
 type AuthStep = 
   | 'welcome' | 'login' 
@@ -24,9 +21,9 @@ type AuthStep =
 type CredentialType = 'email' | 'phone';
 
 const onboardingSlides = [
-  { image: onboarding1, title: 'Conecta-te', subtitle: 'Encontra amigos e faz novas conexões' },
-  { image: onboarding2, title: 'Partilha', subtitle: 'Publica momentos e histórias' },
-  { image: onboarding3, title: 'Descobre', subtitle: 'Explora conteúdo feito para ti' },
+  { title: 'Conecta-te', subtitle: 'Encontra amigos e faz novas conexões' },
+  { title: 'Partilha', subtitle: 'Publica momentos e histórias' },
+  { title: 'Descobre', subtitle: 'Explora conteúdo feito para ti' },
 ];
 
 export default function Auth() {
@@ -71,7 +68,7 @@ export default function Auth() {
     return (
       <div className="h-full flex items-center justify-center bg-background">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-4">
-          <h1 className="text-4xl font-bold text-primary">paji</h1>
+          <h1 className="text-4xl font-bold text-primary">blynk</h1>
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </motion.div>
       </div>
@@ -161,7 +158,7 @@ export default function Auth() {
     try {
       const verified = await verifyPhoneCode();
       if (!verified) { toast.error('Código inválido'); return; }
-      const tempEmail = `${formData.phone.replace(/\+/g, '')}@phone.paji.app`;
+      const tempEmail = `${formData.phone.replace(/\+/g, '')}@phone.blynk.app`;
       const { data, error } = await supabase.auth.signUp({
         email: tempEmail, password: formData.password,
         options: { emailRedirectTo: `${window.location.origin}/`, data: { first_name: formData.firstName, username: formData.username, phone: formData.phone, phone_verified: true } }
@@ -227,7 +224,7 @@ export default function Auth() {
   const inputClass = "h-14 rounded-2xl text-base bg-muted/30 border border-border/50 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary/30 transition-all";
 
   return (
-    <div className="h-full flex flex-col bg-background overflow-y-auto">
+    <div className="h-full flex flex-col overflow-y-auto bg-gradient-to-b from-primary/10 via-background to-background">
       {step !== 'welcome' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="sticky top-0 z-10 p-4">
           <Button variant="ghost" size="icon" onClick={goBack} className="rounded-full h-10 w-10 bg-muted/50 backdrop-blur-sm">
@@ -241,18 +238,28 @@ export default function Auth() {
           {/* ══════ Welcome ══════ */}
           {step === 'welcome' && (
             <motion.div key="welcome" variants={slideVariants} initial="enter" animate="center" exit="exit"
-              transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }} className="flex flex-col items-center text-center gap-6">
-              
-              {/* Carousel */}
-              <div className="relative w-full h-56 flex items-center justify-center overflow-hidden">
+              transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }} className="flex flex-col items-center text-center gap-7">
+
+              {/* Brand mark */}
+              <div className="relative">
+                <div className="absolute -inset-6 rounded-full bg-primary/15 blur-2xl" />
+                <img src={blynkLogo} alt="Blynk" className="relative h-24 w-24 rounded-[28px] object-cover shadow-xl" />
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-[38px] font-extrabold tracking-tight leading-none">Blynk</h1>
+                <p className="text-sm text-muted-foreground">A tua rede, do teu jeito.</p>
+              </div>
+
+              {/* Text carousel */}
+              <div className="relative w-full h-20 overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.div key={currentSlide}
-                    initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
-                    transition={{ duration: 0.4 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                    initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }}
+                    transition={{ duration: 0.35 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
                   >
-                    <img src={onboardingSlides[currentSlide].image} alt="" className="h-36 w-auto object-contain" />
-                    <h3 className="text-lg font-bold">{onboardingSlides[currentSlide].title}</h3>
+                    <h3 className="text-xl font-bold">{onboardingSlides[currentSlide].title}</h3>
                     <p className="text-sm text-muted-foreground">{onboardingSlides[currentSlide].subtitle}</p>
                   </motion.div>
                 </AnimatePresence>
@@ -266,12 +273,6 @@ export default function Auth() {
                 ))}
               </div>
 
-              {/* Community avatars */}
-              <div className="flex flex-col items-center gap-2">
-                <img src={communityAvatars} alt="Comunidade" className="h-12 w-auto object-contain" />
-                <p className="text-xs text-muted-foreground">Junta-te a milhares de pessoas</p>
-              </div>
-
               <div className="w-full space-y-3">
                 <Button onClick={() => setStep('login')}
                   className="w-full h-14 rounded-2xl text-base font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
@@ -283,7 +284,7 @@ export default function Auth() {
                 </Button>
               </div>
 
-              <p className="text-[11px] text-muted-foreground/60">© 2026/2027 Paji</p>
+              <p className="text-[11px] text-muted-foreground/60">© 2026/2027 Blynk</p>
             </motion.div>
           )}
 

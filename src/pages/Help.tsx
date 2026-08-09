@@ -75,7 +75,7 @@ export default function Help() {
               </div>
               <div>
                 <p className="font-semibold">Email</p>
-                <p className="text-sm text-muted-foreground">suporte@paji.com</p>
+                <p className="text-sm text-muted-foreground">suporte@blynk.com</p>
               </div>
             </div>
 

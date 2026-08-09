@@ -224,12 +224,22 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
         if (!entry) return;
         if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
           playGlobalMusic(track).then((played) => setHasError(!played));
+        } else if (isGlobalTrackPlaying(track.id)) {
+          // Instagram behaviour: leaving the content stops its music
+          currentPlayingAudio?.pause();
+          notifyMusicListeners();
         }
       },
       { threshold: [0, 0.6, 1], rootMargin: '0px 0px -15% 0px' }
     );
     observer.observe(node);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (isGlobalTrackPlaying(track.id)) {
+        currentPlayingAudio?.pause();
+        notifyMusicListeners();
+      }
+    };
   }, [autoPlayInView, track]);
 
   const togglePlay = (e: React.MouseEvent) => {

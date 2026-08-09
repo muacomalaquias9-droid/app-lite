@@ -11,7 +11,7 @@ import { useGlobalUserPresence } from "@/hooks/useGlobalUserPresence";
 // In-app message toast removed — push only on native device
 // FreeDataBanner removed - no longer showing "Sistema Grátis"
 import Auth from "./pages/Auth";
-import Landing from "./pages/Landing";
+
 import SavedAccounts from "./pages/SavedAccounts";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
@@ -80,7 +80,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-5xl font-bold animate-pulse">Paji</div>
+          <div className="text-5xl font-bold animate-pulse">Blynk</div>
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </div>
@@ -108,7 +108,7 @@ const AppContent = () => {
       {/* FreeDataBanner removed */}
       <IncomingCallNotification />
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Auth />} />
         <Route path="/saved-accounts" element={<SavedAccounts />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/signup" element={<Signup />} />

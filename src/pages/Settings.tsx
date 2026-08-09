@@ -74,13 +74,13 @@ export default function Settings() {
     try {
       const { data: profileData } = await supabase.from('profiles').select('first_name, username, avatar_url, email').eq('id', user.id).single();
       if (profileData) {
-        const accounts = JSON.parse(localStorage.getItem('paji_saved_accounts') || '[]');
+        const accounts = JSON.parse(localStorage.getItem('blynk_saved_accounts') || '[]');
         const idx = accounts.findIndex((a: any) => a.userId === user.id);
         const acc = { userId: user.id, email: profileData.email || user.email || '', firstName: profileData.first_name, username: profileData.username, avatarUrl: profileData.avatar_url };
         if (idx >= 0) accounts[idx] = acc; else accounts.push(acc);
-        localStorage.setItem('paji_saved_accounts', JSON.stringify(accounts));
+        localStorage.setItem('blynk_saved_accounts', JSON.stringify(accounts));
         const { data: { session } } = await supabase.auth.getSession();
-        if (session) localStorage.setItem(`paji_session_${user.id}`, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token }));
+        if (session) localStorage.setItem(`blynk_session_${user.id}`, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token }));
       }
     } catch {}
     await supabase.auth.signOut();
@@ -104,7 +104,7 @@ export default function Settings() {
       title: 'Subscrições',
       items: [
         { label: 'Verificação', icon: Key, path: '/verification' },
-        { label: 'Paji Pay', icon: CreditCard, path: '#' },
+        { label: 'Blynk Pay', icon: CreditCard, path: '#' },
       ]
     },
   ];
@@ -196,7 +196,7 @@ export default function Settings() {
             </Button>
           </div>
 
-          <p className="text-center text-[11px] text-muted-foreground/40 pb-4">Paji © 2026 · Privacidade · Termos</p>
+          <p className="text-center text-[11px] text-muted-foreground/40 pb-4">Blynk © 2026 · Privacidade · Termos</p>
         </div>
       </div>
 

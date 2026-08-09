@@ -216,7 +216,7 @@ function BoostPanel({ users }: { users: User[] }) {
 
 function AdminModerationPanel({ users, onRefresh }: { users: User[]; onRefresh: () => void }) {
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [reason, setReason] = useState("Violação das regras da comunidade Paji");
+  const [reason, setReason] = useState("Violação das regras da comunidade Blynk");
   const [postSearch, setPostSearch] = useState("");
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);

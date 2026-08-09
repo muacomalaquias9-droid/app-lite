@@ -74,7 +74,7 @@ export default function Footer() {
 
         <div className="pt-6 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
-            © 2026/2027 Paji. Todos os direitos reservados.
+            © 2026/2027 Blynk. Todos os direitos reservados.
           </p>
         </div>
       </div>

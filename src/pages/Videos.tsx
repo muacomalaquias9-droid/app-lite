@@ -32,7 +32,7 @@ interface MusicTrack {
 }
 
 const TRENDING_MUSIC: MusicTrack[] = [
-  { id: '1', title: 'Cold Keys Warm Steel', artist: 'Paji Music', preview_url: '/music/trending/cold-keys-warm-steel.mp3' },
+  { id: '1', title: 'Cold Keys Warm Steel', artist: 'Blynk Music', preview_url: '/music/trending/cold-keys-warm-steel.mp3' },
   { id: '2', title: 'Neon Dreams', artist: 'Afrobeat Vibes' },
   { id: '3', title: 'Luanda Nights', artist: 'Kuduro Mix' },
   { id: '4', title: 'Estrelas do Sul', artist: 'Semba Soul' },

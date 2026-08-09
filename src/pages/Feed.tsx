@@ -281,6 +281,7 @@ export default function Feed() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
+    const [isReady, setIsReady] = useState(false);
     const isMuted = mutedVideos[postId] ?? true;
 
     const handleError = () => {
@@ -305,16 +306,28 @@ export default function Feed() {
     }
 
     return (
-      <div className="relative bg-black/5 dark:bg-white/5 overflow-hidden rounded-3xl" onClick={() => {
+      <div className="relative bg-black overflow-hidden rounded-3xl aspect-[4/5] max-h-[540px]" onClick={() => {
         const video = videoRefs.current[postId];
         if (video) { if (video.paused) { video.play(); } else { video.pause(); } }
       }}>
-        <video ref={registerVideoRef(postId)} className="w-full max-h-[520px] object-contain cursor-pointer"
-          playsInline muted={isMuted} loop preload="auto"
-          onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} onError={handleError}>
-          <source src={url} type="video/mp4" />
-        </video>
-        {!isPlaying && (
+        <video ref={registerVideoRef(postId)}
+          src={url}
+          className={`absolute inset-0 h-full w-full object-contain cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+          playsInline muted={isMuted} loop preload="metadata"
+          disablePictureInPicture disableRemotePlayback
+          onLoadedData={() => setIsReady(true)}
+          onCanPlay={() => setIsReady(true)}
+          onPlay={() => { setIsPlaying(true); setIsReady(true); }}
+          onPause={() => setIsPlaying(false)}
+          onError={handleError} />
+
+        {!isReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
+            <Loader2 className="h-6 w-6 animate-spin text-white/70" />
+          </div>
+        )}
+
+        {isReady && !isPlaying && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="h-16 w-16 rounded-full bg-background/80 backdrop-blur-xl flex items-center justify-center shadow-2xl border border-border/20">
               <Play className="h-7 w-7 text-foreground fill-foreground ml-1" />
@@ -396,7 +409,7 @@ export default function Feed() {
               className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
               <Menu className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
-            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Paji</span>
+            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Blynk</span>
             <div className="flex-1" />
             <button onClick={() => navigate("/videos")} aria-label="Pesquisar"
               className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
