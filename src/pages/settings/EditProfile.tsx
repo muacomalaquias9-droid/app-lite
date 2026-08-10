@@ -212,7 +212,7 @@ export default function EditProfile() {
                             active ? 'border-primary bg-primary/10' : 'border-border/60 bg-muted/20'
                           }`}
                         >
-                          <img src={badge.icon} alt="" className="h-4.5 w-4.5 h-[18px] w-[18px] object-contain" draggable={false} />
+                          <img src={badge.icon} alt="" className="h-[18px] w-[18px] object-contain" draggable={false} />
                           <span className="text-[12px] font-semibold">{badge.label}</span>
                         </button>
                       );
