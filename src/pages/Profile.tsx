@@ -111,11 +111,19 @@ export default function Profile() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
+  const [profileAds, setProfileAds] = useState<any[]>([]);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const onlineUsers = useOnlineUsers();
 
   useEffect(() => { loadProfile(); }, [userId]);
+
+  // O programador da plataforma tem sempre anúncios no perfil
+  useEffect(() => {
+    if (profile?.id !== DEV_USER_ID) { setProfileAds([]); return; }
+    supabase.from("sponsored_ads").select("*").eq("is_active", true).limit(3)
+      .then(({ data }) => setProfileAds(data || []));
+  }, [profile?.id]);
 
   useEffect(() => {
     if (!profile?.id) return;
