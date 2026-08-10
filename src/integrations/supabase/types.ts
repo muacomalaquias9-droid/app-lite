@@ -1919,6 +1919,7 @@ export type Database = {
           category: string | null
           civil_status: string | null
           created_at: string | null
+          dev_badges: string[] | null
           email: string | null
           first_name: string
           full_name: string | null
@@ -1943,6 +1944,7 @@ export type Database = {
           category?: string | null
           civil_status?: string | null
           created_at?: string | null
+          dev_badges?: string[] | null
           email?: string | null
           first_name: string
           full_name?: string | null
@@ -1967,6 +1969,7 @@ export type Database = {
           category?: string | null
           civil_status?: string | null
           created_at?: string | null
+          dev_badges?: string[] | null
           email?: string | null
           first_name?: string
           full_name?: string | null

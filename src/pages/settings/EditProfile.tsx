@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Camera, Link2, MapPin, Briefcase, AtSign, User, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import VerificationBadge, { BADGE_COLORS, BADGE_TYPES } from '@/components/VerificationBadge';
+import { DEV_BADGES, DEV_BADGE_GROUPS, DEV_EMAIL } from '@/lib/devBadges';
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ export default function EditProfile() {
     first_name: '', username: '', full_name: '', bio: '', website: '',
     location: '', category: '', avatar_url: '', verified: false, badge_type: null as string | null,
   });
+  const [devBadges, setDevBadges] = useState<string[]>([]);
+  const isDeveloper = user?.email === DEV_EMAIL;
 
   useEffect(() => { loadProfile(); }, [user]);
 
   const loadProfile = async () => {
     if (!user) return;
     const { data } = await supabase.from('profiles')
-      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type')
+      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges')
       .eq('id', user.id).single();
     if (data) setForm({
       first_name: data.first_name || '', username: data.username || '', full_name: data.full_name || '',
@@ -34,6 +37,7 @@ export default function EditProfile() {
       category: data.category || '', avatar_url: data.avatar_url || '',
       verified: !!data.verified, badge_type: data.badge_type,
     });
+    if (data) setDevBadges(((data as any).dev_badges as string[]) || []);
   };
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +76,7 @@ export default function EditProfile() {
         website: form.website,
         location: form.location,
         category: form.category,
+        ...(isDeveloper ? { dev_badges: devBadges } : {}),
         ...(form.verified ? { badge_type: form.badge_type || 'blue' } : {}),
       }).eq('id', user.id);
       if (error) throw error;
@@ -185,6 +190,38 @@ export default function EditProfile() {
               className="rounded-2xl text-base resize-none bg-muted/30 border-border/40" placeholder="Fale sobre você..." />
             <p className="text-[11px] text-muted-foreground/60 text-right mt-1">{form.bio.length}/160</p>
           </div>
+
+          {isDeveloper && (
+            <div className="px-4 pb-4 border-t border-border/40 pt-4">
+              <p className="text-[13px] font-bold mb-0.5">Selos de programador</p>
+              <p className="text-[11.5px] text-muted-foreground mb-3">
+                Aparecem abaixo do botão “Editar perfil”, no teu perfil.
+              </p>
+              {DEV_BADGE_GROUPS.map((group) => (
+                <div key={group} className="mb-4">
+                  <p className="text-[11.5px] font-semibold text-muted-foreground mb-2">{group}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DEV_BADGES.filter(b => b.group === group).map((badge) => {
+                      const active = devBadges.includes(badge.id);
+                      return (
+                        <button
+                          key={badge.id}
+                          type="button"
+                          onClick={() => setDevBadges(prev => active ? prev.filter(id => id !== badge.id) : [...prev, badge.id])}
+                          className={`flex items-center gap-1.5 h-9 pl-2 pr-3 rounded-full border transition active:scale-95 ${
+                            active ? 'border-primary bg-primary/10' : 'border-border/60 bg-muted/20'
+                          }`}
+                        >
+                          <img src={badge.icon} alt="" className="h-[18px] w-[18px] object-contain" draggable={false} />
+                          <span className="text-[12px] font-semibold">{badge.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="px-4">
             <Button type="submit" disabled={loading} className="w-full h-12 rounded-full text-[15px] font-semibold">

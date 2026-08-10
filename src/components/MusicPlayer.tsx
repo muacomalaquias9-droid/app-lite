@@ -191,6 +191,14 @@ export async function toggleGlobalMusic(track: GlobalMusicTrack) {
   return playGlobalMusic(track);
 }
 
+/** Pausa apenas se a faixa indicada é a que está a tocar (evita cortar outro conteúdo). */
+export function pauseGlobalMusic(trackId: string) {
+  if (currentPlayingId === trackId && currentPlayingAudio && !currentPlayingAudio.paused) {
+    currentPlayingAudio.pause();
+    notifyMusicListeners();
+  }
+}
+
 export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
   const instanceId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -222,23 +230,19 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-        if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           playGlobalMusic(track).then((played) => setHasError(!played));
-        } else if (isGlobalTrackPlaying(track.id)) {
-          // Instagram behaviour: leaving the content stops its music
-          currentPlayingAudio?.pause();
-          notifyMusicListeners();
+        } else {
+          // Instagram behaviour: sair do conteúdo pausa a música dele (retoma ao voltar)
+          pauseGlobalMusic(track.id);
         }
       },
-      { threshold: [0, 0.6, 1], rootMargin: '0px 0px -15% 0px' }
+      { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '0px 0px -10% 0px' }
     );
     observer.observe(node);
     return () => {
       observer.disconnect();
-      if (isGlobalTrackPlaying(track.id)) {
-        currentPlayingAudio?.pause();
-        notifyMusicListeners();
-      }
+      pauseGlobalMusic(track.id);
     };
   }, [autoPlayInView, track]);
 

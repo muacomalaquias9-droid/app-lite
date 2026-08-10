@@ -487,7 +487,15 @@ export default function Feed() {
 
                       {/* Text */}
                       {post.content && (
-                        <p className="px-3.5 pb-2.5 text-[15px] leading-[21px] text-foreground whitespace-pre-wrap break-words">
+                        <p
+                          className={`px-3.5 pb-2.5 text-foreground whitespace-pre-wrap break-words ${
+                            (!post.media_urls || post.media_urls.length === 0) && post.content.length <= 85
+                              ? post.content.length <= 45
+                                ? 'text-[27px] leading-[33px] font-semibold tracking-tight'
+                                : 'text-[21px] leading-[27px] font-medium'
+                              : 'text-[15px] leading-[21px]'
+                          }`}
+                        >
                           {parseTextWithLinksAndMentions(post.content)}
                         </p>
                       )}

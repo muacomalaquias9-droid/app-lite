@@ -29,6 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Slider } from "@/components/ui/slider";
 import MusicSearch from "@/components/MusicSearch";
 import { Card } from "@/components/ui/card";
+import PostEmojiPicker from "@/components/PostEmojiPicker";
 
 const visibilityOptions = [
   { value: 'public', label: 'Público', icon: Globe, desc: 'Todos podem ver' },
@@ -46,6 +47,7 @@ export default function Create() {
   const [musicVolume, setMusicVolume] = useState(50);
   const [videoVolume, setVideoVolume] = useState(100);
   const [musicDialogOpen, setMusicDialogOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const [visibility, setVisibility] = useState('public');
   const [showVisibility, setShowVisibility] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -217,6 +219,11 @@ export default function Create() {
                   <button className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/50 transition-colors" onClick={() => setMusicDialogOpen(true)}>
                     <Music className="h-4.5 w-4.5 text-muted-foreground" />
                   </button>
+                  <button type="button" aria-label="Emojis e packs de apps"
+                    className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/50 transition-colors"
+                    onClick={() => setEmojiOpen(true)}>
+                    <Smile className="h-4.5 w-4.5 text-muted-foreground" />
+                  </button>
                   <button className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-muted/50 transition-colors">
                     <Hash className="h-4.5 w-4.5 text-muted-foreground" />
                   </button>
@@ -348,6 +355,11 @@ export default function Create() {
         )}
 
         {musicDialogOpen && <MusicSearch onSelect={handleMusicSelect} onClose={() => setMusicDialogOpen(false)} />}
+        <PostEmojiPicker
+          open={emojiOpen}
+          onOpenChange={setEmojiOpen}
+          onSelect={(value) => setContent(prev => `${prev}${value}`)}
+        />
       </div>
     </ProtectedRoute>
   );
