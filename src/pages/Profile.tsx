@@ -25,6 +25,9 @@ import { motion } from "framer-motion";
 import { useOnlineUsers } from "@/hooks/useOnlineUsers";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import BottomNav from "@/components/BottomNav";
+import DevBadges from "@/components/DevBadges";
+import { DEV_USER_ID } from "@/lib/devBadges";
+import { SponsoredAd } from "@/components/SponsoredAd";
 
 interface Profile {
   id: string;
@@ -39,6 +42,7 @@ interface Profile {
   location?: string;
   website?: string;
   category?: string;
+  dev_badges?: string[] | null;
   civil_status?: string;
   instagram?: string;
   twitter?: string;
@@ -487,8 +491,20 @@ export default function Profile() {
                 <span className="font-bold text-foreground">{formatNumber(postsCount)}</span> publicações
               </span>
             </div>
+
+            {/* Pack de selos de programador */}
+            <DevBadges badges={profile.dev_badges} className="mt-3" />
           </div>
         </div>
+
+        {/* Anúncios permanentes no perfil do programador da plataforma */}
+        {profile.id === DEV_USER_ID && profileAds.length > 0 && (
+          <div className="px-3 mt-3 space-y-3">
+            {profileAds.map((ad) => (
+              <SponsoredAd key={ad.id} ad={ad} likesCount={0} isLiked={false} userId={currentUserId} />
+            ))}
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
           <TabsList className="grid w-full grid-cols-3 bg-transparent border-b h-10 rounded-none p-0 gap-0">
