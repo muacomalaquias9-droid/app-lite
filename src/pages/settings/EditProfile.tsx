@@ -191,6 +191,38 @@ export default function EditProfile() {
             <p className="text-[11px] text-muted-foreground/60 text-right mt-1">{form.bio.length}/160</p>
           </div>
 
+          {isDeveloper && (
+            <div className="px-4 pb-4 border-t border-border/40 pt-4">
+              <p className="text-[13px] font-bold mb-0.5">Selos de programador</p>
+              <p className="text-[11.5px] text-muted-foreground mb-3">
+                Aparecem abaixo do botão “Editar perfil”, no teu perfil.
+              </p>
+              {DEV_BADGE_GROUPS.map((group) => (
+                <div key={group} className="mb-4">
+                  <p className="text-[11.5px] font-semibold text-muted-foreground mb-2">{group}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {DEV_BADGES.filter(b => b.group === group).map((badge) => {
+                      const active = devBadges.includes(badge.id);
+                      return (
+                        <button
+                          key={badge.id}
+                          type="button"
+                          onClick={() => setDevBadges(prev => active ? prev.filter(id => id !== badge.id) : [...prev, badge.id])}
+                          className={`flex items-center gap-1.5 h-9 pl-2 pr-3 rounded-full border transition active:scale-95 ${
+                            active ? 'border-primary bg-primary/10' : 'border-border/60 bg-muted/20'
+                          }`}
+                        >
+                          <img src={badge.icon} alt="" className="h-4.5 w-4.5 h-[18px] w-[18px] object-contain" draggable={false} />
+                          <span className="text-[12px] font-semibold">{badge.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="px-4">
             <Button type="submit" disabled={loading} className="w-full h-12 rounded-full text-[15px] font-semibold">
               {loading ? 'A guardar...' : 'Guardar alterações'}
