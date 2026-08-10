@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Camera, Link2, MapPin, Briefcase, AtSign, User, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import VerificationBadge, { BADGE_COLORS, BADGE_TYPES } from '@/components/VerificationBadge';
+import { DEV_BADGES, DEV_BADGE_GROUPS, DEV_EMAIL } from '@/lib/devBadges';
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ export default function EditProfile() {
     first_name: '', username: '', full_name: '', bio: '', website: '',
     location: '', category: '', avatar_url: '', verified: false, badge_type: null as string | null,
   });
+  const [devBadges, setDevBadges] = useState<string[]>([]);
+  const isDeveloper = user?.email === DEV_EMAIL;
 
   useEffect(() => { loadProfile(); }, [user]);
 
   const loadProfile = async () => {
     if (!user) return;
     const { data } = await supabase.from('profiles')
-      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type')
+      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges')
       .eq('id', user.id).single();
     if (data) setForm({
       first_name: data.first_name || '', username: data.username || '', full_name: data.full_name || '',
@@ -34,6 +37,7 @@ export default function EditProfile() {
       category: data.category || '', avatar_url: data.avatar_url || '',
       verified: !!data.verified, badge_type: data.badge_type,
     });
+    if (data) setDevBadges(((data as any).dev_badges as string[]) || []);
   };
 
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +76,7 @@ export default function EditProfile() {
         website: form.website,
         location: form.location,
         category: form.category,
+        ...(isDeveloper ? { dev_badges: devBadges } : {}),
         ...(form.verified ? { badge_type: form.badge_type || 'blue' } : {}),
       }).eq('id', user.id);
       if (error) throw error;
