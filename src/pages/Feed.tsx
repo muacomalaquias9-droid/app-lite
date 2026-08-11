@@ -165,6 +165,49 @@ export default function Feed() {
     return () => { observer.disconnect(); };
   }, [posts]);
 
+  // Instagram behaviour: ao chegar num conteúdo sem música, a música anterior para.
+  useEffect(() => {
+    postObserverRef.current?.disconnect();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting && e.intersectionRatio >= 0.5)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        const postId = (visible.target as HTMLElement).dataset.postId;
+        const post = posts.find((p) => p.id === postId);
+        if (post && !post.music_name) pauseAllAudio();
+      },
+      { threshold: [0, 0.5, 0.75, 1] }
+    );
+    postObserverRef.current = observer;
+    Object.values(postRefs.current).forEach((el) => { if (el) observer.observe(el); });
+    return () => { observer.disconnect(); };
+  }, [posts]);
+
+  const handleFollow = async (targetId: string) => {
+    if (!currentUserId || targetId === currentUserId) return;
+    playClickSound();
+    if (following.includes(targetId)) {
+      setFollowing((prev) => prev.filter((id) => id !== targetId));
+      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', targetId);
+    } else {
+      setFollowing((prev) => [...prev, targetId]);
+      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: targetId });
+    }
+  };
+
+  /** Reação com sticker/emoji: interage direto no feed (aparece nos comentários). */
+  const handleStickerReaction = async (postId: string, value: string) => {
+    if (!currentUserId) return;
+    setPosts((prev) => prev.map((p) => p.id === postId
+      ? { ...p, comments: [...(p.comments || []), { id: `tmp-${Date.now()}` }] }
+      : p));
+    const { error } = await supabase.from('comments').insert({ post_id: postId, user_id: currentUserId, content: value });
+    if (error) { toast.error('Não foi possível reagir'); loadPosts(); return; }
+    toast.success(`Reagiste com ${value}`);
+  };
+
   const loadPosts = async () => {
     const { data } = await supabase.from("posts")
       .select(`*, profiles(id, username, full_name, first_name, avatar_url, verified, badge_type), post_likes(user_id), post_reactions(user_id, reaction_type), comments(id)`)
