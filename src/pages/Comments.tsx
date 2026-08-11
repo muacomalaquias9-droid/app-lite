@@ -35,6 +35,7 @@ interface Comment {
   likes: { count: number }[];
   replies?: Comment[];
   user_liked?: boolean;
+  reply_to_username?: string | null;
 }
 
 interface Post {
