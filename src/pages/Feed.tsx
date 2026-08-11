@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
-import { MusicPlayer } from "@/components/MusicPlayer";
+import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StoriesBar from "@/components/StoriesBar";
@@ -23,6 +23,7 @@ import { playLikeSound, playClickSound } from "@/utils/soundEffects";
 import { useRateLimiting } from "@/hooks/useRateLimiting";
 import BottomNav from "@/components/BottomNav";
 import { useContentProtection } from "@/hooks/useContentProtection";
+import StickerReactions from "@/components/StickerReactions";
 
 interface Post {
   id: string;
@@ -67,7 +68,10 @@ export default function Feed() {
   const [likeAnimations, setLikeAnimations] = useState<{ [key: string]: boolean }>({});
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
+  const [following, setFollowing] = useState<string[]>([]);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  const postRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  const postObserverRef = useRef<IntersectionObserver | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const observedVideosRef = useRef<Set<HTMLVideoElement>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -109,14 +113,16 @@ export default function Feed() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
-        const [profileResult, savedResult, blockedResult] = await Promise.all([
+        const [profileResult, savedResult, blockedResult, followResult] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('saved_posts').select('post_id').eq('user_id', user.id),
           supabase.from('blocked_accounts').select('user_id'),
+          supabase.from('follows').select('following_id').eq('follower_id', user.id),
         ]);
         if (profileResult.data) setMyProfile(profileResult.data);
         if (savedResult.data) setSavedPosts(savedResult.data.map(s => s.post_id));
         if (blockedResult.data) setBlockedUserIds(blockedResult.data.map(b => b.user_id));
+        if (followResult.data) setFollowing(followResult.data.map((f: any) => f.following_id));
       }
       await Promise.all([loadPosts(), loadSponsoredAds()]);
       setLoading(false);
