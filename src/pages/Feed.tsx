@@ -527,6 +527,7 @@ export default function Feed() {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onScroll={handleScroll}
           style={{ transform: refreshing ? 'translateY(40px)' : `translateY(${pullDistance > 0 ? pullDistance * 0.3 : 0}px)`, transition: refreshing || pullDistance > 0 ? 'transform 0.3s ease-out' : 'none' }}
         >
           <div className="max-w-lg mx-auto">
@@ -542,11 +543,7 @@ export default function Feed() {
                 const adIndex = Math.floor(index / 5) % sponsoredAds.length;
 
                 return (
-                  <motion.div key={post.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
-                  >
+                  <div key={post.id}>
                     {showAd && <div className="mb-2"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
                     {/* Meta-style post card */}
@@ -671,11 +668,17 @@ export default function Feed() {
                         </motion.button>
                       </div>
                     </article>
-                  </motion.div>
+                  </div>
                 );
               })}
 
-              {visiblePosts.length > 0 && (
+              {loadingMore && (
+                <div className="py-6 flex justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
+              {!hasMore && visiblePosts.length > 0 && (
                 <div className="py-8 text-center">
                   <p className="text-[12px] text-muted-foreground/60">Estás atualizado ✓</p>
                 </div>
