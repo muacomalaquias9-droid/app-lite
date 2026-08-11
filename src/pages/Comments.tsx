@@ -575,7 +575,7 @@ export default function Comments() {
         user_id: currentUserId,
         content,
         audio_url: mediaUrl,
-        parent_comment_id: replyingTo,
+        parent_comment_id: replyingTo?.id ?? null,
       }).select().single();
 
       if (error) throw error;
@@ -786,7 +786,7 @@ export default function Comments() {
                     key={comment.id}
                     comment={comment}
                     onLike={handleLikeComment}
-                    onReply={setReplyingTo}
+                    onReply={(c) => setReplyingTo({ id: c.id, username: c.profiles?.username || '' })}
                     onDelete={handleDeleteComment}
                     currentUserId={currentUserId}
                   />
