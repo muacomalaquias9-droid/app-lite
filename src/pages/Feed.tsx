@@ -490,7 +490,7 @@ export default function Feed() {
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
 
             {/* Posts Feed - New unique card design */}
-            <div className="space-y-3 px-3 pb-4">
+            <div className="space-y-2 pb-4">
               {visiblePosts.map((post, index) => {
                 const userReaction = getUserReaction(post);
                 const totalReactions = getLikeCount(post);
@@ -504,10 +504,14 @@ export default function Feed() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.03 }}
                   >
-                    {showAd && <div className="mb-3"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
+                    {showAd && <div className="mb-2"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
                     {/* Meta-style post card */}
-                    <article className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+                    <article
+                      data-post-id={post.id}
+                      ref={(el) => { postRefs.current[post.id] = el; }}
+                      className="bg-card w-full border-y border-border/60 overflow-hidden"
+                    >
                       {/* Header */}
                       <div className="flex items-center gap-2.5 px-3.5 pt-3.5 pb-2.5">
                         <Avatar className="h-11 w-11 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
@@ -523,6 +527,18 @@ export default function Feed() {
                             </span>
                             {(post.profiles.verified || hasSpecialBadgeEmoji(post.profiles.username) || hasSpecialBadgeEmoji(post.profiles.full_name)) && (
                               <VerificationBadge verified={post.profiles.verified} badgeType={post.profiles.badge_type} username={post.profiles.username} fullName={post.profiles.full_name} className="w-[15px] h-[15px] shrink-0" />
+                            )}
+                            {post.user_id !== currentUserId && (
+                              <button
+                                onClick={() => handleFollow(post.user_id)}
+                                className={`ml-1 h-[26px] shrink-0 px-2.5 rounded-full text-[12.5px] font-bold active:scale-95 transition ${
+                                  following.includes(post.user_id)
+                                    ? 'bg-muted text-muted-foreground'
+                                    : 'bg-primary text-primary-foreground'
+                                }`}
+                              >
+                                {following.includes(post.user_id) ? 'Filhou' : 'Filhar'}
+                              </button>
                             )}
                           </div>
                           <span className="text-muted-foreground text-[12.5px]">
@@ -562,6 +578,11 @@ export default function Feed() {
                           {renderMediaGrid(post.media_urls, post.id)}
                         </div>
                       )}
+
+                      {/* Reações rápidas (emojis + stickers de apps) */}
+                      <div className="px-3.5 pt-1.5">
+                        <StickerReactions onSelect={(value) => handleStickerReaction(post.id, value)} />
+                      </div>
 
                       {/* Counters */}
                       {(totalReactions > 0 || post.comments.length > 0) && (
