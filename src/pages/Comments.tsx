@@ -15,6 +15,7 @@ import { useHashtagsAndMentions } from "@/hooks/useHashtagsAndMentions";
 import { ImageGalleryViewer } from "@/components/ImageGalleryViewer";
 import { TranslateButton } from "@/components/TranslateButton";
 import { motion, AnimatePresence } from "framer-motion";
+import StickerReactions from "@/components/StickerReactions";
 
 interface Comment {
   id: string;
@@ -829,6 +830,13 @@ export default function Comments() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Reações rápidas: emojis + pack de stickers de apps */}
+          {!isRecording && (
+            <div className="px-3 pt-2 max-w-2xl mx-auto">
+              <StickerReactions onSelect={(value) => setNewComment((prev) => `${prev}${value}`)} />
+            </div>
+          )}
 
           <div className="p-3 flex items-center gap-2 max-w-2xl mx-auto">
             <Avatar className="h-8 w-8 shrink-0">

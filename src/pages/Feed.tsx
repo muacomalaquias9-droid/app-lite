@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
-import { MusicPlayer } from "@/components/MusicPlayer";
+import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StoriesBar from "@/components/StoriesBar";
@@ -23,6 +23,7 @@ import { playLikeSound, playClickSound } from "@/utils/soundEffects";
 import { useRateLimiting } from "@/hooks/useRateLimiting";
 import BottomNav from "@/components/BottomNav";
 import { useContentProtection } from "@/hooks/useContentProtection";
+import StickerReactions from "@/components/StickerReactions";
 
 interface Post {
   id: string;
@@ -67,7 +68,10 @@ export default function Feed() {
   const [likeAnimations, setLikeAnimations] = useState<{ [key: string]: boolean }>({});
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
+  const [following, setFollowing] = useState<string[]>([]);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  const postRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  const postObserverRef = useRef<IntersectionObserver | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const observedVideosRef = useRef<Set<HTMLVideoElement>>(new Set());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -109,14 +113,16 @@ export default function Feed() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
-        const [profileResult, savedResult, blockedResult] = await Promise.all([
+        const [profileResult, savedResult, blockedResult, followResult] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('saved_posts').select('post_id').eq('user_id', user.id),
           supabase.from('blocked_accounts').select('user_id'),
+          supabase.from('follows').select('following_id').eq('follower_id', user.id),
         ]);
         if (profileResult.data) setMyProfile(profileResult.data);
         if (savedResult.data) setSavedPosts(savedResult.data.map(s => s.post_id));
         if (blockedResult.data) setBlockedUserIds(blockedResult.data.map(b => b.user_id));
+        if (followResult.data) setFollowing(followResult.data.map((f: any) => f.following_id));
       }
       await Promise.all([loadPosts(), loadSponsoredAds()]);
       setLoading(false);
@@ -158,6 +164,49 @@ export default function Feed() {
     });
     return () => { observer.disconnect(); };
   }, [posts]);
+
+  // Instagram behaviour: ao chegar num conteúdo sem música, a música anterior para.
+  useEffect(() => {
+    postObserverRef.current?.disconnect();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting && e.intersectionRatio >= 0.5)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        const postId = (visible.target as HTMLElement).dataset.postId;
+        const post = posts.find((p) => p.id === postId);
+        if (post && !post.music_name) pauseAllAudio();
+      },
+      { threshold: [0, 0.5, 0.75, 1] }
+    );
+    postObserverRef.current = observer;
+    Object.values(postRefs.current).forEach((el) => { if (el) observer.observe(el); });
+    return () => { observer.disconnect(); };
+  }, [posts]);
+
+  const handleFollow = async (targetId: string) => {
+    if (!currentUserId || targetId === currentUserId) return;
+    playClickSound();
+    if (following.includes(targetId)) {
+      setFollowing((prev) => prev.filter((id) => id !== targetId));
+      await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', targetId);
+    } else {
+      setFollowing((prev) => [...prev, targetId]);
+      await supabase.from('follows').insert({ follower_id: currentUserId, following_id: targetId });
+    }
+  };
+
+  /** Reação com sticker/emoji: interage direto no feed (aparece nos comentários). */
+  const handleStickerReaction = async (postId: string, value: string) => {
+    if (!currentUserId) return;
+    setPosts((prev) => prev.map((p) => p.id === postId
+      ? { ...p, comments: [...(p.comments || []), { id: `tmp-${Date.now()}` }] }
+      : p));
+    const { error } = await supabase.from('comments').insert({ post_id: postId, user_id: currentUserId, content: value });
+    if (error) { toast.error('Não foi possível reagir'); loadPosts(); return; }
+    toast.success(`Reagiste com ${value}`);
+  };
 
   const loadPosts = async () => {
     const { data } = await supabase.from("posts")
@@ -441,7 +490,7 @@ export default function Feed() {
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
 
             {/* Posts Feed - New unique card design */}
-            <div className="space-y-3 px-3 pb-4">
+            <div className="space-y-2 pb-4">
               {visiblePosts.map((post, index) => {
                 const userReaction = getUserReaction(post);
                 const totalReactions = getLikeCount(post);
@@ -455,10 +504,14 @@ export default function Feed() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.03 }}
                   >
-                    {showAd && <div className="mb-3"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
+                    {showAd && <div className="mb-2"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
                     {/* Meta-style post card */}
-                    <article className="bg-card rounded-2xl border border-border/60 overflow-hidden">
+                    <article
+                      data-post-id={post.id}
+                      ref={(el) => { postRefs.current[post.id] = el; }}
+                      className="bg-card w-full border-y border-border/60 overflow-hidden"
+                    >
                       {/* Header */}
                       <div className="flex items-center gap-2.5 px-3.5 pt-3.5 pb-2.5">
                         <Avatar className="h-11 w-11 cursor-pointer" onClick={() => navigate(`/profile/${post.profiles.id}`)}>
@@ -474,6 +527,18 @@ export default function Feed() {
                             </span>
                             {(post.profiles.verified || hasSpecialBadgeEmoji(post.profiles.username) || hasSpecialBadgeEmoji(post.profiles.full_name)) && (
                               <VerificationBadge verified={post.profiles.verified} badgeType={post.profiles.badge_type} username={post.profiles.username} fullName={post.profiles.full_name} className="w-[15px] h-[15px] shrink-0" />
+                            )}
+                            {post.user_id !== currentUserId && (
+                              <button
+                                onClick={() => handleFollow(post.user_id)}
+                                className={`ml-1 h-[26px] shrink-0 px-2.5 rounded-full text-[12.5px] font-bold active:scale-95 transition ${
+                                  following.includes(post.user_id)
+                                    ? 'bg-muted text-muted-foreground'
+                                    : 'bg-primary text-primary-foreground'
+                                }`}
+                              >
+                                {following.includes(post.user_id) ? 'Filhou' : 'Filhar'}
+                              </button>
                             )}
                           </div>
                           <span className="text-muted-foreground text-[12.5px]">
@@ -513,6 +578,11 @@ export default function Feed() {
                           {renderMediaGrid(post.media_urls, post.id)}
                         </div>
                       )}
+
+                      {/* Reações rápidas (emojis + stickers de apps) */}
+                      <div className="px-3.5 pt-1.5">
+                        <StickerReactions onSelect={(value) => handleStickerReaction(post.id, value)} />
+                      </div>
 
                       {/* Counters */}
                       {(totalReactions > 0 || post.comments.length > 0) && (
