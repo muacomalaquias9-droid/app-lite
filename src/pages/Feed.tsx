@@ -69,7 +69,11 @@ export default function Feed() {
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [following, setFollowing] = useState<string[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  const reloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingMoreRef = useRef(false);
   const postRefs = useRef<{ [key: string]: HTMLElement | null }>({});
   const postObserverRef = useRef<IntersectionObserver | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
