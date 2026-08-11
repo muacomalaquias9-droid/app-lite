@@ -850,7 +850,9 @@ export default function Comments() {
                 exit={{ opacity: 0, height: 0 }}
                 className="px-4 py-2 border-b bg-muted/50 flex items-center justify-between"
               >
-                <span className="text-sm text-muted-foreground">A responder a um comentário</span>
+                <span className="text-sm text-muted-foreground">
+                  A responder a <span className="font-semibold text-foreground">@{replyingTo.username}</span>
+                </span>
                 <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -891,7 +893,7 @@ export default function Comments() {
                 <MentionTextarea
                   value={newComment}
                   onChange={setNewComment}
-                  placeholder={replyingTo ? "Escrever resposta..." : "Escreva um comentário..."}
+                  placeholder={replyingTo ? `Responder a @${replyingTo.username}...` : "Escreva um comentário..."}
                   className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto min-h-0 text-sm"
                   rows={1}
                 />
