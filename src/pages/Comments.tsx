@@ -185,46 +185,68 @@ const CommentCard = ({
   );
 
   const likesCount = comment.likes[0]?.count || 0;
+  const displayName = comment.profiles?.first_name || comment.profiles?.username || "Utilizador";
+  const repliesCount = comment.replies?.length || 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex gap-2"
+      className="flex gap-2.5 relative"
     >
-      <Avatar 
-        className="h-9 w-9 shrink-0 cursor-pointer ring-2 ring-border/30"
-        onClick={() => navigate(`/profile/${comment.user_id}`)}
-      >
-        <AvatarImage src={comment.profiles.avatar_url} />
-        <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-accent/20">
-          {comment.profiles.first_name?.[0]?.toUpperCase() || comment.profiles.username?.[0]?.toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      {/* Coluna do avatar + linha da thread (estilo Threads) */}
+      <div className="flex flex-col items-center shrink-0">
+        <Avatar
+          className={`${depth > 0 ? 'h-7 w-7' : 'h-9 w-9'} shrink-0 cursor-pointer`}
+          onClick={() => navigate(`/profile/${comment.user_id}`)}
+        >
+          <AvatarImage src={comment.profiles?.avatar_url} className="object-cover" />
+          <AvatarFallback className="text-xs bg-muted font-semibold">
+            {displayName[0]?.toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        {(repliesCount > 0 && showReplies) && (
+          <div className="w-[2px] flex-1 mt-1.5 rounded-full bg-border" />
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
-        {/* Comment Bubble */}
-        <div className="bg-muted rounded-2xl px-3 py-2 inline-block max-w-full">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span 
-              className="font-semibold text-sm cursor-pointer hover:underline"
-              onClick={() => navigate(`/profile/${comment.user_id}`)}
-            >
-              {comment.profiles.first_name || comment.profiles.username}
-            </span>
-            {(comment.profiles.verified || hasSpecialBadgeEmoji(comment.profiles.username)) && (
-              <VerificationBadge 
-                verified={comment.profiles.verified} 
-                badgeType={comment.profiles.badge_type}
-                username={comment.profiles.username}
-                className="w-3.5 h-3.5"
-              />
-            )}
-          </div>
+        {/* Identificação do utilizador — estilo Threads */}
+        <div className="flex items-center gap-1.5">
+          <span
+            className="font-bold text-[14px] cursor-pointer hover:underline"
+            onClick={() => navigate(`/profile/${comment.user_id}`)}
+          >
+            {displayName}
+          </span>
+          {(comment.profiles?.verified || hasSpecialBadgeEmoji(comment.profiles?.username)) && (
+            <VerificationBadge
+              verified={comment.profiles?.verified}
+              badgeType={comment.profiles?.badge_type}
+              username={comment.profiles?.username}
+              className="w-3.5 h-3.5"
+            />
+          )}
+          <span className="text-[12.5px] text-muted-foreground truncate">
+            @{comment.profiles?.username}
+          </span>
+          <span className="text-[12.5px] text-muted-foreground">·</span>
+          <span className="text-[12.5px] text-muted-foreground shrink-0">
+            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: false, locale: ptBR }).replace('cerca de ', '')}
+          </span>
+        </div>
+
+        {comment.reply_to_username && (
+          <p className="text-[12px] text-primary/80 mb-0.5">
+            Em resposta a @{comment.reply_to_username}
+          </p>
+        )}
+
+        <div className="max-w-full">
 
           {/* Text Content */}
           {comment.content && comment.content !== '🎤 Áudio' && comment.content !== '📷 Imagem' && comment.content !== '🎬 Vídeo' && (
-            <p className="text-sm whitespace-pre-wrap break-words mb-1">{comment.content}</p>
+            <p className="text-[15px] leading-[21px] whitespace-pre-wrap break-words mt-0.5">{comment.content}</p>
           )}
 
           {/* Media Content */}
@@ -261,11 +283,7 @@ const CommentCard = ({
         </div>
 
         {/* Actions - Threads Style */}
-        <div className="flex items-center gap-4 mt-1 px-1">
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: false, locale: ptBR })}
-          </span>
-          
+        <div className="flex items-center gap-4 mt-1.5">
           {/* Heart Like Button - Threads Style */}
           <button 
             className="flex items-center gap-1 group"
@@ -287,7 +305,7 @@ const CommentCard = ({
           
           <button 
             className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            onClick={() => onReply(comment.id)}
+            onClick={() => onReply(comment)}
           >
             Responder
           </button>
@@ -303,7 +321,7 @@ const CommentCard = ({
         </div>
 
         {/* Replies */}
-        {comment.replies && comment.replies.length > 0 && (
+        {repliesCount > 0 && (
           <div className="mt-2">
             {!showReplies ? (
               <button 
@@ -311,11 +329,11 @@ const CommentCard = ({
                 onClick={() => setShowReplies(true)}
               >
                 <div className="w-8 h-px bg-primary/30" />
-                Ver {comment.replies.length} {comment.replies.length === 1 ? 'resposta' : 'respostas'}
+                Ver {repliesCount} {repliesCount === 1 ? 'resposta' : 'respostas'}
               </button>
             ) : (
-              <div className="space-y-3 mt-2 pl-2 border-l-2 border-muted">
-                {comment.replies.map(reply => (
+              <div className="space-y-3.5 mt-2">
+                {comment.replies!.map(reply => (
                   <CommentCard 
                     key={reply.id} 
                     comment={reply} 
@@ -323,8 +341,17 @@ const CommentCard = ({
                     onReply={onReply}
                     onDelete={onDelete}
                     currentUserId={currentUserId}
+                    depth={depth + 1}
                   />
                 ))}
+                {depth === 0 && (
+                  <button
+                    className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowReplies(false)}
+                  >
+                    Ocultar respostas
+                  </button>
+                )}
               </div>
             )}
           </div>
