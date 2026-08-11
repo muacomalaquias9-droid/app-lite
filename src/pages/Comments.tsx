@@ -15,6 +15,7 @@ import { useHashtagsAndMentions } from "@/hooks/useHashtagsAndMentions";
 import { ImageGalleryViewer } from "@/components/ImageGalleryViewer";
 import { TranslateButton } from "@/components/TranslateButton";
 import { motion, AnimatePresence } from "framer-motion";
+import StickerReactions from "@/components/StickerReactions";
 
 interface Comment {
   id: string;
