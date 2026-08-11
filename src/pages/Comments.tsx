@@ -427,49 +427,46 @@ export default function Comments() {
   };
 
   const loadComments = async () => {
-    const { data } = await supabase
-      .from("comments")
-      .select(`
-        *,
-        profiles (username, first_name, avatar_url, verified, badge_type),
-        likes:comment_likes(count)
-      `)
-      .eq("post_id", contentId)
-      .is("parent_comment_id", null)
-      .order("created_at", { ascending: true });
+    // Uma única consulta para todos os comentários + respostas (rápido, sem N+1)
+    const [{ data }, { data: { user } }] = await Promise.all([
+      supabase
+        .from("comments")
+        .select(`
+          *,
+          profiles (username, first_name, avatar_url, verified, badge_type),
+          comment_likes (user_id)
+        `)
+        .eq("post_id", contentId)
+        .order("created_at", { ascending: true }),
+      supabase.auth.getUser(),
+    ]);
 
-    if (data) {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const commentsWithLikesAndReplies = await Promise.all(
-        data.map(async (comment) => {
-          const { data: replies } = await supabase
-            .from("comments")
-            .select(`
-              *,
-              profiles (username, first_name, avatar_url, verified, badge_type),
-              likes:comment_likes(count)
-            `)
-            .eq("parent_comment_id", comment.id)
-            .order("created_at", { ascending: true });
+    if (!data) return;
 
-          const { data: userLike } = await supabase
-            .from("comment_likes")
-            .select("*")
-            .eq("comment_id", comment.id)
-            .eq("user_id", user?.id)
-            .maybeSingle();
+    const byId = new Map<string, Comment>();
+    const flat: Comment[] = data.map((c: any) => {
+      const item: Comment = {
+        ...c,
+        likes: [{ count: c.comment_likes?.length || 0 }],
+        user_liked: !!c.comment_likes?.some((l: any) => l.user_id === user?.id),
+        replies: [],
+      };
+      byId.set(item.id, item);
+      return item;
+    });
 
-          return {
-            ...comment,
-            replies: replies || [],
-            user_liked: !!userLike,
-          };
-        })
-      );
+    const roots: Comment[] = [];
+    flat.forEach((c) => {
+      if (c.parent_comment_id && byId.has(c.parent_comment_id)) {
+        const parent = byId.get(c.parent_comment_id)!;
+        c.reply_to_username = parent.profiles?.username || null;
+        parent.replies!.push(c);
+      } else {
+        roots.push(c);
+      }
+    });
 
-      setComments(commentsWithLikesAndReplies);
-    }
+    setComments(roots);
   };
 
   const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
