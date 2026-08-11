@@ -146,16 +146,18 @@ const CommentCard = ({
   onLike, 
   onReply,
   onDelete,
-  currentUserId 
+  currentUserId,
+  depth = 0,
 }: { 
   comment: Comment; 
   onLike: (id: string) => void;
-  onReply: (id: string) => void;
+  onReply: (comment: Comment) => void;
   onDelete: (id: string) => void;
   currentUserId: string;
+  depth?: number;
 }) => {
   const navigate = useNavigate();
-  const [showReplies, setShowReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(depth > 0);
   const [imageExpanded, setImageExpanded] = useState(false);
   
   // Detect media type
