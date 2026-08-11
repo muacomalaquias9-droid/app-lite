@@ -368,7 +368,7 @@ export default function Comments() {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; username: string } | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
   const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
