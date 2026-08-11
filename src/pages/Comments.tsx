@@ -35,6 +35,7 @@ interface Comment {
   likes: { count: number }[];
   replies?: Comment[];
   user_liked?: boolean;
+  reply_to_username?: string | null;
 }
 
 interface Post {
@@ -145,16 +146,18 @@ const CommentCard = ({
   onLike, 
   onReply,
   onDelete,
-  currentUserId 
+  currentUserId,
+  depth = 0,
 }: { 
   comment: Comment; 
   onLike: (id: string) => void;
-  onReply: (id: string) => void;
+  onReply: (comment: Comment) => void;
   onDelete: (id: string) => void;
   currentUserId: string;
+  depth?: number;
 }) => {
   const navigate = useNavigate();
-  const [showReplies, setShowReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(depth > 0);
   const [imageExpanded, setImageExpanded] = useState(false);
   
   // Detect media type
@@ -182,46 +185,68 @@ const CommentCard = ({
   );
 
   const likesCount = comment.likes[0]?.count || 0;
+  const displayName = comment.profiles?.first_name || comment.profiles?.username || "Utilizador";
+  const repliesCount = comment.replies?.length || 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex gap-2"
+      className="flex gap-2.5 relative"
     >
-      <Avatar 
-        className="h-9 w-9 shrink-0 cursor-pointer ring-2 ring-border/30"
-        onClick={() => navigate(`/profile/${comment.user_id}`)}
-      >
-        <AvatarImage src={comment.profiles.avatar_url} />
-        <AvatarFallback className="text-xs bg-gradient-to-br from-primary/20 to-accent/20">
-          {comment.profiles.first_name?.[0]?.toUpperCase() || comment.profiles.username?.[0]?.toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      {/* Coluna do avatar + linha da thread (estilo Threads) */}
+      <div className="flex flex-col items-center shrink-0">
+        <Avatar
+          className={`${depth > 0 ? 'h-7 w-7' : 'h-9 w-9'} shrink-0 cursor-pointer`}
+          onClick={() => navigate(`/profile/${comment.user_id}`)}
+        >
+          <AvatarImage src={comment.profiles?.avatar_url} className="object-cover" />
+          <AvatarFallback className="text-xs bg-muted font-semibold">
+            {displayName[0]?.toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        {(repliesCount > 0 && showReplies) && (
+          <div className="w-[2px] flex-1 mt-1.5 rounded-full bg-border" />
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
-        {/* Comment Bubble */}
-        <div className="bg-muted rounded-2xl px-3 py-2 inline-block max-w-full">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span 
-              className="font-semibold text-sm cursor-pointer hover:underline"
-              onClick={() => navigate(`/profile/${comment.user_id}`)}
-            >
-              {comment.profiles.first_name || comment.profiles.username}
-            </span>
-            {(comment.profiles.verified || hasSpecialBadgeEmoji(comment.profiles.username)) && (
-              <VerificationBadge 
-                verified={comment.profiles.verified} 
-                badgeType={comment.profiles.badge_type}
-                username={comment.profiles.username}
-                className="w-3.5 h-3.5"
-              />
-            )}
-          </div>
+        {/* Identificação do utilizador — estilo Threads */}
+        <div className="flex items-center gap-1.5">
+          <span
+            className="font-bold text-[14px] cursor-pointer hover:underline"
+            onClick={() => navigate(`/profile/${comment.user_id}`)}
+          >
+            {displayName}
+          </span>
+          {(comment.profiles?.verified || hasSpecialBadgeEmoji(comment.profiles?.username)) && (
+            <VerificationBadge
+              verified={comment.profiles?.verified}
+              badgeType={comment.profiles?.badge_type}
+              username={comment.profiles?.username}
+              className="w-3.5 h-3.5"
+            />
+          )}
+          <span className="text-[12.5px] text-muted-foreground truncate">
+            @{comment.profiles?.username}
+          </span>
+          <span className="text-[12.5px] text-muted-foreground">·</span>
+          <span className="text-[12.5px] text-muted-foreground shrink-0">
+            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: false, locale: ptBR }).replace('cerca de ', '')}
+          </span>
+        </div>
+
+        {comment.reply_to_username && (
+          <p className="text-[12px] text-primary/80 mb-0.5">
+            Em resposta a @{comment.reply_to_username}
+          </p>
+        )}
+
+        <div className="max-w-full">
 
           {/* Text Content */}
           {comment.content && comment.content !== '🎤 Áudio' && comment.content !== '📷 Imagem' && comment.content !== '🎬 Vídeo' && (
-            <p className="text-sm whitespace-pre-wrap break-words mb-1">{comment.content}</p>
+            <p className="text-[15px] leading-[21px] whitespace-pre-wrap break-words mt-0.5">{comment.content}</p>
           )}
 
           {/* Media Content */}
@@ -258,11 +283,7 @@ const CommentCard = ({
         </div>
 
         {/* Actions - Threads Style */}
-        <div className="flex items-center gap-4 mt-1 px-1">
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: false, locale: ptBR })}
-          </span>
-          
+        <div className="flex items-center gap-4 mt-1.5">
           {/* Heart Like Button - Threads Style */}
           <button 
             className="flex items-center gap-1 group"
@@ -284,7 +305,7 @@ const CommentCard = ({
           
           <button 
             className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            onClick={() => onReply(comment.id)}
+            onClick={() => onReply(comment)}
           >
             Responder
           </button>
@@ -300,7 +321,7 @@ const CommentCard = ({
         </div>
 
         {/* Replies */}
-        {comment.replies && comment.replies.length > 0 && (
+        {repliesCount > 0 && (
           <div className="mt-2">
             {!showReplies ? (
               <button 
@@ -308,11 +329,11 @@ const CommentCard = ({
                 onClick={() => setShowReplies(true)}
               >
                 <div className="w-8 h-px bg-primary/30" />
-                Ver {comment.replies.length} {comment.replies.length === 1 ? 'resposta' : 'respostas'}
+                Ver {repliesCount} {repliesCount === 1 ? 'resposta' : 'respostas'}
               </button>
             ) : (
-              <div className="space-y-3 mt-2 pl-2 border-l-2 border-muted">
-                {comment.replies.map(reply => (
+              <div className="space-y-3.5 mt-2">
+                {comment.replies!.map(reply => (
                   <CommentCard 
                     key={reply.id} 
                     comment={reply} 
@@ -320,8 +341,17 @@ const CommentCard = ({
                     onReply={onReply}
                     onDelete={onDelete}
                     currentUserId={currentUserId}
+                    depth={depth + 1}
                   />
                 ))}
+                {depth === 0 && (
+                  <button
+                    className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowReplies(false)}
+                  >
+                    Ocultar respostas
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -338,7 +368,7 @@ export default function Comments() {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; username: string } | null>(null);
   const [currentUserId, setCurrentUserId] = useState("");
   const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -397,49 +427,46 @@ export default function Comments() {
   };
 
   const loadComments = async () => {
-    const { data } = await supabase
-      .from("comments")
-      .select(`
-        *,
-        profiles (username, first_name, avatar_url, verified, badge_type),
-        likes:comment_likes(count)
-      `)
-      .eq("post_id", contentId)
-      .is("parent_comment_id", null)
-      .order("created_at", { ascending: true });
+    // Uma única consulta para todos os comentários + respostas (rápido, sem N+1)
+    const [{ data }, { data: { user } }] = await Promise.all([
+      supabase
+        .from("comments")
+        .select(`
+          *,
+          profiles (username, first_name, avatar_url, verified, badge_type),
+          comment_likes (user_id)
+        `)
+        .eq("post_id", contentId)
+        .order("created_at", { ascending: true }),
+      supabase.auth.getUser(),
+    ]);
 
-    if (data) {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const commentsWithLikesAndReplies = await Promise.all(
-        data.map(async (comment) => {
-          const { data: replies } = await supabase
-            .from("comments")
-            .select(`
-              *,
-              profiles (username, first_name, avatar_url, verified, badge_type),
-              likes:comment_likes(count)
-            `)
-            .eq("parent_comment_id", comment.id)
-            .order("created_at", { ascending: true });
+    if (!data) return;
 
-          const { data: userLike } = await supabase
-            .from("comment_likes")
-            .select("*")
-            .eq("comment_id", comment.id)
-            .eq("user_id", user?.id)
-            .maybeSingle();
+    const byId = new Map<string, Comment>();
+    const flat: Comment[] = data.map((c: any) => {
+      const item: Comment = {
+        ...c,
+        likes: [{ count: c.comment_likes?.length || 0 }],
+        user_liked: !!c.comment_likes?.some((l: any) => l.user_id === user?.id),
+        replies: [],
+      };
+      byId.set(item.id, item);
+      return item;
+    });
 
-          return {
-            ...comment,
-            replies: replies || [],
-            user_liked: !!userLike,
-          };
-        })
-      );
+    const roots: Comment[] = [];
+    flat.forEach((c) => {
+      if (c.parent_comment_id && byId.has(c.parent_comment_id)) {
+        const parent = byId.get(c.parent_comment_id)!;
+        c.reply_to_username = parent.profiles?.username || null;
+        parent.replies!.push(c);
+      } else {
+        roots.push(c);
+      }
+    });
 
-      setComments(commentsWithLikesAndReplies);
-    }
+    setComments(roots);
   };
 
   const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -548,7 +575,7 @@ export default function Comments() {
         user_id: currentUserId,
         content,
         audio_url: mediaUrl,
-        parent_comment_id: replyingTo,
+        parent_comment_id: replyingTo?.id ?? null,
       }).select().single();
 
       if (error) throw error;
@@ -759,7 +786,7 @@ export default function Comments() {
                     key={comment.id}
                     comment={comment}
                     onLike={handleLikeComment}
-                    onReply={setReplyingTo}
+                    onReply={(c) => setReplyingTo({ id: c.id, username: c.profiles?.username || '' })}
                     onDelete={handleDeleteComment}
                     currentUserId={currentUserId}
                   />
@@ -823,7 +850,9 @@ export default function Comments() {
                 exit={{ opacity: 0, height: 0 }}
                 className="px-4 py-2 border-b bg-muted/50 flex items-center justify-between"
               >
-                <span className="text-sm text-muted-foreground">A responder a um comentário</span>
+                <span className="text-sm text-muted-foreground">
+                  A responder a <span className="font-semibold text-foreground">@{replyingTo.username}</span>
+                </span>
                 <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -864,7 +893,7 @@ export default function Comments() {
                 <MentionTextarea
                   value={newComment}
                   onChange={setNewComment}
-                  placeholder={replyingTo ? "Escrever resposta..." : "Escreva um comentário..."}
+                  placeholder={replyingTo ? `Responder a @${replyingTo.username}...` : "Escreva um comentário..."}
                   className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto min-h-0 text-sm"
                   rows={1}
                 />

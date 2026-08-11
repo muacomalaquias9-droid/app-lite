@@ -69,7 +69,11 @@ export default function Feed() {
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [following, setFollowing] = useState<string[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  const reloadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingMoreRef = useRef(false);
   const postRefs = useRef<{ [key: string]: HTMLElement | null }>({});
   const postObserverRef = useRef<IntersectionObserver | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -129,16 +133,20 @@ export default function Feed() {
     };
     loadData();
 
-    // Real-time: posts + stories update instantly
+    // Real-time com debounce: evita recarregar o feed a cada like (muito mais leve)
+    const scheduleReload = () => {
+      if (reloadTimer.current) clearTimeout(reloadTimer.current);
+      reloadTimer.current = setTimeout(() => { loadPosts(); }, 1200);
+    };
+
     const channel = supabase.channel("feed-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "post_likes" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "post_reactions" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "stories" }, () => {
-        // Stories bar updates automatically via its own channel
-      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, scheduleReload)
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "posts" }, scheduleReload)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (reloadTimer.current) clearTimeout(reloadTimer.current);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -208,12 +216,47 @@ export default function Feed() {
     toast.success(`Reagiste com ${value}`);
   };
 
+  const PAGE_SIZE = 15;
+
+  const POST_SELECT = `*, profiles!inner(id, username, full_name, first_name, avatar_url, verified, badge_type), post_likes(user_id), post_reactions(user_id, reaction_type), comments(id)`;
+
+  /** Carrega a primeira página: todas as publicações públicas de todos os utilizadores. */
   const loadPosts = async () => {
     const { data } = await supabase.from("posts")
-      .select(`*, profiles(id, username, full_name, first_name, avatar_url, verified, badge_type), post_likes(user_id), post_reactions(user_id, reaction_type), comments(id)`)
-      .order("created_at", { ascending: false }).limit(30);
-    if (data) setPosts(data);
+      .select(POST_SELECT)
+      .order("created_at", { ascending: false })
+      .range(0, PAGE_SIZE - 1);
+    if (data) {
+      setPosts(data as any);
+      setHasMore(data.length === PAGE_SIZE);
+    }
   };
+
+  /** Scroll infinito: o feed fica sempre cheio de publicações. */
+  const loadMorePosts = async () => {
+    if (loadingMoreRef.current || !hasMore) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    const from = posts.length;
+    const { data } = await supabase.from("posts")
+      .select(POST_SELECT)
+      .order("created_at", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (data) {
+      setPosts((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        return [...prev, ...(data as any[]).filter((p) => !seen.has(p.id))];
+      });
+      setHasMore(data.length === PAGE_SIZE);
+    }
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
+  };
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 900) loadMorePosts();
+  }, [posts.length, hasMore]);
 
   const loadSponsoredAds = async () => {
     // Check global ads toggle first
@@ -484,6 +527,7 @@ export default function Feed() {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onScroll={handleScroll}
           style={{ transform: refreshing ? 'translateY(40px)' : `translateY(${pullDistance > 0 ? pullDistance * 0.3 : 0}px)`, transition: refreshing || pullDistance > 0 ? 'transform 0.3s ease-out' : 'none' }}
         >
           <div className="max-w-lg mx-auto">
@@ -499,11 +543,7 @@ export default function Feed() {
                 const adIndex = Math.floor(index / 5) % sponsoredAds.length;
 
                 return (
-                  <motion.div key={post.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
-                  >
+                  <div key={post.id}>
                     {showAd && <div className="mb-2"><SponsoredAd ad={sponsoredAds[adIndex]} likesCount={0} isLiked={false} userId={currentUserId} /></div>}
                     
                     {/* Meta-style post card */}
@@ -628,11 +668,17 @@ export default function Feed() {
                         </motion.button>
                       </div>
                     </article>
-                  </motion.div>
+                  </div>
                 );
               })}
 
-              {visiblePosts.length > 0 && (
+              {loadingMore && (
+                <div className="py-6 flex justify-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
+              {!hasMore && visiblePosts.length > 0 && (
                 <div className="py-8 text-center">
                   <p className="text-[12px] text-muted-foreground/60">Estás atualizado ✓</p>
                 </div>
