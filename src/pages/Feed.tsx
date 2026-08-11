@@ -133,16 +133,20 @@ export default function Feed() {
     };
     loadData();
 
-    // Real-time: posts + stories update instantly
+    // Real-time com debounce: evita recarregar o feed a cada like (muito mais leve)
+    const scheduleReload = () => {
+      if (reloadTimer.current) clearTimeout(reloadTimer.current);
+      reloadTimer.current = setTimeout(() => { loadPosts(); }, 1200);
+    };
+
     const channel = supabase.channel("feed-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "post_likes" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "post_reactions" }, () => loadPosts())
-      .on("postgres_changes", { event: "*", schema: "public", table: "stories" }, () => {
-        // Stories bar updates automatically via its own channel
-      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, scheduleReload)
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "posts" }, scheduleReload)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (reloadTimer.current) clearTimeout(reloadTimer.current);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -212,12 +216,47 @@ export default function Feed() {
     toast.success(`Reagiste com ${value}`);
   };
 
+  const PAGE_SIZE = 15;
+
+  const POST_SELECT = `*, profiles!inner(id, username, full_name, first_name, avatar_url, verified, badge_type), post_likes(user_id), post_reactions(user_id, reaction_type), comments(id)`;
+
+  /** Carrega a primeira página: todas as publicações públicas de todos os utilizadores. */
   const loadPosts = async () => {
     const { data } = await supabase.from("posts")
-      .select(`*, profiles(id, username, full_name, first_name, avatar_url, verified, badge_type), post_likes(user_id), post_reactions(user_id, reaction_type), comments(id)`)
-      .order("created_at", { ascending: false }).limit(30);
-    if (data) setPosts(data);
+      .select(POST_SELECT)
+      .order("created_at", { ascending: false })
+      .range(0, PAGE_SIZE - 1);
+    if (data) {
+      setPosts(data as any);
+      setHasMore(data.length === PAGE_SIZE);
+    }
   };
+
+  /** Scroll infinito: o feed fica sempre cheio de publicações. */
+  const loadMorePosts = async () => {
+    if (loadingMoreRef.current || !hasMore) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    const from = posts.length;
+    const { data } = await supabase.from("posts")
+      .select(POST_SELECT)
+      .order("created_at", { ascending: false })
+      .range(from, from + PAGE_SIZE - 1);
+    if (data) {
+      setPosts((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        return [...prev, ...(data as any[]).filter((p) => !seen.has(p.id))];
+      });
+      setHasMore(data.length === PAGE_SIZE);
+    }
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
+  };
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 900) loadMorePosts();
+  }, [posts.length, hasMore]);
 
   const loadSponsoredAds = async () => {
     // Check global ads toggle first
