@@ -533,6 +533,9 @@ export default function Feed() {
           <div className="max-w-lg mx-auto">
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
 
+            {/* Rótulo: filhar novas pessoas (cascata motion estilo Threads) */}
+            <NewUsersCascade currentUserId={currentUserId} />
+
             {/* Posts Feed - New unique card design */}
             <div className="space-y-2 pb-4">
               {visiblePosts.map((post, index) => {
