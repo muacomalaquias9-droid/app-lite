@@ -30,6 +30,17 @@ if (typeof window !== 'undefined') {
   window.addEventListener('pointerdown', unlock, { passive: true, once: false });
   window.addEventListener('touchstart', unlock, { passive: true, once: false });
   window.addEventListener('keydown', unlock, { once: false });
+
+  // Silêncio quando a app perde o foco ou muda de página.
+  const hardPause = () => {
+    if (currentPlayingAudio && !currentPlayingAudio.paused) {
+      currentPlayingAudio.pause();
+      notifyMusicListeners();
+    }
+  };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) hardPause(); });
+  window.addEventListener('popstate', hardPause);
+  window.addEventListener('pagehide', hardPause);
 }
 
 export interface GlobalMusicTrack {
@@ -233,8 +244,8 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           playGlobalMusic(track).then((played) => setHasError(!played));
         } else {
-          // Instagram behaviour: sair do conteúdo pausa a música dele (retoma ao voltar)
-          pauseGlobalMusic(track.id);
+          // Só toca dentro do post com música: ao sair, silêncio total.
+          pauseAllAudio();
         }
       },
       { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '0px 0px -10% 0px' }
@@ -242,7 +253,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
     observer.observe(node);
     return () => {
       observer.disconnect();
-      pauseGlobalMusic(track.id);
+      pauseAllAudio();
     };
   }, [autoPlayInView, track]);
 

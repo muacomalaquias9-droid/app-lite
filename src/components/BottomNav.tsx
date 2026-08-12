@@ -29,7 +29,7 @@ export default function BottomNav() {
 
   const items = [
     { to: "/feed", icon: Home, label: "Início" },
-    { to: "/videos", icon: Search, label: "Explorar" },
+    { to: "/friends", icon: Search, label: "Pesquisar" },
     { to: "/messages", icon: MessageCircle, label: "Chat" },
     { to: "/notifications", icon: Bell, label: "Notificações", badge: notifCount },
   ];
