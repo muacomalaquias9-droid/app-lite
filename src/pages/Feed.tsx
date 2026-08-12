@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
 import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
+import NewUsersCascade from "@/components/NewUsersCascade";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StoriesBar from "@/components/StoriesBar";
@@ -503,7 +504,7 @@ export default function Feed() {
             </button>
             <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Blynk</span>
             <div className="flex-1" />
-            <button onClick={() => navigate("/videos")} aria-label="Pesquisar"
+            <button onClick={() => navigate("/friends")} aria-label="Pesquisar"
               className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
               <Search className="h-6 w-6 text-foreground" strokeWidth={2} />
             </button>
