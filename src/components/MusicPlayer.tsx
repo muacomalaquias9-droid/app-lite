@@ -233,8 +233,8 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           playGlobalMusic(track).then((played) => setHasError(!played));
         } else {
-          // Instagram behaviour: sair do conteúdo pausa a música dele (retoma ao voltar)
-          pauseGlobalMusic(track.id);
+          // Só toca dentro do post com música: ao sair, silêncio total.
+          pauseAllAudio();
         }
       },
       { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '0px 0px -10% 0px' }
@@ -242,7 +242,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
     observer.observe(node);
     return () => {
       observer.disconnect();
-      pauseGlobalMusic(track.id);
+      pauseAllAudio();
     };
   }, [autoPlayInView, track]);
 
