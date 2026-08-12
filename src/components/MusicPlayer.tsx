@@ -30,6 +30,17 @@ if (typeof window !== 'undefined') {
   window.addEventListener('pointerdown', unlock, { passive: true, once: false });
   window.addEventListener('touchstart', unlock, { passive: true, once: false });
   window.addEventListener('keydown', unlock, { once: false });
+
+  // Silêncio quando a app perde o foco ou muda de página.
+  const hardPause = () => {
+    if (currentPlayingAudio && !currentPlayingAudio.paused) {
+      currentPlayingAudio.pause();
+      notifyMusicListeners();
+    }
+  };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) hardPause(); });
+  window.addEventListener('popstate', hardPause);
+  window.addEventListener('pagehide', hardPause);
 }
 
 export interface GlobalMusicTrack {
