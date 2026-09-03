@@ -112,9 +112,15 @@ export default function Profile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const [profileAds, setProfileAds] = useState<any[]>([]);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [loadingMorePosts, setLoadingMorePosts] = useState(false);
+  const [swipePull, setSwipePull] = useState(0);
+  const postsPageRef = useRef(0);
+  const swipeStartY = useRef<number | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const onlineUsers = useOnlineUsers();
+
 
   useEffect(() => { loadProfile(); }, [userId]);
 
@@ -207,11 +213,13 @@ export default function Profile() {
     }
   };
 
-  const loadPosts = async (profileId: string) => {
+  const loadPosts = async (profileId: string, page = 0, append = false) => {
+    const from = page * POSTS_PAGE_SIZE;
     const { data } = await supabase.from("posts")
       .select(`*, likes:post_likes(count), comments:comments(count)`)
       .eq("user_id", profileId).is("expires_at", null)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(from, from + POSTS_PAGE_SIZE - 1);
     if (data) {
       const { data: { user } } = await supabase.auth.getUser();
       const postsWithLikes = await Promise.all(
@@ -221,9 +229,37 @@ export default function Profile() {
           return { ...post, likes_count: post.likes[0]?.count || 0, comments_count: post.comments[0]?.count || 0, user_liked: !!userLike };
         })
       );
-      setPosts(postsWithLikes);
+      setHasMorePosts(data.length === POSTS_PAGE_SIZE);
+      postsPageRef.current = page;
+      setPosts((prev) => append
+        ? [...prev, ...postsWithLikes.filter((p) => !prev.some((old) => old.id === p.id))]
+        : postsWithLikes);
     }
   };
+
+  /** Gesto de deslizar para baixo: carrega e mostra mais publicações (estilo Instagram). */
+  const handleSwipeStart = (e: React.TouchEvent) => {
+    const el = e.currentTarget as HTMLDivElement;
+    swipeStartY.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 80 ? e.touches[0].clientY : null;
+  };
+
+  const handleSwipeMove = (e: React.TouchEvent) => {
+    if (swipeStartY.current === null || loadingMorePosts) return;
+    const delta = swipeStartY.current - e.touches[0].clientY;
+    setSwipePull(Math.min(Math.max(delta, 0), 90));
+  };
+
+  const handleSwipeEnd = async () => {
+    const pulled = swipePull;
+    swipeStartY.current = null;
+    setSwipePull(0);
+    if (pulled > 50 && hasMorePosts && !loadingMorePosts && profile?.id) {
+      setLoadingMorePosts(true);
+      await loadPosts(profile.id, postsPageRef.current + 1, true);
+      setLoadingMorePosts(false);
+    }
+  };
+
 
   const loadVideos = async (profileId: string) => {
     const { data } = await supabase.from("verification_videos")
