@@ -63,9 +63,11 @@ export function useRateLimiting() {
     }
   }, [user]);
 
-  const checkLikeLimit = useCallback(() => checkLimit('like', 10), [checkLimit]);
+  // Reações e comentários são ilimitados — sem travar por quantidade.
+  const checkLikeLimit = useCallback(async () => true, []);
+  const checkCommentLimit = useCallback(async () => true, []);
   const checkFollowLimit = useCallback(() => checkLimit('follow', 20), [checkLimit]);
-  const checkCommentLimit = useCallback(() => checkLimit('comment', 50), [checkLimit]);
+
 
   return {
     checkLimit,
