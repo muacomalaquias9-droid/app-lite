@@ -2,7 +2,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect as useReactEffect } from "react";
+import { pauseAllAudio } from "@/components/MusicPlayer";
+
+/** Silêncio global: qualquer mudança de rota corta a música imediatamente. */
+const useGlobalMusicSilence = () => {
+  const location = useLocation();
+  useReactEffect(() => {
+    pauseAllAudio();
+  }, [location.pathname]);
+};
+
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { ActiveProfileProvider } from "@/contexts/ActiveProfileContext";
@@ -103,6 +114,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppContent = () => {
   useStoryReactions();
   useGlobalUserPresence();
+  useGlobalMusicSilence();
+
   return (
     <>
       {/* FreeDataBanner removed */}
