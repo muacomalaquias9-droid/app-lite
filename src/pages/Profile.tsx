@@ -87,6 +87,8 @@ interface Story {
   created_at: string;
 }
 
+const POSTS_PAGE_SIZE = 12;
+
 export default function Profile() {
   const navigate = useNavigate();
   const { userId } = useParams();
@@ -378,7 +380,12 @@ export default function Profile() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen bg-mobile-surface overflow-y-auto native-scroll pb-[88px]">
+      <div
+        className="h-screen bg-mobile-surface overflow-y-auto native-scroll pb-[88px]"
+        onTouchStart={handleSwipeStart}
+        onTouchMove={handleSwipeMove}
+        onTouchEnd={handleSwipeEnd}
+      >
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
