@@ -295,8 +295,8 @@ export default function Feed() {
       };
       playClickSound();
     } else {
-      const allowed = await checkLikeLimit();
-      if (!allowed) return;
+      // Reações ilimitadas — sem verificação de limite.
+
       newPosts[postIdx] = {
         ...post,
         post_reactions: [...(post.post_reactions || []), { user_id: currentUserId, reaction_type: "heart" }],
