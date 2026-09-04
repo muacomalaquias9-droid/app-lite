@@ -158,6 +158,7 @@ export default function Feed() {
         entries.forEach((entry) => {
           const video = entry.target as HTMLVideoElement;
           if (entry.isIntersecting) {
+            pauseAllAudio();
             observedVideosRef.current.forEach((v) => { if (v !== video && !v.paused) v.pause(); });
             video.play().catch(() => { video.muted = true; video.play().catch(console.log); });
           } else { if (!video.paused) video.pause(); }

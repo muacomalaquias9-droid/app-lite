@@ -13,17 +13,13 @@ let retryTimer: ReturnType<typeof setTimeout> | null = null;
 const fallbackAttempts = new Map<string, number>();
 const musicListeners = new Set<() => void>();
 
-// Register a one-time global user-gesture listener at module load so we can
-// unlock autoplay for the singleton <audio> element on the first tap/click
-// anywhere in the app. This mirrors Instagram's behaviour: the first
-// interaction unlocks audio for the rest of the session.
+// Unlock audio on a real gesture, but never restart a track that was paused
+// because its post left the viewport. A scroll begins with pointerdown/touchstart,
+// so calling play() here would make old music leak into unrelated posts.
 if (typeof window !== 'undefined') {
   const unlock = () => {
     audioUnlocked = true;
-    if (currentPlayingAudio && currentPlayingAudio.paused && currentPlayingId) {
-      currentPlayingAudio.muted = false;
-      currentPlayingAudio.play().catch(() => {});
-    } else if (currentPlayingAudio) {
+    if (currentPlayingAudio && !currentPlayingAudio.paused) {
       currentPlayingAudio.muted = false;
     }
   };
@@ -236,24 +232,26 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
     if (!autoPlayInView) return;
     const node = containerRef.current;
     if (!node) return;
+    const observedPost = node.closest<HTMLElement>('[data-post-id]') || node;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
           playGlobalMusic(track).then((played) => setHasError(!played));
         } else {
-          // Só toca dentro do post com música: ao sair, silêncio total.
-          pauseAllAudio();
+          // Pause only this post's track so an entering music post cannot be
+          // silenced by the previous post's observer callback.
+          pauseGlobalMusic(track.id);
         }
       },
-      { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '0px 0px -10% 0px' }
+      { threshold: [0, 0.25, 0.55, 0.75, 1], rootMargin: '-8% 0px -18% 0px' }
     );
-    observer.observe(node);
+    observer.observe(observedPost);
     return () => {
       observer.disconnect();
-      pauseAllAudio();
+      pauseGlobalMusic(track.id);
     };
   }, [autoPlayInView, track]);
 
