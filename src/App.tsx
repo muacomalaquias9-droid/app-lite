@@ -147,6 +147,14 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/reels"
+          element={
+            <ProtectedRoute>
+              <Reels />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/videos"
           element={
             <ProtectedRoute>
