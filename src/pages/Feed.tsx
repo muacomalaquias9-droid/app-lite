@@ -25,6 +25,9 @@ import { useRateLimiting } from "@/hooks/useRateLimiting";
 import BottomNav from "@/components/BottomNav";
 import { useContentProtection } from "@/hooks/useContentProtection";
 import StickerReactions from "@/components/StickerReactions";
+import PostCarousel from "@/components/post/PostCarousel";
+import PostViews from "@/components/post/PostViews";
+
 
 interface Post {
   id: string;
