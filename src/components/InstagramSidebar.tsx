@@ -70,6 +70,7 @@ export default function InstagramSidebar() {
   const navItems = [
     { icon: Home, label: "Início", path: "/feed" },
     { icon: Search, label: "Pesquisa", path: "/search" },
+    { icon: Film, label: "Reels", path: "/reels" },
     { icon: Film, label: "Vídeos", path: "/videos" },
     { icon: MessageCircle, label: "Mensagens", path: "/messages" },
     { icon: Heart, label: "Notificações", path: "/notifications" },
