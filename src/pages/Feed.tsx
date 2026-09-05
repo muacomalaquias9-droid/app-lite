@@ -636,6 +636,13 @@ export default function Feed() {
                         </div>
                       )}
 
+                      {/* Visualizações */}
+                      <div className="px-3.5 pt-2">
+                        <PostViews postId={post.id} currentUserId={currentUserId} />
+                      </div>
+
+
+
                       {/* Actions */}
                       <div className="mt-2.5 mx-3.5 border-t border-border/50 flex items-center justify-around py-1">
                         <motion.button onClick={() => handleLike(post.id)} whileTap={{ scale: 0.9 }}
