@@ -457,31 +457,15 @@ export default function Feed() {
       );
     }
     return (
-      <div className={`grid gap-1.5 rounded-3xl overflow-hidden ${mediaUrls.length === 2 ? 'grid-cols-2' : 'grid-cols-2'}`} onDoubleClick={() => handleDoubleTapLike(postId)}>
-        {mediaUrls.slice(0, 4).map((url, idx) => (
-          <div key={idx} className={`relative cursor-pointer ${mediaUrls.length === 3 && idx === 0 ? 'row-span-2' : ''}`}
-            onClick={() => { if (!isVideo(url)) { setGalleryImages(mediaUrls.filter(u => !isVideo(u))); setGalleryIndex(idx); } }}>
-            {isVideo(url) ? (
-              <div className="relative aspect-square bg-black/5 dark:bg-white/5">
-                <video src={url} className="w-full h-full object-cover" playsInline muted preload="metadata"
-                  onClick={(e) => { e.stopPropagation(); const vid = e.currentTarget; if (vid.paused) vid.play(); else vid.pause(); }} />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <Play className="h-8 w-8 text-white/80 fill-white/80" />
-                </div>
-              </div>
-            ) : (
-              <img src={url} alt="" className="w-full aspect-square object-cover" loading="lazy" />
-            )}
-            {idx === 3 && mediaUrls.length > 4 && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <span className="text-white text-xl font-bold">+{mediaUrls.length - 4}</span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <PostCarousel
+        media={mediaUrls}
+        onDoubleTap={() => handleDoubleTapLike(postId)}
+        onOpen={(idx) => { setGalleryImages(mediaUrls.filter(u => !isVideo(u))); setGalleryIndex(idx); }}
+        showLikeAnimation={!!likeAnimations[postId]}
+      />
     );
   };
+
 
   const visiblePosts = posts.filter(post => !blockedUserIds.includes(post.user_id));
 
