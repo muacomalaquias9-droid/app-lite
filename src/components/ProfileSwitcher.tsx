@@ -29,7 +29,11 @@ interface Profile {
   badge_type: string | null;
 }
 
-export default function ProfileSwitcher() {
+interface ProfileSwitcherProps {
+  trigger?: React.ReactNode;
+}
+
+export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) {
   const navigate = useNavigate();
   const { activeProfile, setActiveProfile } = useActiveProfile();
   const [mainProfile, setMainProfile] = useState<Profile | null>(null);
@@ -118,6 +122,7 @@ export default function ProfileSwitcher() {
   return (
     <Sheet>
       <SheetTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        {trigger ?? (<>
         <span className="font-semibold text-foreground text-lg">
           {current.name}
         </span>
@@ -126,7 +131,11 @@ export default function ProfileSwitcher() {
             ✓
           </Badge>
         )}
+        {activeProfile?.type === 'page' && (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide">Página</span>
+        )}
         <ChevronDown className="h-5 w-5 text-foreground" />
+        </>)}
       </SheetTrigger>
       
       <SheetContent side="bottom" className="h-[70vh] max-h-[600px] rounded-t-3xl p-0 border-t-2">
@@ -171,7 +180,7 @@ export default function ProfileSwitcher() {
               <Separator className="my-4" />
               <div className="mb-3">
                 <h3 className="text-sm font-semibold text-muted-foreground px-4 mb-3">
-                  Os teus perfis do Blynk
+                  Os teus perfis Paji
                 </h3>
                 {pageProfiles.map((page) => (
                   <div
@@ -189,6 +198,7 @@ export default function ProfileSwitcher() {
                       <div className="font-semibold text-lg truncate">
                         {page.name}
                       </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide">Página</span>
                     </div>
                     {activeProfile?.id === page.id && activeProfile?.type === 'page' && (
                       <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
@@ -211,7 +221,7 @@ export default function ProfileSwitcher() {
             <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
               <Plus className="h-7 w-7" />
             </div>
-            <span className="font-semibold text-lg">Criar perfil do Blynk</span>
+            <span className="font-semibold text-lg">Criar página Paji</span>
           </div>
 
           <Separator className="my-4" />

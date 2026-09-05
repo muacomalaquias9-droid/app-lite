@@ -52,6 +52,7 @@ import Create from "./pages/Create";
 import Comments from "./pages/Comments";
 // CommentsVideo removed - using unified Comments page
 import Videos from "./pages/Videos";
+import Reels from "./pages/Reels";
 import RequestVerification from "./pages/RequestVerification";
 import Report from './pages/Report';
 import SavedPosts from './pages/SavedPosts';
@@ -142,6 +143,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <Create />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reels"
+          element={
+            <ProtectedRoute>
+              <Reels />
             </ProtectedRoute>
           }
         />

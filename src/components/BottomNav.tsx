@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, MessageCircle, Plus, User, Bell } from "lucide-react";
+import { Home, Search, MessageCircle, Plus, User, Bell, Film } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ export default function BottomNav() {
   const items = [
     { to: "/feed", icon: Home, label: "Início" },
     { to: "/friends", icon: Search, label: "Pesquisar" },
+    { to: "/reels", icon: Film, label: "Reels" },
     { to: "/messages", icon: MessageCircle, label: "Chat" },
     { to: "/notifications", icon: Bell, label: "Notificações", badge: notifCount },
   ];
@@ -37,9 +38,10 @@ export default function BottomNav() {
   const allItems = [
     items[0],
     items[1],
-    { to: "/create", icon: Plus, label: "Criar", isCreate: true } as any,
     items[2],
+    { to: "/create", icon: Plus, label: "Criar", isCreate: true } as any,
     items[3],
+    items[4],
   ];
 
   return (
@@ -49,8 +51,8 @@ export default function BottomNav() {
             const active = isActive(to);
             return (
               <Link key={to} to={to} aria-label={label}
-                className="relative flex items-center justify-center h-11 w-11 active:scale-90 transition-transform">
-                <Icon className="h-[26px] w-[26px]" strokeWidth={active ? 2.5 : 1.8}
+                className="relative flex items-center justify-center h-10 w-10 active:scale-90 transition-transform">
+                <Icon className="h-[24px] w-[24px]" strokeWidth={active ? 2.5 : 1.8}
                   style={{ color: active ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }} />
                 {badge && badge > 0 ? (
                   <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
@@ -62,7 +64,7 @@ export default function BottomNav() {
         })}
 
         <Link to="/profile" aria-label="Perfil"
-          className="flex items-center justify-center h-11 w-11 active:scale-90 transition-transform">
+          className="flex items-center justify-center h-10 w-10 active:scale-90 transition-transform">
           <Avatar className={cn(
             "h-7 w-7 transition-all",
             isActive("/profile") && "ring-2 ring-foreground"

@@ -398,6 +398,15 @@ export default function Profile() {
               <div className="flex items-center gap-1.5">
                 <span className="text-[16px] font-bold">@{profile.username}</span>
                 {hasVerification && <VerificationBadge verified={profile.verified} badgeType={profile.badge_type} username={profile.username} fullName={profile.full_name} className="w-4 h-4" />}
+                {isOwnProfile && (
+                  <ProfileSwitcher
+                    trigger={
+                      <span className="h-7 w-7 rounded-full flex items-center justify-center active:scale-90 transition">
+                        <ChevronDown className="h-[18px] w-[18px]" />
+                      </span>
+                    }
+                  />
+                )}
               </div>
             <div className="flex items-center gap-1">
               {isOwnProfile && (
