@@ -1353,6 +1353,57 @@ export type Database = {
         }
         Relationships: []
       }
+      identity_verifications: {
+        Row: {
+          ai_reason: string | null
+          ai_verdict: string | null
+          birth_date: string | null
+          created_at: string
+          document_expiry: string | null
+          document_number: string | null
+          document_url: string | null
+          face_match_score: number | null
+          full_name_document: string | null
+          id: string
+          selfie_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_reason?: string | null
+          ai_verdict?: string | null
+          birth_date?: string | null
+          created_at?: string
+          document_expiry?: string | null
+          document_number?: string | null
+          document_url?: string | null
+          face_match_score?: number | null
+          full_name_document?: string | null
+          id?: string
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_reason?: string | null
+          ai_verdict?: string | null
+          birth_date?: string | null
+          created_at?: string
+          document_expiry?: string | null
+          document_number?: string | null
+          document_url?: string | null
+          face_match_score?: number | null
+          full_name_document?: string | null
+          id?: string
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       live_streams: {
         Row: {
           created_at: string | null
