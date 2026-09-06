@@ -144,10 +144,11 @@ export default function Reels() {
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, liked: !liked, likes: i.likes + (liked ? -1 : 1) } : i)));
     const table = item.source === 'video' ? 'verification_video_likes' : 'post_likes';
     const column = item.source === 'video' ? 'video_id' : 'post_id';
+    const client = supabase as any;
     if (liked) {
-      await supabase.from(table).delete().eq(column, item.id).eq('user_id', userId);
+      await client.from(table).delete().eq(column, item.id).eq('user_id', userId);
     } else {
-      await supabase.from(table).insert({ [column]: item.id, user_id: userId } as any);
+      await client.from(table).insert({ [column]: item.id, user_id: userId });
     }
   };
 
