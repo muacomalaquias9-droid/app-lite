@@ -14,7 +14,8 @@ import {
 import { 
   Camera, Heart, MessageCircle, Share2, MoreHorizontal, UserPlus, UserCheck,
   Briefcase, ArrowLeft, MapPin, Link as LinkIcon, Grid3X3, Play, Flag, Copy,
-  Clapperboard, Settings, Plus, Users, Globe, ExternalLink, AtSign, TrendingUp, Award
+  Clapperboard, Settings, Plus, Users, Globe, ExternalLink, AtSign, TrendingUp, Award,
+  ChevronDown
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -28,6 +29,7 @@ import BottomNav from "@/components/BottomNav";
 import DevBadges from "@/components/DevBadges";
 import { DEV_USER_ID } from "@/lib/devBadges";
 import { SponsoredAd } from "@/components/SponsoredAd";
+import ProfileSwitcher from "@/components/ProfileSwitcher";
 
 interface Profile {
   id: string;
