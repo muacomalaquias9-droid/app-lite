@@ -194,6 +194,33 @@ export default function EditProfile() {
             <p className="text-[11px] text-muted-foreground/60 text-right mt-1">{form.bio.length}/160</p>
           </div>
 
+          {/* Privacidade da conta */}
+          <div className="flex items-center gap-3 px-4 py-3.5 border-t border-border/40">
+            {form.is_public ? <Globe className="h-5 w-5 text-muted-foreground shrink-0" strokeWidth={1.8} />
+              : <Lock className="h-5 w-5 text-muted-foreground shrink-0" strokeWidth={1.8} />}
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-bold">Conta privada</p>
+              <p className="text-[11.5px] text-muted-foreground">
+                {form.is_public ? 'Qualquer pessoa pode ver as tuas publicações.' : 'Só quem te filha vê as tuas fotos e vídeos.'}
+              </p>
+            </div>
+            <Switch checked={!form.is_public} onCheckedChange={(v) => setForm(p => ({ ...p, is_public: !v }))} />
+          </div>
+
+          {/* Pedir selo de verificação */}
+          {!form.verified && (
+            <button type="button" onClick={() => navigate('/verify-identity')}
+              className="w-full flex items-center gap-3 px-4 py-4 border-t border-border/40 text-left active:bg-muted/40 transition">
+              <ShieldCheck className="h-5 w-5 text-primary shrink-0" strokeWidth={1.9} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13.5px] font-bold">Obter selo de verificação</p>
+                <p className="text-[11.5px] text-muted-foreground">Verificação com rosto e bilhete de identidade.</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            </button>
+          )}
+
+
           {isDeveloper && (
             <div className="px-4 pb-4 border-t border-border/40 pt-4">
               <p className="text-[13px] font-bold mb-0.5">Selos de programador</p>
