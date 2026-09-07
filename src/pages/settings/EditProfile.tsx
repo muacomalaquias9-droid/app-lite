@@ -20,6 +20,7 @@ export default function EditProfile() {
   const [form, setForm] = useState({
     first_name: '', username: '', full_name: '', bio: '', website: '',
     location: '', category: '', avatar_url: '', verified: false, badge_type: null as string | null,
+    is_public: true,
   });
   const [devBadges, setDevBadges] = useState<string[]>([]);
   const isDeveloper = user?.email === DEV_EMAIL;
