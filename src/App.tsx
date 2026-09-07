@@ -196,6 +196,15 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/verify-identity"
+          element={
+            <ProtectedRoute>
+              <VerifyIdentity />
+            </ProtectedRoute>
+          }
+        />
+        
         
         {/* Messages Routes */}
         <Route
