@@ -37,6 +37,7 @@ export default function EditProfile() {
       bio: data.bio || '', website: data.website || '', location: data.location || '',
       category: data.category || '', avatar_url: data.avatar_url || '',
       verified: !!data.verified, badge_type: data.badge_type,
+      is_public: (data as any).is_public !== false,
     });
     if (data) setDevBadges(((data as any).dev_badges as string[]) || []);
   };
