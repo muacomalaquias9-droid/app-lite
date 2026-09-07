@@ -73,21 +73,14 @@ export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) 
   };
 
   const handleSelectProfile = (profileId: string, isPage: boolean, name: string, avatar: string | null) => {
-    if (isPage) {
-      setActiveProfile({
-        id: profileId,
-        name: name,
-        type: 'page',
-        avatar_url: avatar,
-      });
-    } else {
-      setActiveProfile({
-        id: profileId,
-        name: name,
-        type: 'user',
-        avatar_url: avatar,
-      });
-    }
+    setActiveProfile({
+      id: profileId,
+      name,
+      type: isPage ? 'page' : 'user',
+      avatar_url: avatar || undefined,
+    });
+    setOpen(false);
+    navigate(isPage ? `/page/${profileId}` : `/profile/${profileId}`);
   };
 
   const getCurrentProfile = () => {
