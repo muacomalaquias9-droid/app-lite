@@ -30,7 +30,7 @@ export default function EditProfile() {
   const loadProfile = async () => {
     if (!user) return;
     const { data } = await supabase.from('profiles')
-      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges')
+      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges, is_public')
       .eq('id', user.id).single();
     if (data) setForm({
       first_name: data.first_name || '', username: data.username || '', full_name: data.full_name || '',
