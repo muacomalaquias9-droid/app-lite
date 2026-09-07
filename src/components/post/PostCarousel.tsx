@@ -85,8 +85,16 @@ export default function PostCarousel({ media, onDoubleTap, onOpen, showLikeAnima
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide native-scroll"
-        style={{ scrollbarWidth: "none" }}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide"
+        style={{
+          scrollbarWidth: "none",
+          touchAction: "pan-x pan-y",
+          overscrollBehaviorX: "contain",
+          WebkitOverflowScrolling: "touch",
+        }}
       >
         {slides.map((group, slideIdx) => (
           <div key={slideIdx} className="w-full shrink-0 snap-center px-3">
