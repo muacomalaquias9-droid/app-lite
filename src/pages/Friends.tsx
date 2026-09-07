@@ -193,16 +193,18 @@ export default function Friends() {
                     <p className="text-[14px] text-muted-foreground truncate">{p.full_name || p.first_name}</p>
                     {p.bio && <p className="text-[14px] mt-0.5 line-clamp-2">{p.bio}</p>}
                   </div>
-                  <button
-                    onClick={() => toggleFollow(p.id)}
-                    className={`shrink-0 h-9 min-w-[92px] px-4 rounded-xl border text-[14px] font-semibold transition-colors ${
-                      following.includes(p.id)
-                        ? 'border-border text-muted-foreground bg-transparent'
-                        : 'border-border text-foreground bg-transparent'
-                    }`}
-                  >
-                    {following.includes(p.id) ? 'Filhou' : 'Filhar'}
-                  </button>
+                  {!p.isPage && (
+                    <button
+                      onClick={() => toggleFollow(p.id)}
+                      className={`shrink-0 h-9 min-w-[92px] px-4 rounded-xl border text-[14px] font-semibold transition-colors ${
+                        following.includes(p.id)
+                          ? 'border-border text-muted-foreground bg-transparent'
+                          : 'border-border text-foreground bg-transparent'
+                      }`}
+                    >
+                      {following.includes(p.id) ? 'Filhou' : 'Filhar'}
+                    </button>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
