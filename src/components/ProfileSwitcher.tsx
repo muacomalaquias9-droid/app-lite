@@ -80,7 +80,7 @@ export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) 
       avatar_url: avatar || undefined,
     });
     setOpen(false);
-    navigate(isPage ? `/page/${profileId}` : `/profile/${profileId}`);
+    if (!isPage) navigate(`/profile/${profileId}`);
   };
 
   const getCurrentProfile = () => {
