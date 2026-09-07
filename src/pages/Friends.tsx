@@ -184,6 +184,11 @@ export default function Friends() {
                     <div className="flex items-center gap-1">
                       <span className="font-semibold text-[15px] truncate">{p.username}</span>
                       {p.verified && <VerificationBadge verified badgeType={p.badge_type} size="sm" />}
+                      {p.isPage && (
+                        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          Página
+                        </span>
+                      )}
                     </div>
                     <p className="text-[14px] text-muted-foreground truncate">{p.full_name || p.first_name}</p>
                     {p.bio && <p className="text-[14px] mt-0.5 line-clamp-2">{p.bio}</p>}
