@@ -769,6 +769,7 @@ export default function Profile() {
             </div>
           </TabsContent>
         </Tabs>
+        )}
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogContent className="max-w-md h-[70vh] flex flex-col p-0 rounded-2xl">
