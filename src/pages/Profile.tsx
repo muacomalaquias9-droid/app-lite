@@ -15,7 +15,7 @@ import {
   Camera, Heart, MessageCircle, Share2, MoreHorizontal, UserPlus, UserCheck,
   Briefcase, ArrowLeft, MapPin, Link as LinkIcon, Grid3X3, Play, Flag, Copy,
   Clapperboard, Settings, Plus, Users, Globe, ExternalLink, AtSign, TrendingUp, Award,
-  ChevronDown
+  ChevronDown, Lock
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -379,6 +379,7 @@ export default function Profile() {
 
   const isOnline = onlineUsers.has(profile.id);
   const hasVerification = profile.verified || hasSpecialBadgeEmoji(profile.username) || hasSpecialBadgeEmoji(profile.full_name);
+  const isLockedPrivate = (profile as any).is_public === false && !isOwnProfile && !isFollowing;
 
   return (
     <ProtectedRoute>
@@ -568,6 +569,17 @@ export default function Profile() {
           </div>
         )}
 
+        {isLockedPrivate ? (
+          <div className="flex flex-col items-center justify-center px-8 py-20 text-center border-t mt-2">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-muted-foreground/25">
+              <Lock className="h-7 w-7 text-muted-foreground/60" />
+            </div>
+            <h3 className="text-[17px] font-bold">Conta privada</h3>
+            <p className="mt-1 text-[14px] text-muted-foreground max-w-[280px]">
+              Somente os seguidores costumam ver as suas fotos e vídeos.
+            </p>
+          </div>
+        ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
           <TabsList className="grid w-full grid-cols-3 bg-transparent border-b h-10 rounded-none p-0 gap-0">
             {[
@@ -758,6 +770,7 @@ export default function Profile() {
             </div>
           </TabsContent>
         </Tabs>
+        )}
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogContent className="max-w-md h-[70vh] flex flex-col p-0 rounded-2xl">

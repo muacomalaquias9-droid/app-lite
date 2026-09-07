@@ -19,6 +19,7 @@ interface Profile {
   bio?: string | null;
   verified?: boolean;
   badge_type?: string | null;
+  isPage?: boolean;
 }
 
 const PAGE_SIZE = 20;
@@ -54,13 +55,28 @@ export default function Friends() {
 
   const fetchPage = useCallback(async (term: string, page: number) => {
     const from = page * PAGE_SIZE;
-    const { data } = await supabase.from('profiles').select(SELECT)
-      .or(`username.ilike.%${term}%,first_name.ilike.%${term}%,full_name.ilike.%${term}%`)
-      .order('created_at', { ascending: false })
-      .range(from, from + PAGE_SIZE - 1);
+    const [{ data }, { data: pages }] = await Promise.all([
+      supabase.from('profiles').select(SELECT)
+        .or(`username.ilike.%${term}%,first_name.ilike.%${term}%,full_name.ilike.%${term}%`)
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE_SIZE - 1),
+      page === 0
+        ? supabase.from('page_profiles').select('id, name, avatar_url, bio')
+            .ilike('name', `%${term}%`).limit(10)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
     const rows = (data || []).filter((p: any) => p.id !== user?.id) as Profile[];
+    const pageRows: Profile[] = (pages || []).map((p: any) => ({
+      id: p.id,
+      username: p.name,
+      first_name: p.name,
+      full_name: p.name,
+      avatar_url: p.avatar_url,
+      bio: p.bio,
+      isPage: true,
+    }));
     setHasMore((data || []).length === PAGE_SIZE);
-    return rows;
+    return [...pageRows, ...rows];
   }, [user]);
 
   useEffect(() => {
@@ -168,20 +184,27 @@ export default function Friends() {
                     <div className="flex items-center gap-1">
                       <span className="font-semibold text-[15px] truncate">{p.username}</span>
                       {p.verified && <VerificationBadge verified badgeType={p.badge_type} size="sm" />}
+                      {p.isPage && (
+                        <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                          Página
+                        </span>
+                      )}
                     </div>
                     <p className="text-[14px] text-muted-foreground truncate">{p.full_name || p.first_name}</p>
                     {p.bio && <p className="text-[14px] mt-0.5 line-clamp-2">{p.bio}</p>}
                   </div>
-                  <button
-                    onClick={() => toggleFollow(p.id)}
-                    className={`shrink-0 h-9 min-w-[92px] px-4 rounded-xl border text-[14px] font-semibold transition-colors ${
-                      following.includes(p.id)
-                        ? 'border-border text-muted-foreground bg-transparent'
-                        : 'border-border text-foreground bg-transparent'
-                    }`}
-                  >
-                    {following.includes(p.id) ? 'Filhou' : 'Filhar'}
-                  </button>
+                  {!p.isPage && (
+                    <button
+                      onClick={() => toggleFollow(p.id)}
+                      className={`shrink-0 h-9 min-w-[92px] px-4 rounded-xl border text-[14px] font-semibold transition-colors ${
+                        following.includes(p.id)
+                          ? 'border-border text-muted-foreground bg-transparent'
+                          : 'border-border text-foreground bg-transparent'
+                      }`}
+                    >
+                      {following.includes(p.id) ? 'Filhou' : 'Filhar'}
+                    </button>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

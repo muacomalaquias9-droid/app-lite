@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Camera, Link2, MapPin, Briefcase, AtSign, User, Check } from 'lucide-react';
+import { ArrowLeft, Camera, Link2, MapPin, Briefcase, AtSign, User, Check, Globe, Lock, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import VerificationBadge, { BADGE_COLORS, BADGE_TYPES } from '@/components/VerificationBadge';
 import { DEV_BADGES, DEV_BADGE_GROUPS, DEV_EMAIL } from '@/lib/devBadges';
@@ -20,6 +21,7 @@ export default function EditProfile() {
   const [form, setForm] = useState({
     first_name: '', username: '', full_name: '', bio: '', website: '',
     location: '', category: '', avatar_url: '', verified: false, badge_type: null as string | null,
+    is_public: true,
   });
   const [devBadges, setDevBadges] = useState<string[]>([]);
   const isDeveloper = user?.email === DEV_EMAIL;
@@ -29,13 +31,14 @@ export default function EditProfile() {
   const loadProfile = async () => {
     if (!user) return;
     const { data } = await supabase.from('profiles')
-      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges')
+      .select('first_name, username, full_name, bio, website, location, category, avatar_url, verified, badge_type, dev_badges, is_public')
       .eq('id', user.id).single();
     if (data) setForm({
       first_name: data.first_name || '', username: data.username || '', full_name: data.full_name || '',
       bio: data.bio || '', website: data.website || '', location: data.location || '',
       category: data.category || '', avatar_url: data.avatar_url || '',
       verified: !!data.verified, badge_type: data.badge_type,
+      is_public: (data as any).is_public !== false,
     });
     if (data) setDevBadges(((data as any).dev_badges as string[]) || []);
   };
@@ -76,6 +79,7 @@ export default function EditProfile() {
         website: form.website,
         location: form.location,
         category: form.category,
+        is_public: form.is_public,
         ...(isDeveloper ? { dev_badges: devBadges } : {}),
         ...(form.verified ? { badge_type: form.badge_type || 'blue' } : {}),
       }).eq('id', user.id);
@@ -190,6 +194,33 @@ export default function EditProfile() {
               className="rounded-2xl text-base resize-none bg-muted/30 border-border/40" placeholder="Fale sobre você..." />
             <p className="text-[11px] text-muted-foreground/60 text-right mt-1">{form.bio.length}/160</p>
           </div>
+
+          {/* Privacidade da conta */}
+          <div className="flex items-center gap-3 px-4 py-3.5 border-t border-border/40">
+            {form.is_public ? <Globe className="h-5 w-5 text-muted-foreground shrink-0" strokeWidth={1.8} />
+              : <Lock className="h-5 w-5 text-muted-foreground shrink-0" strokeWidth={1.8} />}
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-bold">Conta privada</p>
+              <p className="text-[11.5px] text-muted-foreground">
+                {form.is_public ? 'Qualquer pessoa pode ver as tuas publicações.' : 'Só quem te filha vê as tuas fotos e vídeos.'}
+              </p>
+            </div>
+            <Switch checked={!form.is_public} onCheckedChange={(v) => setForm(p => ({ ...p, is_public: !v }))} />
+          </div>
+
+          {/* Pedir selo de verificação */}
+          {!form.verified && (
+            <button type="button" onClick={() => navigate('/verify-identity')}
+              className="w-full flex items-center gap-3 px-4 py-4 border-t border-border/40 text-left active:bg-muted/40 transition">
+              <ShieldCheck className="h-5 w-5 text-primary shrink-0" strokeWidth={1.9} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13.5px] font-bold">Obter selo de verificação</p>
+                <p className="text-[11.5px] text-muted-foreground">Verificação com rosto e bilhete de identidade.</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            </button>
+          )}
+
 
           {isDeveloper && (
             <div className="px-4 pb-4 border-t border-border/40 pt-4">

@@ -54,6 +54,7 @@ import Comments from "./pages/Comments";
 import Videos from "./pages/Videos";
 import Reels from "./pages/Reels";
 import RequestVerification from "./pages/RequestVerification";
+import VerifyIdentity from "./pages/VerifyIdentity";
 import Report from './pages/Report';
 import SavedPosts from './pages/SavedPosts';
 import PostDetail from './pages/PostDetail';
@@ -195,6 +196,15 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/verify-identity"
+          element={
+            <ProtectedRoute>
+              <VerifyIdentity />
+            </ProtectedRoute>
+          }
+        />
+        
         
         {/* Messages Routes */}
         <Route

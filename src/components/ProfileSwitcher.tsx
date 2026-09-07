@@ -38,6 +38,7 @@ export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) 
   const { activeProfile, setActiveProfile } = useActiveProfile();
   const [mainProfile, setMainProfile] = useState<Profile | null>(null);
   const [pageProfiles, setPageProfiles] = useState<PageProfile[]>([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchProfiles();
@@ -73,21 +74,14 @@ export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) 
   };
 
   const handleSelectProfile = (profileId: string, isPage: boolean, name: string, avatar: string | null) => {
-    if (isPage) {
-      setActiveProfile({
-        id: profileId,
-        name: name,
-        type: 'page',
-        avatar_url: avatar,
-      });
-    } else {
-      setActiveProfile({
-        id: profileId,
-        name: name,
-        type: 'user',
-        avatar_url: avatar,
-      });
-    }
+    setActiveProfile({
+      id: profileId,
+      name,
+      type: isPage ? 'page' : 'user',
+      avatar_url: avatar || undefined,
+    });
+    setOpen(false);
+    if (!isPage) navigate(`/profile/${profileId}`);
   };
 
   const getCurrentProfile = () => {
@@ -120,7 +114,7 @@ export default function ProfileSwitcher({ trigger }: ProfileSwitcherProps = {}) 
   const current = getCurrentProfile();
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity">
         {trigger ?? (<>
         <span className="font-semibold text-foreground text-lg">

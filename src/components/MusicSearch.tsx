@@ -204,6 +204,15 @@ export default function MusicSearch({ onSelect, onClose }: MusicSearchProps) {
                   onClick={() => onSelect(track)}
                   className="flex items-center gap-3 p-3 hover:bg-accent/50 rounded-lg cursor-pointer transition-all active:scale-98"
                 >
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-secondary/60">
+                    {track.cover ? (
+                      <img src={track.cover} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-muted-foreground text-[10px] font-semibold">
+                        ♪
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate text-foreground">{track.name}</p>
                     <p className="text-sm text-muted-foreground truncate">
