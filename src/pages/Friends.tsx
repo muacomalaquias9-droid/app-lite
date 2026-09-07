@@ -19,6 +19,7 @@ interface Profile {
   bio?: string | null;
   verified?: boolean;
   badge_type?: string | null;
+  isPage?: boolean;
 }
 
 const PAGE_SIZE = 20;
