@@ -55,13 +55,28 @@ export default function Friends() {
 
   const fetchPage = useCallback(async (term: string, page: number) => {
     const from = page * PAGE_SIZE;
-    const { data } = await supabase.from('profiles').select(SELECT)
-      .or(`username.ilike.%${term}%,first_name.ilike.%${term}%,full_name.ilike.%${term}%`)
-      .order('created_at', { ascending: false })
-      .range(from, from + PAGE_SIZE - 1);
+    const [{ data }, { data: pages }] = await Promise.all([
+      supabase.from('profiles').select(SELECT)
+        .or(`username.ilike.%${term}%,first_name.ilike.%${term}%,full_name.ilike.%${term}%`)
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE_SIZE - 1),
+      page === 0
+        ? supabase.from('page_profiles').select('id, name, avatar_url, bio')
+            .ilike('name', `%${term}%`).limit(10)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
     const rows = (data || []).filter((p: any) => p.id !== user?.id) as Profile[];
+    const pageRows: Profile[] = (pages || []).map((p: any) => ({
+      id: p.id,
+      username: p.name,
+      first_name: p.name,
+      full_name: p.name,
+      avatar_url: p.avatar_url,
+      bio: p.bio,
+      isPage: true,
+    }));
     setHasMore((data || []).length === PAGE_SIZE);
-    return rows;
+    return [...pageRows, ...rows];
   }, [user]);
 
   useEffect(() => {
