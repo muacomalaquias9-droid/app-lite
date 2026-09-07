@@ -379,6 +379,7 @@ export default function Profile() {
 
   const isOnline = onlineUsers.has(profile.id);
   const hasVerification = profile.verified || hasSpecialBadgeEmoji(profile.username) || hasSpecialBadgeEmoji(profile.full_name);
+  const isLockedPrivate = (profile as any).is_public === false && !isOwnProfile && !isFollowing;
 
   return (
     <ProtectedRoute>
