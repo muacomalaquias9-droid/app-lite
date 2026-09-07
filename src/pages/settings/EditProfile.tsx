@@ -78,6 +78,7 @@ export default function EditProfile() {
         website: form.website,
         location: form.location,
         category: form.category,
+        is_public: form.is_public,
         ...(isDeveloper ? { dev_badges: devBadges } : {}),
         ...(form.verified ? { badge_type: form.badge_type || 'blue' } : {}),
       }).eq('id', user.id);
