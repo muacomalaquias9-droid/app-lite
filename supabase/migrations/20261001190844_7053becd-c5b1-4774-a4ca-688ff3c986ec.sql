@@ -1,0 +1,1 @@
+CREATE POLICY "Users can see their own block" ON public.blocked_accounts FOR SELECT TO authenticated USING (auth.uid() = user_id);
