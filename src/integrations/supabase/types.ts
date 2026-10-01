@@ -3159,6 +3159,7 @@ export type Database = {
       delete_expired_stories: { Args: never; Returns: undefined }
       delete_expired_two_factor_codes: { Args: never; Returns: undefined }
       generate_2fa_secret: { Args: never; Returns: string }
+      get_blocked_user_ids: { Args: never; Returns: string[] }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_channel_admin: {
         Args: { _channel_id: string; _user_id: string }

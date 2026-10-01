@@ -124,12 +124,12 @@ export default function Feed() {
         const [profileResult, savedResult, blockedResult, followResult] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('saved_posts').select('post_id').eq('user_id', user.id),
-          supabase.from('blocked_accounts').select('user_id'),
+          (supabase as any).rpc('get_blocked_user_ids'),
           supabase.from('follows').select('following_id').eq('follower_id', user.id),
         ]);
         if (profileResult.data) setMyProfile(profileResult.data);
         if (savedResult.data) setSavedPosts(savedResult.data.map(s => s.post_id));
-        if (blockedResult.data) setBlockedUserIds(blockedResult.data.map(b => b.user_id));
+        if (blockedResult.data) setBlockedUserIds((blockedResult.data as any[]).map((b: any) => typeof b === 'string' ? b : b.get_blocked_user_ids ?? b.user_id));
         if (followResult.data) setFollowing(followResult.data.map((f: any) => f.following_id));
       }
       await Promise.all([loadPosts(), loadSponsoredAds()]);
