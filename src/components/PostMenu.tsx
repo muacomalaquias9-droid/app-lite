@@ -284,6 +284,18 @@ export default function PostMenu({
             <p className="font-medium text-sm">Denunciar publicação</p>
           </div>
         </DropdownMenuItem>
+
+        {!isOwner && (
+          <DropdownMenuItem
+            onClick={() => { navigate(`/report?type=user&id=${postUserId}`); setOpen(false); }}
+            className="py-2.5 cursor-pointer text-destructive focus:text-destructive"
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-4 w-4" />
+              <p className="font-medium text-sm">Denunciar conta</p>
+            </div>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

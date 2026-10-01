@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.app-view-api]
 verify_jwt = false
+
+[functions.report-review]
+verify_jwt = false
+
+[functions.account-appeal]
+verify_jwt = false
