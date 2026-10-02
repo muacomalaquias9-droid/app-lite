@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Users } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,12 +35,15 @@ export default function Groups() {
   const [groupName, setGroupName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (user) {
       loadGroups();
       loadFriends();
-      subscribeToGroups();
+      const cleanup = subscribeToGroups();
+      return cleanup;
     }
   }, [user]);
 
@@ -61,23 +64,18 @@ export default function Groups() {
   const loadFriends = async () => {
     if (!user) return;
 
-    const { data: friendships } = await supabase
-      .from('friendships')
-      .select('user_id_1, user_id_2')
-      .or(`user_id_1.eq.${user.id},user_id_2.eq.${user.id}`);
-
-    if (friendships) {
-      const friendIds = friendships.map(f =>
-        f.user_id_1 === user.id ? f.user_id_2 : f.user_id_1
-      );
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', friendIds);
-
-      if (profiles) setFriends(profiles);
-    }
+    const [{ data: followers }, { data: following }] = await Promise.all([
+      supabase.from('follows').select('follower_id').eq('following_id', user.id),
+      supabase.from('follows').select('following_id').eq('follower_id', user.id),
+    ]);
+    const ids = [...new Set([
+      ...(followers || []).map(f => f.follower_id),
+      ...(following || []).map(f => f.following_id),
+    ])].filter(id => id !== user.id);
+    if (!ids.length) { setFriends([]); return; }
+    const { data: profiles } = await supabase.from('profiles')
+      .select('id, username, first_name, avatar_url').in('id', ids).order('first_name');
+    setFriends(profiles || []);
   };
 
   const subscribeToGroups = () => {
@@ -105,12 +103,13 @@ export default function Groups() {
     if (!groupName.trim() || selectedFriends.length === 0 || !user) {
       toast({
         title: 'Preencha todos os campos',
-        description: 'Insira um nome e selecione pelo menos um amigo',
+        description: 'Insira um nome e selecione pelo menos uma pessoa',
         variant: 'destructive',
       });
       return;
     }
 
+    setCreating(true);
     try {
       const { data: group, error: groupError } = await supabase
         .from('groups')
@@ -132,10 +131,11 @@ export default function Groups() {
 
       // Add creator as member
       const members = [
-        { group_id: group.id, user_id: user.id },
+        { group_id: group.id, user_id: user.id, is_admin: true },
         ...selectedFriends.map(friendId => ({
           group_id: group.id,
           user_id: friendId,
+          is_admin: false,
         })),
       ];
 
@@ -156,6 +156,7 @@ export default function Groups() {
       setSelectedFriends([]);
       setIsDialogOpen(false);
       await loadGroups();
+      navigate(`/group/${group.id}`);
     } catch (error: any) {
       console.error('Error creating group:', error);
       toast({
@@ -163,18 +164,20 @@ export default function Groups() {
         description: error.message || 'Tente novamente',
         variant: 'destructive',
       });
+    } finally {
+      setCreating(false);
     }
   };
 
   return (
     <MainLayout title="Grupos">
-      <div className="flex flex-col h-full relative">
-        <header className="sticky top-0 z-10 bg-card border-b border-border px-4 py-4">
+      <div className="flex flex-col h-full relative bg-background">
+        <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Grupos</h1>
+            <div className="flex items-center gap-2"><Button variant="ghost" size="icon" aria-label="Voltar" onClick={() => navigate('/messages')}><ArrowLeft /></Button><h1 className="text-xl font-semibold">Grupos</h1></div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="icon" className="rounded-full">
+                 <Button size="icon" className="rounded-full" aria-label="Criar grupo">
                   <Plus className="h-5 w-5" />
                 </Button>
               </DialogTrigger>
@@ -189,10 +192,11 @@ export default function Groups() {
                     onChange={(e) => setGroupName(e.target.value)}
                   />
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Adicionar amigos</p>
+                    <p className="text-sm font-medium">Seguidores e pessoas que filhas</p>
+                    <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input value={memberSearch} onChange={e => setMemberSearch(e.target.value)} placeholder="Pesquisar pessoas" className="pl-9" /></div>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {friends.map((friend) => (
-                        <div key={friend.id} className="flex items-center gap-3">
+                      {friends.filter(friend => `${friend.first_name} ${friend.username}`.toLowerCase().includes(memberSearch.toLowerCase())).map((friend) => (
+                        <label key={friend.id} className="flex items-center gap-3 py-1 cursor-pointer">
                           <Checkbox
                             checked={selectedFriends.includes(friend.id)}
                             onCheckedChange={(checked) => {
@@ -205,19 +209,20 @@ export default function Groups() {
                           />
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={friend.avatar_url || undefined} />
-                            <AvatarFallback>{friend.first_name[0]}</AvatarFallback>
+                            <AvatarFallback>{friend.first_name?.[0] || friend.username?.[0]}</AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{friend.first_name}</span>
-                        </div>
+                          <span className="text-sm">{friend.first_name || friend.username}</span>
+                        </label>
                       ))}
+                      {friends.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Ainda não tens seguidores nem pessoas que filhas.</p>}
                     </div>
                   </div>
                   <Button
                     onClick={createGroup}
                     className="w-full"
-                    disabled={!groupName.trim() || selectedFriends.length === 0}
+                    disabled={creating || !groupName.trim() || selectedFriends.length === 0}
                   >
-                    Criar Grupo
+                     {creating ? 'A criar…' : 'Criar grupo'}
                   </Button>
                 </div>
               </DialogContent>
@@ -227,10 +232,10 @@ export default function Groups() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {groups.map((group) => (
-            <button
+            <Button variant="ghost"
               key={group.id}
-              onClick={() => navigate(`/grupo/${group.id}`)}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+              onClick={() => navigate(`/group/${group.id}`)}
+              className="w-full h-auto flex items-center justify-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
             >
               <Avatar className="h-12 w-12">
                 <AvatarImage src={group.avatar_url || undefined} />
@@ -241,20 +246,10 @@ export default function Groups() {
               <div className="flex-1 text-left">
                 <p className="font-semibold">{group.name}</p>
               </div>
-            </button>
+            </Button>
           ))}
         </div>
 
-        {/* Floating Action Button */}
-        <div className="fixed bottom-6 right-4 z-10">
-          <Button
-            onClick={() => navigate('/canais')}
-            size="lg"
-            className="h-14 w-14 rounded-full shadow-lg"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </div>
       </div>
     </MainLayout>
   );
