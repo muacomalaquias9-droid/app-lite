@@ -495,6 +495,10 @@ export default function Profile() {
                 </button>
               ) : (
                 <>
+                  <button onClick={() => navigate(`/report?type=user&id=${profile.id}`)} aria-label="Denunciar conta"
+                    className="h-9 w-9 rounded-full border border-border flex items-center justify-center text-destructive active:scale-95 transition">
+                    <Flag className="h-[17px] w-[17px]" />
+                  </button>
                   <button onClick={handleShare}
                     className="h-9 w-9 rounded-full border border-border flex items-center justify-center active:scale-95 transition">
                     <Share2 className="h-[17px] w-[17px]" />
