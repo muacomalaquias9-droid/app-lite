@@ -433,8 +433,8 @@ export default function Profile() {
                   {!isOwnProfile && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate(`/report?type=profile&id=${profile.id}`)} className="text-destructive">
-                        <Flag className="h-4 w-4 mr-2" />Denunciar
+                      <DropdownMenuItem onClick={() => navigate(`/report?type=user&id=${profile.id}`)} className="text-destructive">
+                        <Flag className="h-4 w-4 mr-2" />Denunciar conta
                       </DropdownMenuItem>
                     </>
                   )}
