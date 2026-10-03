@@ -65,6 +65,7 @@ export default function Chat() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [friend, setFriend] = useState<Profile | null>(null);
+  const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [activeCall, setActiveCall] = useState<{ id: string; type: 'voice' | 'video' } | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -116,7 +117,7 @@ export default function Chat() {
 
     const loadData = async () => {
       const startTime = Date.now();
-      await Promise.all([loadFriend(), loadChatSettings(), loadMessages(), loadWallpaper()]);
+      await Promise.all([loadFriend(), loadMyProfile(), loadChatSettings(), loadMessages(), loadWallpaper()]);
       
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 1500 - elapsed);
@@ -256,6 +257,16 @@ export default function Chat() {
       .single();
     
     if (data) setFriend(data);
+  };
+
+  const loadMyProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, username, first_name, avatar_url, verified, badge_type')
+      .eq('id', user.id)
+      .single();
+    if (data) setMyProfile(data);
   };
 
   const loadWallpaper = async () => {
@@ -730,6 +741,7 @@ export default function Chat() {
   }
 
   const isTyping = typingUsers.size > 0;
+  const lastReadOwnId = [...messages].reverse().find((message) => message.sender_id === user?.id && message.read)?.id;
 
   // Group messages by date
   const groupedMessages = messages.reduce((acc, msg) => {
@@ -757,48 +769,32 @@ export default function Chat() {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-mobile-surface overflow-hidden overscroll-none" style={{ height: '100dvh', maxHeight: '100dvh' }}>
-      {/* Native App Chat Header */}
-      <header className="flex-shrink-0 z-50 safe-area-top px-2 py-2 bg-mobile-header text-mobile-header-foreground shadow-lg shadow-mobile-header/20">
-        <div className="flex items-center gap-3 w-full">
+    <div className="fixed inset-0 flex flex-col bg-background overflow-hidden overscroll-none" style={{ height: '100dvh', maxHeight: '100dvh' }}>
+      <header className="flex-shrink-0 z-50 safe-area-top px-3 py-2 border-b border-border/40 bg-card/70 backdrop-blur-[50px] saturate-200">
+        <div className="grid grid-cols-[44px_1fr_44px] items-center w-full max-w-3xl mx-auto">
           <motion.div whileTap={{ scale: 0.9 }}>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/messages')}
-              className="h-9 w-9 rounded-full press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10"
+              className="h-9 w-9 rounded-full bg-card/80 shadow-sm border border-border/40"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </motion.div>
           
-          <motion.div 
-            whileTap={{ scale: 0.95 }}
-            className="relative flex-shrink-0 cursor-pointer"
-            onClick={() => navigate(`/profile/${friend.id}`)}
-          >
-            <div className="relative">
-              <Avatar className="h-10 w-10 ring-2 ring-mobile-header-foreground/25 ring-offset-1 ring-offset-mobile-header">
+          <div className="flex flex-col items-center min-w-0 cursor-pointer" onClick={() => navigate(`/profile/${friend.id}`)}>
+            <div className="flex -space-x-3 mb-1">
+              <Avatar className="h-9 w-9 border-2 border-card shadow-md z-10">
                 <AvatarImage src={friend.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/50 text-primary-foreground text-base font-semibold">
-                  {friend.first_name[0]}
-                </AvatarFallback>
+                <AvatarFallback className="bg-muted text-sm font-semibold">{friend.first_name[0]}</AvatarFallback>
               </Avatar>
-              {isOnline && (
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-green-500 border-[3px] border-card shadow-lg" 
-                />
-              )}
+              <Avatar className="h-9 w-9 border-2 border-card shadow-md">
+                <AvatarImage src={myProfile?.avatar_url || undefined} className="object-cover" />
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">{myProfile?.first_name?.[0] || 'P'}</AvatarFallback>
+              </Avatar>
             </div>
-          </motion.div>
-          
-          <div 
-            className="flex-1 min-w-0 cursor-pointer"
-            onClick={() => navigate(`/profile/${friend.id}`)}
-          >
-            <p className="font-bold text-base truncate text-mobile-header-foreground">{friend.first_name}</p>
+            <p className="font-bold text-[13px] leading-none truncate">2 Pessoas</p>
             <AnimatePresence mode="wait">
               {isTyping ? (
                 <motion.div 
@@ -806,13 +802,13 @@ export default function Chat() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 mt-1"
                 >
-                  <span className="text-xs font-medium text-mobile-header-foreground/80">digitando</span>
+                  <span className="text-[10px] font-medium text-primary">a escrever</span>
                   <motion.span 
                     animate={{ opacity: [1, 0.3, 1] }}
                     transition={{ duration: 1.2, repeat: Infinity }}
-                    className="text-mobile-header-foreground/80"
+                    className="text-primary"
                   >
                     ...
                   </motion.span>
@@ -823,59 +819,17 @@ export default function Chat() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-xs text-mobile-header-foreground/65"
+                  className="text-[10px] text-muted-foreground mt-1"
                 >
                   {isOnline ? 'online' : 'offline'}
                 </motion.p>
               )}
             </AnimatePresence>
           </div>
-
-          <div className="flex items-center gap-1.5">
-            <motion.div whileTap={{ scale: 0.9 }}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-full press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10"
-                onClick={() => startCall('video')}
-              >
-                <Video className="h-5 w-5" />
-              </Button>
-            </motion.div>
-            <motion.div whileTap={{ scale: 0.9 }}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-full press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10"
-                onClick={() => startCall('voice')}
-              >
-                <Phone className="h-5 w-5" />
-              </Button>
-            </motion.div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <motion.div whileTap={{ scale: 0.9 }}>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full press-effect text-mobile-header-foreground hover:bg-mobile-header-foreground/10">
-                    <MoreVertical className="h-[18px] w-[18px]" />
-                  </Button>
-                </motion.div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-2xl">
-                <DropdownMenuItem onClick={() => setShowWallpaperPicker(true)} className="rounded-xl">
-                  <Palette className="h-4 w-4 mr-2" />
-                  Mudar papel de parede
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate(`/chat/${friendId}/settings`)} className="rounded-xl">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Mensagens temporárias
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate(`/profile/${friend.id}`)} className="rounded-xl">
-                  Ver perfil
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="justify-self-end">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-card/80 shadow-sm border border-border/40" onClick={() => startCall('video')} aria-label="Videochamada">
+              <Video className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </header>
@@ -888,7 +842,7 @@ export default function Chat() {
           backgroundImage: wallpaper ? `url(${wallpaper})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundColor: wallpaper ? undefined : 'hsl(var(--muted) / 0.2)',
+          backgroundColor: wallpaper ? undefined : 'hsl(var(--background))',
         }}
       >
         <div className="max-w-3xl mx-auto px-3 py-4 space-y-1 pb-5">
@@ -899,7 +853,7 @@ export default function Chat() {
                 <motion.span 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="px-4 py-1.5 text-xs font-medium bg-card/95 backdrop-blur-xl text-muted-foreground rounded-full shadow-sm border border-border/50"
+                  className="px-3 py-1 text-[10px] font-medium text-muted-foreground"
                 >
                   {formatDateLabel(date)}
                 </motion.span>
@@ -965,8 +919,8 @@ export default function Chat() {
                           whileTap={{ scale: 0.98 }}
                           className={`relative px-4 py-2.5 shadow-sm select-none ${
                             isOwn
-                              ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-3xl rounded-br-lg'
-                              : 'bg-card/95 backdrop-blur-sm text-foreground rounded-3xl rounded-bl-lg border border-border/50'
+                              ? 'bg-primary text-primary-foreground rounded-[20px] rounded-br-md'
+                              : 'bg-muted text-foreground rounded-[20px] rounded-bl-md'
                           }`}
                           onTouchStart={() => handleMessageTouchStart(message)}
                           onTouchEnd={handleMessageTouchEnd}
@@ -996,7 +950,7 @@ export default function Chat() {
                             <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
                           )}
                           
-                          <div className={`flex items-center gap-1.5 justify-end mt-1.5 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                          <div className={`flex items-center gap-1.5 justify-end mt-1 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                             {message.edited && (
                               <span className="text-[10px] italic">editado</span>
                             )}
@@ -1012,6 +966,12 @@ export default function Chat() {
                             )}
                           </div>
                         </motion.div>
+                      )}
+                      {isOwn && message.id === lastReadOwnId && friend && (
+                        <Avatar className="h-4 w-4 flex-shrink-0 border border-background shadow-sm" aria-label={`Vista por ${friend.first_name}`}>
+                          <AvatarImage src={friend.avatar_url || undefined} className="object-cover" />
+                          <AvatarFallback className="text-[7px]">{friend.first_name[0]}</AvatarFallback>
+                        </Avatar>
                       )}
                     </div>
                   </motion.div>
@@ -1081,14 +1041,14 @@ export default function Chat() {
       </AnimatePresence>
 
       {/* Native Input Area */}
-      <div className="flex-shrink-0 bg-card/98 border-t border-border/40 px-3 py-2 safe-area-bottom [transform:translateZ(0)]" style={{ backdropFilter: 'saturate(180%) blur(20px)', WebkitBackdropFilter: 'saturate(180%) blur(20px)' }}>
+      <div className="flex-shrink-0 bg-card/70 border-t border-border/40 px-3 py-2 safe-area-bottom [transform:translateZ(0)] backdrop-blur-[50px] saturate-200">
         <form onSubmit={editingMessage ? (e) => { e.preventDefault(); saveEditedMessage(); } : sendMessage} className="flex items-center gap-2.5 max-w-3xl mx-auto">
           <motion.div whileTap={{ scale: 0.9 }}>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full press-effect text-muted-foreground"
+              className="h-10 w-10 rounded-full press-effect bg-muted/70 text-foreground"
               onClick={() => setShowEmojiPicker(true)}
             >
               <Smile className="h-5 w-5" />
@@ -1100,8 +1060,8 @@ export default function Chat() {
               type="text"
               value={editingMessage ? editText : newMessage}
               onChange={(e) => editingMessage ? setEditText(e.target.value) : handleTyping(e.target.value)}
-              placeholder="Escreva uma mensagem..."
-              className="h-11 rounded-full bg-muted/60 border-0 px-5 pr-14 text-[16px] focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/50"
+              placeholder="Mensagem"
+              className="h-11 rounded-full bg-muted/70 border-0 px-5 pr-14 text-[16px] focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/60"
               style={{ fontSize: '16px' }}
               enterKeyHint="send"
               autoComplete="off"
