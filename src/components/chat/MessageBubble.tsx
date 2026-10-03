@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import AudioWaveform from './AudioWaveform';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Reaction {
   emoji: string;
@@ -31,9 +32,10 @@ interface MessageBubbleProps {
   contextType?: 'chat' | 'group' | 'channel';
   contextId?: string;
   onDeleteLocal?: (id: string) => void;
+  viewedBy?: Array<{ id: string; first_name: string; avatar_url: string | null }>;
 }
 
-export default function MessageBubble({ message, isSent, hideMedia = false, isGroupMessage = false, contextType = 'chat', contextId, onDeleteLocal }: MessageBubbleProps) {
+export default function MessageBubble({ message, isSent, hideMedia = false, isGroupMessage = false, contextType = 'chat', contextId, onDeleteLocal, viewedBy = [] }: MessageBubbleProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showReactionPicker, setShowReactionPicker] = useState(false);
@@ -343,6 +345,21 @@ export default function MessageBubble({ message, isSent, hideMedia = false, isGr
                 </span>
               </button>
             ))}
+          </div>
+        )}
+        {isSent && viewedBy.length > 0 && (
+          <div className="flex justify-end -space-x-1.5 pr-1" aria-label={`Vista por ${viewedBy.length}`}>
+            {viewedBy.slice(0, 5).map((viewer) => (
+              <Avatar key={viewer.id} className="h-4 w-4 border border-background shadow-sm">
+                <AvatarImage src={viewer.avatar_url || undefined} className="object-cover" />
+                <AvatarFallback className="text-[7px] bg-muted">{viewer.first_name?.[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+            ))}
+            {viewedBy.length > 5 && (
+              <span className="h-4 min-w-4 rounded-full bg-muted px-1 text-[8px] text-muted-foreground flex items-center justify-center border border-background">
+                +{viewedBy.length - 5}
+              </span>
+            )}
           </div>
         )}
       </div>
