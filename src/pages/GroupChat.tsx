@@ -100,13 +100,7 @@ export default function GroupChat() {
       .eq('group_id', groupId)
       .order('created_at', { ascending: true });
 
-    if (data) {
-      setMessages(data as Message[]);
-      const unreadIds = data.filter((message: any) => message.sender_id !== user?.id && !(message.read_by || []).includes(user?.id)).map((message: any) => message.id);
-      if (unreadIds.length && user) {
-        await Promise.all(unreadIds.map((id: string) => supabase.rpc('mark_group_message_read', { _message_id: id })));
-      }
-    }
+    if (data) setMessages(data as Message[]);
   };
 
   const subscribeToMessages = () => {
@@ -133,9 +127,6 @@ export default function GroupChat() {
           } as Message;
 
           setMessages(prev => [...prev, newMsg]);
-          if (user && newMsg.sender_id !== user.id) {
-            await supabase.rpc('mark_group_message_read', { _message_id: newMsg.id });
-          }
         }
       )
       .subscribe();
