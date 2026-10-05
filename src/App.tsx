@@ -33,6 +33,12 @@ import ChatSettings from "./pages/ChatSettings";
 import GroupChat from "./pages/GroupChat";
 import Groups from "./pages/Groups";
 import GroupSettings from "./pages/GroupSettings";
+import AddGroupMembers from "./pages/group-settings/AddMembers";
+import EditGroupName from "./pages/group-settings/EditName";
+import EditGroupPhoto from "./pages/group-settings/EditPhoto";
+import GroupNicknames from "./pages/group-settings/Nicknames";
+import GroupPermissions from "./pages/group-settings/Permissions";
+import GroupMembers from "./pages/group-settings/ViewMembers";
 import Channels from "./pages/Channels";
 import ChannelView from "./pages/ChannelView";
 import CreateChannel from "./pages/CreateChannel";
@@ -257,6 +263,12 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/group/:groupId/add-members" element={<ProtectedRoute><AddGroupMembers /></ProtectedRoute>} />
+        <Route path="/group/:groupId/members" element={<ProtectedRoute><GroupMembers /></ProtectedRoute>} />
+        <Route path="/group/:groupId/edit-name" element={<ProtectedRoute><EditGroupName /></ProtectedRoute>} />
+        <Route path="/group/:groupId/edit-photo" element={<ProtectedRoute><EditGroupPhoto /></ProtectedRoute>} />
+        <Route path="/group/:groupId/nicknames" element={<ProtectedRoute><GroupNicknames /></ProtectedRoute>} />
+        <Route path="/group/:groupId/permissions" element={<ProtectedRoute><GroupPermissions /></ProtectedRoute>} />
         
         {/* Channels Routes */}
         <Route

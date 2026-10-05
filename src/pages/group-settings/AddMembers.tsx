@@ -34,23 +34,21 @@ export default function AddMembers() {
   const loadFriends = async () => {
     if (!user) return;
 
-    const { data: friendships } = await supabase
-      .from('friendships')
-      .select('user_id_1, user_id_2')
-      .or(`user_id_1.eq.${user.id},user_id_2.eq.${user.id}`);
-
-    if (friendships) {
-      const friendIds = friendships.map(f =>
-        f.user_id_1 === user.id ? f.user_id_2 : f.user_id_1
-      );
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', friendIds);
-
-      if (profiles) setFriends(profiles);
-    }
+    const [{ data: followers }, { data: following }] = await Promise.all([
+      supabase.from('follows').select('follower_id').eq('following_id', user.id),
+      supabase.from('follows').select('following_id').eq('follower_id', user.id),
+    ]);
+    const ids = [...new Set([
+      ...(followers || []).map(item => item.follower_id),
+      ...(following || []).map(item => item.following_id),
+    ])].filter(id => id !== user.id);
+    if (ids.length === 0) { setFriends([]); return; }
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, first_name, avatar_url')
+      .in('id', ids)
+      .order('first_name');
+    setFriends(profiles || []);
   };
 
   const loadExistingMembers = async () => {
@@ -95,7 +93,7 @@ export default function AddMembers() {
       toast({
         title: 'Membros adicionados com sucesso!',
       });
-      navigate(`/grupo/${groupId}/configuracoes`);
+      navigate(`/group/${groupId}/settings`);
     }
   };
 
@@ -110,7 +108,7 @@ export default function AddMembers() {
           <div className="space-y-2">
             {availableFriends.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                Todos os seus amigos já estão no grupo
+                Todos os teus seguidores e pessoas que filhas já estão no grupo
               </p>
             ) : (
               availableFriends.map((friend) => (

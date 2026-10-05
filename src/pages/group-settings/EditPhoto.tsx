@@ -96,7 +96,7 @@ export default function EditPhoto() {
       });
       
       setTimeout(() => {
-        navigate(`/grupo/${groupId}/configuracoes`);
+        navigate(`/group/${groupId}/settings`);
       }, 500);
     } catch (error: any) {
       toast({

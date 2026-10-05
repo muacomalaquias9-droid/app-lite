@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import MessageBubble from '@/components/chat/MessageBubble';
 import MediaPicker from '@/components/chat/MediaPicker';
 import WallpaperPicker from '@/components/chat/WallpaperPicker';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -65,7 +66,19 @@ export default function GroupChat() {
 
   useEffect(() => {
     scrollToBottom();
+    markVisibleMessagesRead();
   }, [messages]);
+
+  const markVisibleMessagesRead = async () => {
+    if (!user) return;
+    const unread = messages.filter(message =>
+      message.sender_id !== user.id && !(message.read_by || []).includes(user.id)
+    );
+    if (unread.length === 0) return;
+    await Promise.all(unread.map(message =>
+      supabase.rpc('mark_group_message_read', { _message_id: message.id })
+    ));
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -105,7 +118,7 @@ export default function GroupChat() {
 
   const subscribeToMessages = () => {
     const channel = supabase
-      .channel('group-chat-messages')
+      .channel(`group-chat-messages:${groupId}`)
       .on(
         'postgres_changes',
         {
@@ -128,6 +141,13 @@ export default function GroupChat() {
 
           setMessages(prev => [...prev, newMsg]);
         }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'group_messages', filter: `group_id=eq.${groupId}` },
+        (payload) => setMessages(prev => prev.map(message =>
+          message.id === payload.new.id ? { ...message, ...payload.new } as Message : message
+        ))
       )
       .subscribe();
 
@@ -152,6 +172,8 @@ export default function GroupChat() {
 
     if (error) {
       console.error('Error sending message:', error);
+      setNewMessage(messageText);
+      toast.error('Não foi possível enviar a mensagem');
     }
   };
 
@@ -169,6 +191,7 @@ export default function GroupChat() {
 
     if (error) {
       console.error('Error sending media:', error);
+      toast.error('Não foi possível enviar o ficheiro');
     }
   };
 
@@ -256,15 +279,15 @@ export default function GroupChat() {
               {!isSent && (
                 <div className="mb-1 flex-shrink-0">
                   <Avatar className="h-7 w-7 border-2 border-background shadow-sm">
-                    <AvatarImage src={message.profiles.avatar_url || undefined} />
+                    <AvatarImage src={message.profiles?.avatar_url || undefined} />
                     <AvatarFallback className="text-xs">
-                      {message.profiles.first_name[0]}
+                      {message.profiles?.first_name?.[0] || 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </div>
               )}
               <div className={`flex-1 flex flex-col ${isSent ? 'items-end' : 'items-start'}`}>
-                {!isSent && <span className="text-[10px] text-muted-foreground ml-2 mb-0.5">{message.profiles.first_name}</span>}
+                {!isSent && <span className="text-[10px] text-muted-foreground ml-2 mb-0.5">{message.profiles?.first_name || 'Membro'}</span>}
                 <MessageBubble
                   message={message}
                   isSent={isSent}
