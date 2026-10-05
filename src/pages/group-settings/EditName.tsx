@@ -59,7 +59,7 @@ export default function EditName() {
       toast({
         title: 'Nome atualizado!',
       });
-      navigate(`/grupo/${groupId}/configuracoes`);
+      navigate(`/group/${groupId}/settings`);
     }
   };
 

@@ -97,7 +97,7 @@ export default function GroupSettings() {
       });
     } else {
       toast({ title: 'Você saiu do grupo' });
-      navigate('/grupos');
+      navigate('/groups');
     }
   };
 
@@ -120,7 +120,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/adicionar-membros`)}
+                onClick={() => navigate(`/group/${groupId}/add-members`)}
               >
                 <div className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5" />
@@ -145,7 +145,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/membros`)}
+                onClick={() => navigate(`/group/${groupId}/members`)}
               >
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
@@ -160,7 +160,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/editar-nome`)}
+                onClick={() => navigate(`/group/${groupId}/edit-name`)}
               >
                 <div className="flex items-center gap-2">
                   <Edit className="h-5 w-5" />
@@ -172,7 +172,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/editar-foto`)}
+                onClick={() => navigate(`/group/${groupId}/edit-photo`)}
               >
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-5 w-5" />
@@ -184,7 +184,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/alcunhas`)}
+                onClick={() => navigate(`/group/${groupId}/nicknames`)}
               >
                 <div className="flex items-center gap-2">
                   <Edit className="h-5 w-5" />
@@ -199,7 +199,7 @@ export default function GroupSettings() {
               <Button
                 variant="outline"
                 className="w-full justify-between"
-                onClick={() => navigate(`/grupo/${groupId}/permissoes`)}
+                onClick={() => navigate(`/group/${groupId}/permissions`)}
               >
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" />
