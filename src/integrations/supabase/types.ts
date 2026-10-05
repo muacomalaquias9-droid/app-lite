@@ -3183,6 +3183,10 @@ export type Database = {
       }
       is_super_admin: { Args: never; Returns: boolean }
       is_user_suspended: { Args: { _user_id: string }; Returns: boolean }
+      mark_group_message_read: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
