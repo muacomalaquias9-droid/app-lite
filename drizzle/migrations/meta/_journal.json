@@ -8,6 +8,13 @@
       "when": 1791194479270,
       "tag": "0000_repair_group_messaging_settings_and_views",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791491963280,
+      "tag": "0001_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }
