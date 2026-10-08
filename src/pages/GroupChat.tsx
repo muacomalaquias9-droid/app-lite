@@ -139,7 +139,7 @@ export default function GroupChat() {
             profiles: profile,
           } as Message;
 
-          setMessages(prev => [...prev, newMsg]);
+          setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
         }
       )
       .on(
