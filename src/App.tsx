@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useEffect as useReactEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useEffect as useReactEffect, useEffect } from "react";
 import { pauseAllAudio } from "@/components/MusicPlayer";
 
 /** Silêncio global: qualquer mudança de rota corta a música imediatamente. */
@@ -95,16 +95,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, session } = useAuth();
   
   // CRITICAL: Wait for auth to fully initialize before checking user/session
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-5xl font-bold animate-pulse">Blynk</div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  // Instant render: no splash while the saved session is restored
+  if (loading) return <>{children}</>;
   
   // Only redirect if auth is loaded and there's no valid session
   if (!loading && (!user || !session)) {
@@ -119,10 +111,35 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const SWIPE_TABS = ["/feed", "/friends", "/reels", "/messages", "/notifications"];
+const useSwipeTabs = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const idx = SWIPE_TABS.indexOf(location.pathname);
+    if (idx < 0) return;
+    let sx = 0, sy = 0, t = 0;
+    const start = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; t = Date.now(); };
+    const end = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - sx;
+      const dy = e.changedTouches[0].clientY - sy;
+      if (Date.now() - t > 600 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+      const target = e.target as HTMLElement;
+      if (target.closest('input,textarea,[data-no-swipe],.overflow-x-auto,.snap-x')) return;
+      const next = dx < 0 ? idx + 1 : idx - 1;
+      if (next >= 0 && next < SWIPE_TABS.length) navigate(SWIPE_TABS[next]);
+    };
+    window.addEventListener('touchstart', start, { passive: true });
+    window.addEventListener('touchend', end, { passive: true });
+    return () => { window.removeEventListener('touchstart', start); window.removeEventListener('touchend', end); };
+  }, [location.pathname, navigate]);
+};
+
 const AppContent = () => {
   useStoryReactions();
   useGlobalUserPresence();
   useGlobalMusicSilence();
+  useSwipeTabs();
 
   return (
     <>

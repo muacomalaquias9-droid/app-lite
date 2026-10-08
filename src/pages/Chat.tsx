@@ -303,40 +303,36 @@ export default function Chat() {
   };
 
   const subscribeToMessages = () => {
+    const isThisChat = (m: Message) =>
+      (m.sender_id === user?.id && m.receiver_id === friendId) ||
+      (m.sender_id === friendId && m.receiver_id === user?.id);
     const channel = supabase
-      .channel('chat-messages')
+      .channel(`chat-messages:${user?.id}:${friendId}:${Date.now()}`)
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
+        { event: 'INSERT', schema: 'public', table: 'messages' },
         async (payload) => {
           const newMsg = payload.new as Message;
-          if (
-            (newMsg.sender_id === user?.id && newMsg.receiver_id === friendId) ||
-            (newMsg.sender_id === friendId && newMsg.receiver_id === user?.id)
-          ) {
-            setMessages(prev => [...prev, newMsg]);
-            
-            if (newMsg.sender_id === friendId && document.hidden) {
-              const { data: senderProfile } = await supabase
-                .from('profiles')
-                .select('avatar_url, first_name')
-                .eq('id', friendId)
-                .single();
-
-              showNotification(senderProfile?.first_name || 'Nova mensagem', {
-                body: newMsg.content || 'Mídia recebida',
-                icon: senderProfile?.avatar_url || '/logo-192.png',
-                data: {
-                  avatar: senderProfile?.avatar_url,
-                },
-              });
-            }
+          if (!isThisChat(newMsg)) return;
+          setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
+          if (newMsg.sender_id === friendId) {
+            supabase.from('messages').update({ read: true }).eq('id', newMsg.id).then(() => {});
           }
         }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages' },
+        (payload) => {
+          const upd = payload.new as Message;
+          if (!isThisChat(upd)) return;
+          setMessages(prev => prev.map(m => m.id === upd.id ? { ...m, ...upd } : m));
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'messages' },
+        (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id))
       )
       .subscribe();
 
