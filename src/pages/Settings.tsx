@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { LogOut, Camera, ChevronRight, Lock, User, Smartphone, Eye, Key, FileText, CreditCard, ArrowLeft, Globe } from 'lucide-react';
+import { LogOut, Camera, ChevronRight, Lock, User, Smartphone, Eye, Key, FileText, CreditCard, ArrowLeft, Globe, Bell } from 'lucide-react';
+import { enablePhonePush } from '@/utils/webPush';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import VerificationBadge from '@/components/VerificationBadge';
@@ -144,6 +145,32 @@ export default function Settings() {
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground/40" />
           </button>
+
+          {/* Phone notifications */}
+          <div className="px-4 pt-5">
+            <button
+              onClick={async () => {
+                if (!user) return;
+                const s = await enablePhonePush(user.id);
+                const msg: Record<string, string> = {
+                  registered: 'Notificações ativadas neste telemóvel',
+                  unsupported: 'Este navegador não suporta. No iPhone, adiciona o Paji ao ecrã principal primeiro.',
+                  denied: 'Notificações bloqueadas. Ativa-as nas definições do navegador.',
+                  'open-in-new-tab': 'Abre o Paji num separador próprio para ativar.',
+                  error: 'Não foi possível ativar. Tenta novamente.',
+                };
+                s === 'registered' ? toast.success(msg[s]) : toast.error(msg[s]);
+              }}
+              className="w-full flex items-center gap-3 p-4 rounded-2xl border border-border/50 bg-card text-left"
+            >
+              <Bell className="h-5 w-5" />
+              <div className="flex-1">
+                <p className="font-semibold text-sm">Notificações no telemóvel</p>
+                <p className="text-xs text-muted-foreground">Curtidas, mensagens, seguidores e grupos — mesmo com a app fechada</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
 
           {/* Language */}
           <div className="px-4 pt-5 pb-2">
