@@ -35,7 +35,7 @@ self.addEventListener('fetch', event => {
 // Push notification handling
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Blynk';
+  const title = data.title || 'Paji';
   
   const options = {
     body: data.body || 'Nova notificação',
