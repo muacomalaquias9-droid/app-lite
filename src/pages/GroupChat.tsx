@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshot';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +44,7 @@ export default function GroupChat() {
   const { groupId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => readSnapshot<Message[]>(`group:${user?.id}:${groupId}`, []));
   const [group, setGroup] = useState<Group | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [showWallpaperPicker, setShowWallpaperPicker] = useState(false);
@@ -113,7 +114,7 @@ export default function GroupChat() {
       .eq('group_id', groupId)
       .order('created_at', { ascending: true });
 
-    if (data) setMessages(data as Message[]);
+    if (data) { setMessages(data as Message[]); writeSnapshot(`group:${user?.id}:${groupId}`, data, 60); }
   };
 
   const subscribeToMessages = () => {

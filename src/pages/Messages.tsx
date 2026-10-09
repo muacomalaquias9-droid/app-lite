@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshot';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,9 +38,9 @@ interface Conversation {
 export default function Messages() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(() => readSnapshot<Conversation[]>(`convs:${user?.id}`, []));
   const [myProfile, setMyProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => readSnapshot<any[]>(`convs:${user?.id}`, []).length === 0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('principal');
   const { onlineUsers } = useUserPresence();
