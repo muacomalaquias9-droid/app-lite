@@ -45,11 +45,11 @@ export default function GroupChat() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>(() => readSnapshot<Message[]>(`group:${user?.id}:${groupId}`, []));
-  const [group, setGroup] = useState<Group | null>(null);
+  const [group, setGroup] = useState<Group | null>(() => readSnapshot<Group | null>(`groupinfo:${groupId}`, null));
   const [newMessage, setNewMessage] = useState('');
   const [showWallpaperPicker, setShowWallpaperPicker] = useState(false);
   const [wallpaper, setWallpaper] = useState<string>('');
-  const [members, setMembers] = useState<MemberProfile[]>([]);
+  const [members, setMembers] = useState<MemberProfile[]>(() => readSnapshot<MemberProfile[]>(`groupmembers:${groupId}`, []));
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function GroupChat() {
       .eq('id', groupId)
       .single();
     
-    if (data) setGroup(data);
+    if (data) { setGroup(data); writeSnapshot(`groupinfo:${groupId}`, data); }
   };
 
   const loadMembers = async () => {
@@ -103,6 +103,7 @@ export default function GroupChat() {
       .eq('group_id', groupId);
     const profiles = (data || []).map((row: any) => row.profiles).filter(Boolean) as MemberProfile[];
     setMembers(profiles);
+    writeSnapshot(`groupmembers:${groupId}`, profiles, 100);
   };
 
   const loadMessages = async () => {

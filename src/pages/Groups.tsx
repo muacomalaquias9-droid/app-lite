@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshot';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -30,7 +31,7 @@ export default function Groups() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [groups, setGroups] = useState<Group[]>(() => readSnapshot<Group[]>(`groups:${user?.id}`, []));
   const [friends, setFriends] = useState<Friend[]>([]);
   const [groupName, setGroupName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
@@ -58,6 +59,7 @@ export default function Groups() {
     if (data) {
       const groupsList = data.map(item => item.groups).filter(Boolean);
       setGroups(groupsList as Group[]);
+      writeSnapshot(`groups:${user?.id}`, groupsList, 100);
     }
   };
 
