@@ -253,7 +253,7 @@ export default function Chat() {
       .eq('id', friendId)
       .single();
     
-    if (data) setFriend(data);
+    if (data) { setFriend(data); writeSnapshot(`chatfriend:${friendId}`, data); }
   };
 
   const loadMyProfile = async () => {

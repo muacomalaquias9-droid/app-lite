@@ -99,11 +99,13 @@ export default function Messages() {
         })
       );
 
-      setConversations(conversationsWithData.sort((a, b) => {
+      const sorted = conversationsWithData.sort((a, b) => {
         const aTime = a.lastMessage?.created_at || '0';
         const bTime = b.lastMessage?.created_at || '0';
         return bTime.localeCompare(aTime);
-      }));
+      });
+      setConversations(sorted);
+      writeSnapshot(`convs:${user.id}`, sorted, 50);
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
