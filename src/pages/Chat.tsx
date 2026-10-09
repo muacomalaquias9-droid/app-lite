@@ -65,8 +65,7 @@ export default function Chat() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>(() => readSnapshot<Message[]>(`chat:${user?.id}:${friendId}`, []));
-  const [friend0] = useState(() => readSnapshot<any>(`chatfriend:${friendId}`, null));
-  const [friend, setFriend] = useState<Profile | null>(null);
+  const [friend, setFriend] = useState<Profile | null>(() => readSnapshot<Profile | null>(`chatfriend:${friendId}`, null));
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [activeCall, setActiveCall] = useState<{ id: string; type: 'voice' | 'video' } | null>(null);
