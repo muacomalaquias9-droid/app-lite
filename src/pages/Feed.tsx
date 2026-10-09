@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { readSnapshot, writeSnapshot } from '@/lib/snapshot';
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -57,10 +58,10 @@ export default function Feed() {
   const navigate = useNavigate();
   const { checkLikeLimit } = useRateLimiting();
   useContentProtection();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>(() => readSnapshot<Post[]>(`feed:${user?.id}`, []));
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => readSnapshot<any[]>(`feed:${user?.id}`, []).length === 0);
   const [sponsoredAds, setSponsoredAds] = useState<any[]>([]);
   const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -233,6 +234,7 @@ export default function Feed() {
       .range(0, PAGE_SIZE - 1);
     if (data) {
       setPosts(data as any);
+      writeSnapshot(`feed:${user?.id}`, data.slice(0, 12));
       setHasMore(data.length === PAGE_SIZE);
     }
   };

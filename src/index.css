@@ -352,3 +352,9 @@ html, body, button, input, textarea, select {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Instagram-style cascade when swiping between tabs */
+@keyframes swipe-in-left { from { transform: translate3d(28%,0,0); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes swipe-in-right { from { transform: translate3d(-28%,0,0); opacity: .4; } to { transform: none; opacity: 1; } }
+.swipe-in-left { animation: swipe-in-left .28s cubic-bezier(.22,.9,.3,1) both; }
+.swipe-in-right { animation: swipe-in-right .28s cubic-bezier(.22,.9,.3,1) both; }

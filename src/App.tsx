@@ -127,7 +127,10 @@ const useSwipeTabs = () => {
       const target = e.target as HTMLElement;
       if (target.closest('input,textarea,[data-no-swipe],.overflow-x-auto,.snap-x')) return;
       const next = dx < 0 ? idx + 1 : idx - 1;
-      if (next >= 0 && next < SWIPE_TABS.length) navigate(SWIPE_TABS[next]);
+      if (next >= 0 && next < SWIPE_TABS.length) {
+        document.documentElement.dataset.swipe = dx < 0 ? 'left' : 'right';
+        navigate(SWIPE_TABS[next]);
+      }
     };
     window.addEventListener('touchstart', start, { passive: true });
     window.addEventListener('touchend', end, { passive: true });
@@ -140,11 +143,15 @@ const AppContent = () => {
   useGlobalUserPresence();
   useGlobalMusicSilence();
   useSwipeTabs();
+  const location = useLocation();
+  const swipeDir = typeof document !== 'undefined' ? document.documentElement.dataset.swipe : undefined;
+  useEffect(() => { delete document.documentElement.dataset.swipe; }, [location.pathname]);
 
   return (
     <>
       {/* FreeDataBanner removed */}
       <IncomingCallNotification />
+      <div key={location.pathname} className={swipeDir === 'left' ? 'swipe-in-left' : swipeDir === 'right' ? 'swipe-in-right' : undefined}>
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/saved-accounts" element={<SavedAccounts />} />
@@ -658,6 +665,7 @@ const AppContent = () => {
         
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </div>
     </>
   );
 };

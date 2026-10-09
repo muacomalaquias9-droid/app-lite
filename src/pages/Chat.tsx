@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { readSnapshot, writeSnapshot } from '@/lib/snapshot';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,8 +64,8 @@ export default function Chat() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [friend, setFriend] = useState<Profile | null>(null);
+  const [messages, setMessages] = useState<Message[]>(() => readSnapshot<Message[]>(`chat:${user?.id}:${friendId}`, []));
+  const [friend, setFriend] = useState<Profile | null>(() => readSnapshot<Profile | null>(`chatfriend:${friendId}`, null));
   const [myProfile, setMyProfile] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [activeCall, setActiveCall] = useState<{ id: string; type: 'voice' | 'video' } | null>(null);
@@ -116,14 +117,10 @@ export default function Chat() {
     if (!friendId) return;
 
     const loadData = async () => {
-      const startTime = Date.now();
+      if (messages.length) setLoading(false);
       await Promise.all([loadFriend(), loadMyProfile(), loadChatSettings(), loadMessages(), loadWallpaper()]);
       
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 1500 - elapsed);
-      setTimeout(() => {
-        setLoading(false);
-      }, remaining);
+      setLoading(false);
     };
     
     loadData();
@@ -256,7 +253,7 @@ export default function Chat() {
       .eq('id', friendId)
       .single();
     
-    if (data) setFriend(data);
+    if (data) { setFriend(data); writeSnapshot(`chatfriend:${friendId}`, data); }
   };
 
   const loadMyProfile = async () => {
@@ -293,7 +290,7 @@ export default function Chat() {
       .or(`and(sender_id.eq.${user.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${user.id})`)
       .order('created_at', { ascending: true });
 
-    if (data) setMessages(data);
+    if (data) { setMessages(data); writeSnapshot(`chat:${user.id}:${friendId}`, data, 60); }
 
     await supabase
       .from('messages')
