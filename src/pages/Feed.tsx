@@ -234,7 +234,7 @@ export default function Feed() {
       .range(0, PAGE_SIZE - 1);
     if (data) {
       setPosts(data as any);
-      writeSnapshot(`feed:${user?.id}`, data.slice(0, 12));
+      writeSnapshot(`feed:${user?.id}`, data.slice(0, 30));
       setHasMore(data.length === PAGE_SIZE);
     }
   };
