@@ -148,9 +148,10 @@ const AppContent = () => {
   useEffect(() => { delete document.documentElement.dataset.swipe; }, [location.pathname]);
 
   return (
-    <div key={location.pathname} className={swipeDir === 'left' ? 'swipe-in-left' : swipeDir === 'right' ? 'swipe-in-right' : undefined}>
+    <>
       {/* FreeDataBanner removed */}
       <IncomingCallNotification />
+      <div key={location.pathname} className={swipeDir === 'left' ? 'swipe-in-left' : swipeDir === 'right' ? 'swipe-in-right' : undefined}>
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/saved-accounts" element={<SavedAccounts />} />
@@ -664,6 +665,7 @@ const AppContent = () => {
         
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </div>
     </>
   );
 };
