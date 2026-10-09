@@ -23,10 +23,15 @@ export async function enablePhonePush(userId: string, ask = true): Promise<PushS
     let sub = await reg.pushManager.getSubscription();
     if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toUint8(VAPID_PUBLIC_KEY) });
     const j = sub.toJSON() as any;
-    await supabase.from('push_subscriptions').upsert(
-      { user_id: userId, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth },
-      { onConflict: 'endpoint' }
-    );
+    const row = { user_id: userId, endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth };
+    const { error } = await supabase.from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
+    if (error) {
+      // Endpoint may belong to a previous account on this phone: get a fresh one
+      await sub.unsubscribe();
+      const fresh = (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toUint8(VAPID_PUBLIC_KEY) })).toJSON() as any;
+      const { error: e2 } = await supabase.from('push_subscriptions').insert({ user_id: userId, endpoint: fresh.endpoint, p256dh: fresh.keys.p256dh, auth: fresh.keys.auth });
+      if (e2) throw e2;
+    }
     return 'registered';
   } catch (e) {
     console.error('push subscribe failed', e);
