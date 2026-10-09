@@ -7,6 +7,7 @@ import { X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showMessageNotification, playNotificationSound } from '@/utils/pushNotifications';
 import VerificationBadge from '@/components/VerificationBadge';
+import { enablePhonePush } from '@/utils/webPush';
 
 interface Notification {
   id: string;
@@ -27,6 +28,16 @@ export const MessageNotification = () => {
   const navigate = useNavigate();
   const [notification, setNotification] = useState<Notification | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<UnreadCount>({});
+
+  // Keep this phone registered for push automatically
+  useEffect(() => {
+    if (!user || !('Notification' in window)) return;
+    if (Notification.permission === 'granted') { enablePhonePush(user.id, false); return; }
+    if (Notification.permission !== 'default') return;
+    const ask = () => enablePhonePush(user.id, true);
+    window.addEventListener('pointerdown', ask, { once: true });
+    return () => window.removeEventListener('pointerdown', ask);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
