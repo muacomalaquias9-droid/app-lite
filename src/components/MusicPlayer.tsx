@@ -214,7 +214,7 @@ export function pauseGlobalMusic(trackId: string) {
   }
 }
 
-export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
+export function MusicPlayer({ musicName, musicArtist, musicUrl, coverUrl, overlay = false, autoPlayInView = false }: MusicPlayerProps) {
   const instanceId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const track = useMemo<GlobalMusicTrack>(() => ({
@@ -268,6 +268,12 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
     toggleGlobalMusic(track).then((played) => setHasError(!played && !isPlaying));
   };
 
+  const cover = coverUrl || parseMusicUrl(musicUrl).cover;
+  const coverDisc = (size: string) => cover ? (
+    <motion.img src={cover} alt="" className={`${size} shrink-0 rounded-full object-cover ring-2 ring-border`}
+      animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
+      transition={isPlaying ? { duration: 6, repeat: Infinity, ease: 'linear' } : { duration: 0.3 }} />
+  ) : null;
   const label = musicArtist ? `${musicName} • ${musicArtist}` : musicName;
   const marquee = isPlaying && label.length > 24;
 
@@ -280,7 +286,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
         className="flex max-w-[240px] items-center gap-2 rounded-full bg-black/80 px-3 py-2 cursor-pointer"
         onClick={togglePlay}
       >
-        <Music2 className="h-3.5 w-3.5 text-white shrink-0" />
+        {coverDisc('h-5 w-5') || <Music2 className="h-3.5 w-3.5 text-white shrink-0" />}
         <div className="min-w-0 flex-1 overflow-hidden">
           <motion.p
             className="whitespace-nowrap text-white text-xs font-semibold"
@@ -318,7 +324,7 @@ export function MusicPlayer({ musicName, musicArtist, musicUrl, overlay = false,
       className="flex h-8 max-w-full items-center gap-2 cursor-pointer overflow-hidden text-muted-foreground"
       onClick={togglePlay}
     >
-      <Music2 className={`h-4 w-4 shrink-0 ${isPlaying ? 'text-primary' : 'text-muted-foreground'}`} />
+      {coverDisc('h-6 w-6') || <Music2 className={`h-4 w-4 shrink-0 ${isPlaying ? 'text-primary' : 'text-muted-foreground'}`} />}
       <div className="min-w-0 flex-1 overflow-hidden">
         <motion.p
           className="whitespace-nowrap text-[13px] font-semibold leading-none"

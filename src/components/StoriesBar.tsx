@@ -1,3 +1,4 @@
+import { parseMusicUrl } from "@/lib/musicMeta";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -148,6 +149,7 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
                   onClick={() => handleViewStory(userStories, 0)}
                   className="flex flex-col items-center gap-1.5 flex-shrink-0 w-[68px]"
                 >
+                  <div className="relative">
                   <Avatar className={`h-[64px] w-[64px] border-[1.5px] ${
                     allViewed ? 'border-border' : 'border-primary'
                   }`}>
@@ -156,6 +158,10 @@ export default function StoriesBar({ onCreateStory }: StoriesBarProps) {
                       {firstStory.profile.first_name?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
+                  {(() => { const c = parseMusicUrl(firstStory.custom_music_url).cover; return c ? (
+                    <img src={c} alt="" className="absolute -bottom-0.5 -right-0.5 h-[24px] w-[24px] rounded-full object-cover border-2 border-background animate-[spin_6s_linear_infinite]" />
+                  ) : null; })()}
+                  </div>
                   <span className="flex items-center justify-center gap-0.5 w-full px-0.5">
                     <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight truncate">
                       {firstStory.profile.first_name}
