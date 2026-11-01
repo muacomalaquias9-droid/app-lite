@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useId, useMemo } from 'react';
 import { Music2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { parseMusicUrl } from '@/lib/musicMeta';
 
 // Global audio manager: one audio element for the whole app.
 let currentPlayingAudio: HTMLAudioElement | null = null;
@@ -152,7 +153,8 @@ export async function playGlobalMusic(track: GlobalMusicTrack) {
   currentErrorId = null;
   notifyMusicListeners();
 
-  let playableUrl = sameTrack && currentResolvedUrl ? currentResolvedUrl : track.musicUrl || '';
+  const meta = parseMusicUrl(track.musicUrl);
+  let playableUrl = sameTrack && currentResolvedUrl ? currentResolvedUrl : meta.url || '';
   if (!playableUrl) playableUrl = await resolveFreshMusicUrl(track) || '';
 
   if (!playableUrl) {
@@ -165,8 +167,14 @@ export async function playGlobalMusic(track: GlobalMusicTrack) {
     audio.pause();
     currentResolvedUrl = playableUrl;
     audio.src = playableUrl;
-    audio.currentTime = 0;
     audio.load();
+    const startAt = meta.start;
+    if (startAt > 0) {
+      const seek = () => { try { audio.currentTime = startAt; } catch { /* ignore */ } };
+      audio.addEventListener('loadedmetadata', seek, { once: true });
+    } else {
+      audio.currentTime = 0;
+    }
   }
 
   try {
