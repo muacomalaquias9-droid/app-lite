@@ -109,7 +109,7 @@ export default function FeedDiscover({ currentUserId }: { currentUserId: string 
         {people.map((p) => (
           <button key={p.id} onClick={() => navigate(`/profile/${p.id}`)}
             className="relative shrink-0 w-[132px] h-[218px] rounded-[22px] overflow-hidden snap-start active:scale-[0.97] transition bg-muted">
-            <img src={p.avatar_url!} alt={name(p)} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={p.avatar_url!} alt={name(p)} loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-foreground/70 to-transparent dark:from-background/80" />
             <span className="absolute bottom-3 inset-x-2 flex items-center justify-center gap-1 text-[14px] font-medium text-background dark:text-foreground truncate">
               {name(p)} {p.verified && <BadgeCheck className="h-4 w-4 shrink-0" />}
@@ -127,7 +127,7 @@ export default function FeedDiscover({ currentUserId }: { currentUserId: string 
         {rec.map((p) => (
           <div key={p.id} className="shrink-0 w-[132px] rounded-[18px] bg-muted/60 overflow-hidden snap-start">
             <button onClick={() => navigate(`/profile/${p.id}`)} className="relative block w-full h-[112px]">
-              <img src={p.avatar_url!} alt={name(p)} loading="lazy" className="h-full w-full object-cover rounded-[18px]" />
+              <img src={p.avatar_url!} alt={name(p)} loading="eager" decoding="async" className="h-full w-full object-cover rounded-[18px]" />
               <span onClick={(e) => { e.stopPropagation(); toggleFollow(p.id); }}
                 className="absolute bottom-2 right-2 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-background/80 backdrop-blur-md text-foreground">
                 {following.has(p.id) ? "Filhou" : "Filhar"}

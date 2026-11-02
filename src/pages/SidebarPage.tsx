@@ -100,31 +100,29 @@ export default function SidebarPage() {
   };
 
   const MenuItem = ({ icon: Icon, label, path, badge, accent }: { icon: any; label: string; path: string; badge?: number; accent?: boolean }) => (
-    <Link to={path} className="flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-muted/40 active:scale-[0.98] transition-all">
-      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center", accent ? "bg-primary/10" : "bg-muted/60")}>
-        <Icon className={cn("h-[18px] w-[18px]", accent ? "text-primary" : "text-foreground/70")} strokeWidth={1.8} />
-      </div>
-      <span className="flex-1 text-[14px] font-medium text-foreground/90">{label}</span>
+    <Link to={path} className="flex items-center gap-4 px-4 py-3.5 active:bg-muted/60 transition-colors">
+      <Icon className={cn("h-[22px] w-[22px]", accent ? "text-primary" : "text-foreground")} strokeWidth={2} />
+      <span className="flex-1 text-[16px] font-semibold text-foreground">{label}</span>
       {badge && badge > 0 ? (
         <span className="min-w-[22px] h-[22px] px-1.5 bg-destructive text-destructive-foreground text-[11px] font-bold rounded-full flex items-center justify-center">
           {badge > 99 ? '99+' : badge}
         </span>
       ) : (
-        <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
+        <ChevronRight className="h-5 w-5 text-foreground/60" />
       )}
     </Link>
   );
 
   const SectionTitle = ({ title }: { title: string }) => (
-    <p className="px-5 pt-5 pb-1.5 text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest">{title}</p>
+    <p className="px-5 pt-7 pb-2.5 text-[20px] font-bold tracking-tight text-foreground">{title}</p>
   );
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 safe-area-top bg-background border-b border-border/60">
+      <div className="sticky top-0 z-50 safe-area-top bg-background/80 backdrop-blur-[50px] backdrop-saturate-200">
         <div className="flex items-center justify-between h-14 px-4">
-          <Logo2026 size="md" />
+          <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">Menu</h1>
           <div className="flex items-center gap-1.5">
             <Button variant="ghost" size="icon" onClick={() => updateSettings({ theme: isDarkMode ? 'light' : 'dark' })}
               className="h-9 w-9 rounded-xl bg-muted/40">
@@ -137,8 +135,8 @@ export default function SidebarPage() {
       <ScrollArea className="h-[calc(100vh-3.5rem)]">
         <div className="pb-8">
           {/* Profile Card */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mx-3 mt-3">
-            <Link to="/profile" className="flex items-center gap-3.5 p-4 rounded-2xl bg-card border border-border/50 hover:bg-muted/30 transition-colors">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mx-4 mt-2">
+            <Link to="/profile" className="flex items-center gap-4 p-4 rounded-[28px] bg-muted/50 active:scale-[0.98] transition">
               <Avatar className="h-14 w-14">
                 <AvatarImage src={profile?.avatar_url} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
@@ -158,7 +156,7 @@ export default function SidebarPage() {
 
           {/* Main */}
           <SectionTitle title="Principal" />
-          <div className="mx-2">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
             <MenuItem icon={Home} label="Início" path="/feed" />
             <MenuItem icon={Search} label="Explorar" path="/friends" />
             <MenuItem icon={MessageCircle} label="Mensagens" path="/messages" badge={unreadMessages} />
@@ -169,7 +167,7 @@ export default function SidebarPage() {
 
           {/* Social */}
           <SectionTitle title="Social" />
-          <div className="mx-2">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
             <MenuItem icon={Users} label="Amigos" path="/friends" />
             <MenuItem icon={Users} label="Grupos" path="/groups" />
             <MenuItem icon={Target} label="CTF Hacking" path="/ctf" />
@@ -177,7 +175,7 @@ export default function SidebarPage() {
 
           {/* Criar */}
           <SectionTitle title="Criar" />
-          <div className="mx-2">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
             <MenuItem icon={PlusSquare} label="Nova Publicação" path="/create" accent />
             <MenuItem icon={Megaphone} label="Criar Anúncio" path="/create-ad" />
             <MenuItem icon={Video} label="Editor de Vídeo" path="/video-editor" />
@@ -185,7 +183,7 @@ export default function SidebarPage() {
 
           {/* Premium */}
           <SectionTitle title="Premium" />
-          <div className="mx-2">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
             <MenuItem icon={DollarSign} label="Monetização" path="/monetization" />
             <MenuItem icon={BadgeCheck} label="Verificação" path="/verification-checkout" accent />
             <MenuItem icon={TrendingUp} label="Profissional" path="/professional" />
@@ -195,7 +193,7 @@ export default function SidebarPage() {
           {isAdmin && (
             <>
               <SectionTitle title="Administração" />
-              <div className="mx-2">
+              <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
                 <MenuItem icon={Shield} label="Painel Admin" path="/admin" accent />
                 <MenuItem icon={CreditCard} label="Pagamentos" path="/admin/verification" />
                 <MenuItem icon={Webhook} label="API & Webhooks" path="/api-keys" accent />
@@ -207,8 +205,8 @@ export default function SidebarPage() {
 
           {/* Language */}
           <SectionTitle title="Idioma" />
-          <div className="mx-2">
-            <button onClick={() => setShowLang(!showLang)} className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl hover:bg-muted/40 transition-colors">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
+            <button onClick={() => setShowLang(!showLang)} className="w-full flex items-center gap-4 px-4 py-3.5">
               <div className="h-9 w-9 rounded-xl bg-muted/60 flex items-center justify-center">
                 <Globe className="h-[18px] w-[18px] text-foreground/70" strokeWidth={1.8} />
               </div>
@@ -234,7 +232,7 @@ export default function SidebarPage() {
 
           {/* Settings */}
           <SectionTitle title="Definições" />
-          <div className="mx-2">
+          <div className="mx-4 rounded-[24px] bg-muted/50 overflow-hidden divide-y divide-border/40">
             <MenuItem icon={Settings} label="Configurações" path="/app-settings" />
             <MenuItem icon={Lock} label="Privacidade" path="/settings/security" />
             <MenuItem icon={HelpCircle} label="Ajuda" path="/help" />
@@ -244,13 +242,13 @@ export default function SidebarPage() {
           {/* Logout */}
           <div className="mx-5 mt-5">
             <Button variant="outline" onClick={handleLogout}
-              className="w-full h-12 rounded-2xl border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold">
+              className="w-full h-12 rounded-full border-destructive/20 text-destructive hover:bg-destructive/5 font-semibold">
               <LogOut className="h-[18px] w-[18px] mr-2" strokeWidth={1.8} />
               Terminar Sessão
             </Button>
           </div>
 
-          <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© 2026/2027 Blynk · Privacidade · Termos</p>
+          <p className="text-[10px] text-muted-foreground/30 text-center mt-6 pb-4">© 2026/2027 Paji · Privacidade · Termos</p>
         </div>
       </ScrollArea>
     </div>
