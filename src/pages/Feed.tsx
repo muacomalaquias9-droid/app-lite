@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Share2, Bookmark, Play, Volume2, VolumeX, MoreHorizontal, Heart, Send, Menu, RefreshCw, Loader2, Search, Bell, UserPlus } from "lucide-react";
 import { MusicPlayer, pauseAllAudio } from "@/components/MusicPlayer";
-import NewUsersCascade from "@/components/NewUsersCascade";
+import FeedDiscover from "@/components/feed/FeedDiscover";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import StoriesBar from "@/components/StoriesBar";
@@ -485,26 +485,6 @@ export default function Feed() {
   return (
     <ProtectedRoute>
       <div className="fixed inset-0 bg-mobile-surface overflow-hidden">
-        {/* Header — Instagram-style flat white */}
-        <header className="fixed top-0 left-0 right-0 z-50 safe-area-top bg-background border-b border-border">
-          <div className="flex items-center gap-2 h-14 px-4 max-w-lg mx-auto">
-            <button onClick={() => navigate("/sidebar")} aria-label="Menu"
-              className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
-              <Menu className="h-6 w-6 text-foreground" strokeWidth={2} />
-            </button>
-            <span className="font-display text-[24px] font-extrabold tracking-tight text-foreground">Blynk</span>
-            <div className="flex-1" />
-            <button onClick={() => navigate("/friends")} aria-label="Pesquisar"
-              className="h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
-              <Search className="h-6 w-6 text-foreground" strokeWidth={2} />
-            </button>
-            <button onClick={() => navigate("/notifications")} aria-label="Notificações"
-              className="relative h-9 w-9 flex items-center justify-center active:scale-90 transition shrink-0">
-              <Bell className="h-6 w-6 text-foreground" strokeWidth={2} />
-            </button>
-          </div>
-        </header>
-
         {/* Pull-to-refresh indicator */}
         <div className="fixed top-12 left-0 right-0 z-40 flex justify-center pointer-events-none"
           style={{ transform: `translateY(${Math.max(pullDistance - 20, 0)}px)`, opacity: pullDistance > 10 ? 1 : 0, transition: refreshing ? 'none' : 'all 0.2s ease-out' }}>
@@ -514,7 +494,7 @@ export default function Feed() {
         </div>
 
         <div ref={scrollContainerRef}
-          className="pt-14 pb-[100px] h-[100dvh] overflow-y-auto overscroll-contain native-scroll"
+          className="safe-area-top pb-[100px] h-[100dvh] overflow-y-auto overscroll-contain native-scroll"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -522,10 +502,10 @@ export default function Feed() {
           style={{ transform: refreshing ? 'translateY(40px)' : `translateY(${pullDistance > 0 ? pullDistance * 0.3 : 0}px)`, transition: refreshing || pullDistance > 0 ? 'transform 0.3s ease-out' : 'none' }}
         >
           <div className="max-w-lg mx-auto">
+            <FeedDiscover currentUserId={currentUserId} />
             <StoriesBar onCreateStory={() => setCreateStoryOpen(true)} />
 
             {/* Rótulo: filhar novas pessoas (cascata motion estilo Threads) */}
-            <NewUsersCascade currentUserId={currentUserId} />
 
             {/* Posts Feed - New unique card design */}
             <div className="space-y-2 pb-4">
