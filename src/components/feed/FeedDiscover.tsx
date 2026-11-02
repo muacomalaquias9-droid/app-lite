@@ -10,9 +10,9 @@ const TABS = ["Para ti", "Filhando", "Novos"] as const;
 
 export default function FeedDiscover({ currentUserId }: { currentUserId: string | null }) {
   const navigate = useNavigate();
-  const [me, setMe] = useState<P | null>(() => readSnapshot<P>("disc-me"));
-  const [people, setPeople] = useState<P[]>(() => readSnapshot<P[]>("disc-people") || []);
-  const [rec, setRec] = useState<(P & { followers: number })[]>(() => readSnapshot("disc-rec") || []);
+  const [me, setMe] = useState<P | null>(() => readSnapshot<P | null>("disc-me", null));
+  const [people, setPeople] = useState<P[]>(() => readSnapshot<P[]>("disc-people", []));
+  const [rec, setRec] = useState<(P & { followers: number })[]>(() => readSnapshot<(P & { followers: number })[]>("disc-rec", []));
   const [following, setFollowing] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState<(typeof TABS)[number]>("Para ti");
   const [unread, setUnread] = useState(0);
