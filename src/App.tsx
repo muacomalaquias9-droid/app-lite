@@ -118,23 +118,51 @@ const useSwipeTabs = () => {
   useEffect(() => {
     const idx = SWIPE_TABS.indexOf(location.pathname);
     if (idx < 0) return;
-    let sx = 0, sy = 0, t = 0;
-    const start = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; t = Date.now(); };
+    let sx = 0, sy = 0, startedAt = 0;
+    let startTarget: HTMLElement | null = null;
+    const start = (e: TouchEvent) => {
+      if (e.touches.length !== 1) { startTarget = null; return; }
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      if (!target || target.closest('input,textarea,select,[contenteditable="true"],[data-no-swipe],button,a,[role="button"]')) {
+        startTarget = null;
+        return;
+      }
+      let node: HTMLElement | null = target;
+      while (node && node !== document.body) {
+        const style = window.getComputedStyle(node);
+        if ((style.overflowX === 'auto' || style.overflowX === 'scroll') && node.scrollWidth > node.clientWidth + 8) {
+          startTarget = null;
+          return;
+        }
+        node = node.parentElement;
+      }
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+      startedAt = Date.now();
+      startTarget = target;
+    };
     const end = (e: TouchEvent) => {
+      if (!startTarget || e.changedTouches.length !== 1) return;
       const dx = e.changedTouches[0].clientX - sx;
       const dy = e.changedTouches[0].clientY - sy;
-      if (Date.now() - t > 600 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
-      const target = e.target as HTMLElement;
-      if (target.closest('input,textarea,[data-no-swipe],.overflow-x-auto,.snap-x')) return;
+      const minimumDistance = Math.max(64, window.innerWidth * 0.14);
+      if (Date.now() - startedAt > 850 || Math.abs(dx) < minimumDistance || Math.abs(dx) < Math.abs(dy) * 1.45) return;
       const next = dx < 0 ? idx + 1 : idx - 1;
       if (next >= 0 && next < SWIPE_TABS.length) {
         document.documentElement.dataset.swipe = dx < 0 ? 'left' : 'right';
         navigate(SWIPE_TABS[next]);
       }
+      startTarget = null;
     };
+    const cancel = () => { startTarget = null; };
     window.addEventListener('touchstart', start, { passive: true });
     window.addEventListener('touchend', end, { passive: true });
-    return () => { window.removeEventListener('touchstart', start); window.removeEventListener('touchend', end); };
+    window.addEventListener('touchcancel', cancel, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', start);
+      window.removeEventListener('touchend', end);
+      window.removeEventListener('touchcancel', cancel);
+    };
   }, [location.pathname, navigate]);
 };
 
