@@ -15,6 +15,13 @@
       "when": 1791491963280,
       "tag": "0001_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794681742792,
+      "tag": "0002_secure_live_rooms_and_signaling",
+      "breakpoints": true
     }
   ]
 }
