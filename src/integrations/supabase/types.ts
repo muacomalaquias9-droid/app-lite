@@ -1404,6 +1404,157 @@ export type Database = {
         }
         Relationships: []
       }
+      live_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_room_participants: {
+        Row: {
+          force_muted: boolean
+          id: string
+          is_banned: boolean
+          is_moderator: boolean
+          is_muted: boolean
+          joined_at: string
+          requested_at: string | null
+          room_role: string
+          state: string
+          stream_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          force_muted?: boolean
+          id?: string
+          is_banned?: boolean
+          is_moderator?: boolean
+          is_muted?: boolean
+          joined_at?: string
+          requested_at?: string | null
+          room_role?: string
+          state?: string
+          stream_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          force_muted?: boolean
+          id?: string
+          is_banned?: boolean
+          is_moderator?: boolean
+          is_muted?: boolean
+          joined_at?: string
+          requested_at?: string | null
+          room_role?: string
+          state?: string
+          stream_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_room_participants_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_room_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_signals: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          receiver_id: string
+          sender_id: string
+          signal_type: string
+          stream_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          receiver_id: string
+          sender_id: string
+          signal_type: string
+          stream_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          receiver_id?: string
+          sender_id?: string
+          signal_type?: string
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_signals_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_signals_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_signals_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_streams: {
         Row: {
           created_at: string | null
@@ -3177,6 +3328,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_live_room: {
+        Args: { _stream_id: string; _user_id: string }
+        Returns: boolean
+      }
       check_action_limit: {
         Args: { _action_type: string; _limit: number; _user_id: string }
         Returns: Json
